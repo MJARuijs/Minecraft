@@ -36,7 +36,7 @@ out vec4 outColor;
 
 vec4 computeAmbientColor() {
 
-    vec4 textureColor = texture(blockTextures[passTextureId], passTextureCoord);
+    vec4 textureColor = texture(blockTextures[0], passTextureCoord);
     return textureColor;
 }
 

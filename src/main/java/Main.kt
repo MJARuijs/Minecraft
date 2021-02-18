@@ -1,3 +1,4 @@
+import chunks.Biome
 import chunks.ChunkGenerator
 import chunks.blocks.ChunkRenderer
 import devices.Key
@@ -29,13 +30,14 @@ object Main {
         val ambientLight = AmbientLight(Color(0.25f, 0.25f, 0.25f))
         val directionalLight = DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector3(0.5f, 0.5f, 0.5f))
 
-        val chunks = 5
-
-        for (x in -chunks until chunks) {
-            for (z in -chunks until chunks) {
-                ChunkRenderer += ChunkGenerator.generateChunk(Vector3(x, 0, z))
-            }
-        }
+//        val chunks = 2
+        val x = 0
+        val z = 0
+//        for (x in -chunks until chunks) {
+//            for (z in -chunks until chunks) {
+                ChunkRenderer += ChunkGenerator.generateChunk(Vector3(x, 0, z), Biome.PLANES, 0)
+//            }
+//        }
 
         val skyBox = SkyBox("textures/sky/box", camera.zFar)
 

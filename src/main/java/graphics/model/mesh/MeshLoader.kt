@@ -63,8 +63,6 @@ class MeshLoader: Loader<Mesh> {
             }
         }
 
-        println(aiMesh.mNumFaces())
-
         for (i in 0 until aiMesh.mNumFaces()) {
             val face = aiMesh.mFaces().get(i)
 
