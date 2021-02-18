@@ -1,3 +1,4 @@
+import chunks.Biome
 import chunks.ChunkGenerator
 import chunks.blocks.ChunkRenderer
 import devices.Key
@@ -24,18 +25,21 @@ object Main {
         GraphicsContext.init(Color(0.25f, 0.25f, 0.25f))
         GraphicsContext.enable(GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING, GraphicsOption.TEXTURE_MAPPING)
 
-        val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0f, 71f, 0f))
+        val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0f, 71f, 3f))
 
         val ambientLight = AmbientLight(Color(0.25f, 0.25f, 0.25f))
         val directionalLight = DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector3(0.5f, 0.5f, 0.5f))
 
-        val chunks = 5
+//        val chunks = 2
 
-        for (x in -chunks until chunks) {
-            for (z in -chunks until chunks) {
-                ChunkRenderer += ChunkGenerator.generateChunk(Vector3(x, 0, z))
-            }
-        }
+        val x = 0
+        val z = 0
+//        for (x in -chunks until chunks) {
+//            for (z in -chunks until chunks) {
+//                println("$x $z")
+                ChunkRenderer += ChunkGenerator.generateChunk(Vector3(x, 0, z), Biome.PLANES, 0)
+//            }
+//        }
 
         val skyBox = SkyBox("textures/sky/box", camera.zFar)
 
@@ -53,6 +57,17 @@ object Main {
                 window.close()
             }
 
+            if (keyboard.isPressed(Key.F)) {
+//                for (x in 0 until ChunkGenerator.CHUNK_SIZE) {
+//                    for (y in 0 until ChunkGenerator.CHUNK_HEIGHT) {
+//                        for (z in 0 until ChunkGenerator.CHUNK_SIZE) {
+//                            ChunkRenderer[0].blockMoved(Vector3(x, y, z), Vector3(x * 2, y * 2, z * 2))
+//                        }
+//                    }
+//                }
+//                ChunkRenderer[0].blockMoved(Vector3(0, 0, 0), Vector3(0, 0, 0))
+            }
+
             GraphicsContext.clear(GraphicsOption.COLOR_BUFFER_BIT, GraphicsOption.DEPTH_BUFFER_BIT)
 
             skyBox.render(camera)
@@ -62,6 +77,7 @@ object Main {
 
             window.synchronize()
             timer.update()
+//            println(1f / timer.getDelta())
         }
 
         window.destroy()

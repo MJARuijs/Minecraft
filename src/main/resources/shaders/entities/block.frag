@@ -23,7 +23,7 @@ struct Material {
 in vec4 worldPosition;
 in vec2 passTextureCoord;
 in vec3 passNormal;
-in flat int passTextureId;
+//in flat int passTextureId;
 
 uniform AmbientLight ambient;
 uniform DirectionalLight sun;
@@ -36,7 +36,7 @@ out vec4 outColor;
 
 vec4 computeAmbientColor() {
 
-    vec4 textureColor = texture(blockTextures[passTextureId], passTextureCoord);
+    vec4 textureColor = texture(blockTextures[1], passTextureCoord);
     return textureColor;
 }
 

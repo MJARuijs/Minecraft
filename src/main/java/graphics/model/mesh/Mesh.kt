@@ -64,6 +64,12 @@ open class Mesh(layout: Layout, vertices: FloatArray, indices: IntArray): Resour
     }
 
     fun updateInstanceData(data: FloatArray) {
+//        for (i in data) {
+//            println(i)
+//        }
+//        if (data.isNotEmpty()) {
+//            println()
+//        }
         glBindBuffer(GL_ARRAY_BUFFER, ibo)
         glBufferData(GL_ARRAY_BUFFER, data, GL_STREAM_DRAW)
         glBufferSubData(GL_ARRAY_BUFFER, 0, data)

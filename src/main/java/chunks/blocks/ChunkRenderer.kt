@@ -1,6 +1,7 @@
 package chunks.blocks
 
 import chunks.Chunk
+import chunks.ChunkGenerator
 import graphics.Camera
 import graphics.GraphicsContext
 import graphics.GraphicsOption
@@ -17,11 +18,15 @@ object ChunkRenderer {
         chunks += chunk
     }
 
+    operator fun get(i: Int) = chunks[i]
+
     fun render(camera: Camera, ambientLight: AmbientLight, directionalLight: DirectionalLight) {
         GraphicsContext.enable(GraphicsOption.ALPHA_BLENDING)
         shaderProgram.start()
         shaderProgram.set("projection", camera.projectionMatrix)
         shaderProgram.set("view", camera.viewMatrix)
+        shaderProgram.set("chunkHeight", ChunkGenerator.CHUNK_HEIGHT)
+        shaderProgram.set("chunkSize", ChunkGenerator.CHUNK_SIZE)
         shaderProgram.set("blockTextures[0]", 0)
         shaderProgram.set("blockTextures[1]", 1)
 
@@ -29,7 +34,7 @@ object ChunkRenderer {
         directionalLight.apply(shaderProgram)
 
         for (chunk in chunks) {
-            chunk.render()
+            chunk.render(shaderProgram)
         }
 
         shaderProgram.stop()
