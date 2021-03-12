@@ -12,7 +12,7 @@ class Block {
     fun chunkChanged() {
         mesh.initInstancedBuffers(
                 Layout(Primitive.TRIANGLE,
-                        Attribute(3, 4)
+                        Attribute(3, 1)
                 )
         )
     }

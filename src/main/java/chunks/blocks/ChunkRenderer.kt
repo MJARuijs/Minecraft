@@ -25,7 +25,7 @@ object ChunkRenderer {
         shaderProgram.start()
         shaderProgram.set("projection", camera.projectionMatrix)
         shaderProgram.set("view", camera.viewMatrix)
-        shaderProgram.set("chunkHeight", ChunkGenerator.CHUNK_HEIGHT)
+        shaderProgram.set("chunkHeight", ChunkGenerator.MAX_HEIGHT)
         shaderProgram.set("chunkSize", ChunkGenerator.CHUNK_SIZE)
         shaderProgram.set("blockTextures[0]", 0)
         shaderProgram.set("blockTextures[1]", 1)

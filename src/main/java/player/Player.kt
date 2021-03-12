@@ -1,46 +1,25 @@
-package graphics
+package player
 
 import devices.Key
 import devices.Keyboard
 import devices.Mouse
 import math.matrices.Matrix4
 import math.vectors.Vector3
-import player.Player
 import kotlin.math.PI
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.tan
 
-class Camera(
-        var fieldOfView: Float = 70.0f,
-        var aspectRatio: Float = 1.0f,
-        var zNear: Float = 0.01f,
-        var zFar: Float = 1000.0f,
+class Player(val height: Float = 1.8f) {
 
-        var position: Vector3 = Vector3(),
-        var rotation: Vector3 = Vector3()
-) {
+    var position = Vector3(0, 18, 0)
+        private set
 
-    val projectionMatrix: Matrix4
-        get() = Matrix4(floatArrayOf(
-                1.0f / (aspectRatio * tan((PI.toFloat() / 180.0f) * fieldOfView / 2.0f)), 0.0f, 0.0f, 0.0f,
-                0.0f, 1.0f / tan((PI.toFloat() / 180.0f) * fieldOfView / 2.0f), 0.0f, 0.0f,
-                0.0f, 0.0f, -(zFar + zNear) / (zFar - zNear), -(2.0f * zFar * zNear) / (zFar - zNear),
-                0.0f, 0.0f, -1.0f, 0.0f
-        ))
+    var rotation = Vector3()
+        private set
 
-    val viewMatrix: Matrix4
-        get() = Matrix4()
-            .rotate(rotation)
-            .translate(-position)
+    private val actions = ArrayList<Action>()
 
-    val rotationMatrix: Matrix4
-        get() = Matrix4().rotateY(-rotation.y).rotateX(-rotation.x)
-
-    fun followPlayer(player: Player) {
-        position = player.position + Vector3(0f, player.height, 0f)
-        rotation = player.rotation
-    }
+    fun getYLevel() = position.y
 
     fun update(keyboard: Keyboard, mouse: Mouse, delta: Float) {
 
@@ -71,6 +50,9 @@ class Camera(
 
         if (keyboard.isDown(Key.SPACE)) {
             translation.y -= 1.0f
+            if (actions.none { action -> action is Jump }) {
+                actions += Jump(getYLevel() + 1.1f)
+            }
         }
 
         if (keyboard.isDown(Key.LEFT_SHIFT)) {
@@ -85,5 +67,14 @@ class Camera(
         rotation.x = (-mouse.y.toFloat() * mouseSpeed) % (2.0f * PI.toFloat())
         rotation.x = min(max(-PI.toFloat() / 2.0f, rotation.x), PI.toFloat() / 2.0f)
         rotation.y = (mouse.x.toFloat() * mouseSpeed) % (2.0f * PI.toFloat())
+
+        performActions(delta)
     }
+
+    private fun performActions(delta: Float) {
+        for (action in actions) {
+            action.perform(this, delta)
+        }
+    }
+
 }

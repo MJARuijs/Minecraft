@@ -2,6 +2,7 @@ package math
 
 import java.util.*
 import kotlin.math.cos
+import kotlin.math.pow
 
 class PerlinNoise(
         private val octaves: Int,
@@ -64,7 +65,7 @@ class PerlinNoise(
         return (random.nextFloat() * 2.0f) - 1.0f
     }
 
-    private fun power(base: Float, exponent: Float) = Math.pow(base.toDouble(), exponent.toDouble()).toFloat()
+    private fun power(base: Float, exponent: Float) = base.toDouble().pow(exponent.toDouble()).toFloat()
 
     private fun interpolate(a: Float, b: Float, blend: Float): Float {
         val theta = blend * Math.PI.toFloat()

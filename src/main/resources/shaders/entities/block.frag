@@ -23,10 +23,10 @@ struct Material {
 in vec4 worldPosition;
 in vec2 passTextureCoord;
 in vec3 passNormal;
-//in flat int passTextureId;
+in flat int passTextureId;
 
 uniform AmbientLight ambient;
-uniform DirectionalLight sun;
+uniform DirectionalLight directional;
 uniform PointLight pointlights[2];
 uniform Material material;
 uniform vec3 cameraPosition;
@@ -35,27 +35,30 @@ uniform sampler2D blockTextures[2];
 out vec4 outColor;
 
 vec4 computeAmbientColor() {
-
-    vec4 textureColor = texture(blockTextures[1], passTextureCoord);
-    return textureColor;
+    if (passTextureId == 100000) {
+        discard;
+    } else {
+        return texture(blockTextures[passTextureId], passTextureCoord);
+    }
 }
 
 vec4 computeDirectionalColor() {
+    vec4 textureColor = texture(blockTextures[passTextureId], passTextureCoord);
 
     // Diffuse
-    vec3 lightDirection = normalize(sun.direction);
+    vec3 lightDirection = normalize(directional.direction);
     vec3 normal = normalize(passNormal);
 
     float brightness = clamp(dot(lightDirection, normal), 0.0, 1.0);
 
-    vec4 diffuseColor = brightness * material.diffuse * sun.color;
+    vec4 diffuseColor = brightness * textureColor * directional.color;
 
     // Specular
     vec3 position = worldPosition.xyz;
     vec3 reflectionVector = 2 * (dot(lightDirection, normal)) * normal - lightDirection;
     vec3 toCameraVector = normalize(cameraPosition - position);
 
-    vec4 specularColor = material.specular * sun.color * clamp(pow(dot(reflectionVector, toCameraVector), material.shininess), 0.0, 1.0);
+    vec4 specularColor = textureColor * directional.color * clamp(pow(dot(reflectionVector, toCameraVector), 0.0), 0.0, 1.0);
 
     return diffuseColor;
 }
@@ -71,8 +74,9 @@ vec4 computePointsColor() {
 
 void main() {
     vec4 ambientColor = computeAmbientColor();
-//    vec4 directionalColor = computeDirectionalColor();
+    vec4 directionalColor = computeDirectionalColor();
 //    vec4 pointColor = computePointsColor();
 
-    outColor = ambientColor;
-    outColor = clamp(outColor, 0.0, 1.0);}
+    outColor = ambientColor + directionalColor;
+    outColor = clamp(outColor, 0.0, 1.0);
+}

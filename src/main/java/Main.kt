@@ -12,6 +12,7 @@ import graphics.lights.AmbientLight
 import graphics.lights.DirectionalLight
 import math.Color
 import math.vectors.Vector3
+import player.Player
 
 object Main {
 
@@ -30,18 +31,19 @@ object Main {
         val ambientLight = AmbientLight(Color(0.25f, 0.25f, 0.25f))
         val directionalLight = DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector3(0.5f, 0.5f, 0.5f))
 
-//        val chunks = 2
-
+        val chunks = 1
         val x = 0
         val z = 0
-//        for (x in -chunks until chunks) {
-//            for (z in -chunks until chunks) {
+        for (x in -chunks until chunks) {
+            for (z in -chunks until chunks) {
 //                println("$x $z")
                 ChunkRenderer += ChunkGenerator.generateChunk(Vector3(x, 0, z), Biome.PLANES, 0)
-//            }
-//        }
+            }
+        }
 
         val skyBox = SkyBox("textures/sky/box", camera.zFar)
+
+        val player = Player()
 
         timer.reset()
         mouse.capture()
@@ -57,21 +59,12 @@ object Main {
                 window.close()
             }
 
-            if (keyboard.isPressed(Key.F)) {
-//                for (x in 0 until ChunkGenerator.CHUNK_SIZE) {
-//                    for (y in 0 until ChunkGenerator.CHUNK_HEIGHT) {
-//                        for (z in 0 until ChunkGenerator.CHUNK_SIZE) {
-//                            ChunkRenderer[0].blockMoved(Vector3(x, y, z), Vector3(x * 2, y * 2, z * 2))
-//                        }
-//                    }
-//                }
-//                ChunkRenderer[0].blockMoved(Vector3(0, 0, 0), Vector3(0, 0, 0))
-            }
-
             GraphicsContext.clear(GraphicsOption.COLOR_BUFFER_BIT, GraphicsOption.DEPTH_BUFFER_BIT)
 
             skyBox.render(camera)
+//            player.update(keyboard, mouse, timer.getDelta())
             camera.update(keyboard, mouse, timer.getDelta())
+//            camera.followPlayer(player)
 
             ChunkRenderer.render(camera, ambientLight, directionalLight)
 
