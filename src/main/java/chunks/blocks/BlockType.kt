@@ -7,6 +7,7 @@ enum class BlockType(val textures: ImageMap? = null) {
 
     AIR,
     BEDROCK(ImageMap(ImageCache.get("textures/blocks/bedrock.png"))),
-    DIRT(ImageMap(ImageCache.get("textures/blocks/dirt.jpg")))
+    DIRT(ImageMap(ImageCache.get("textures/blocks/dirt.jpg"))),
+    STONE(ImageMap(ImageCache.get("textures/blocks/stone.jpg")))
 
 }

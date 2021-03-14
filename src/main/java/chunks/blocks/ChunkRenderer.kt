@@ -12,6 +12,8 @@ import graphics.shaders.ShaderProgram
 object ChunkRenderer {
 
     private val shaderProgram = ShaderProgram.load("shaders/entities/block.vert", "shaders/entities/block.frag")
+    private val colorCodedProgram = ShaderProgram.load("shaders/entities/colorCodedBlock.vert", "shaders/entities/colorCodedBlock.frag")
+
     private val chunks = ArrayList<Chunk>()
 
     operator fun plusAssign(chunk: Chunk) {
@@ -39,5 +41,30 @@ object ChunkRenderer {
 
         shaderProgram.stop()
         GraphicsContext.disable(GraphicsOption.ALPHA_BLENDING)
+    }
+
+    fun renderColorCoded(camera: Camera) {
+
+        var totalNumberOfSolidBlocks = 0
+        for (chunk in chunks) {
+            totalNumberOfSolidBlocks += chunk.numberOfBlocks
+        }
+
+        println(totalNumberOfSolidBlocks)
+
+        val stepSize = (1.0f / totalNumberOfSolidBlocks)
+
+        colorCodedProgram.start()
+        colorCodedProgram.set("projection", camera.projectionMatrix)
+        colorCodedProgram.set("view", camera.viewMatrix)
+        colorCodedProgram.set("chunkHeight", ChunkGenerator.MAX_HEIGHT)
+        colorCodedProgram.set("chunkSize", ChunkGenerator.CHUNK_SIZE)
+        colorCodedProgram.set("stepSize", stepSize)
+
+        for (chunk in chunks) {
+            chunk.render(colorCodedProgram)
+        }
+
+        colorCodedProgram.stop()
     }
 }
