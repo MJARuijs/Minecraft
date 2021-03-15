@@ -53,7 +53,7 @@ data class Sampler(
         this.minification = minification
         glSamplerParameteri(index, GL_TEXTURE_MIN_FILTER, if (mipmapping) {
             when (minification) {
-                SampleFilter.NEAREST -> GL_NEAREST_MIPMAP_LINEAR
+                SampleFilter.NEAREST -> GL_NEAREST_MIPMAP_NEAREST
                 SampleFilter.LINEAR -> GL_LINEAR_MIPMAP_LINEAR
             }
         } else {

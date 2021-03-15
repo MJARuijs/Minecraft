@@ -98,7 +98,9 @@ class Mouse(private val window: Window) {
             capture()
         }
     }
-    
+
+    fun isCaptured() = captured
+
     fun update() {
         pressed.clear()
         released.clear()

@@ -41,6 +41,10 @@ class RenderTarget(private var width: Int, private var height: Int, private val 
         glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
     }
 
+    fun stop() {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0)
+    }
+
     fun renderTo(target: RenderTarget) = renderTo(target.handle)
 
     private fun renderTo(targetId: Int) {

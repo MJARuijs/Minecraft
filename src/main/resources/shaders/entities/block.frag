@@ -23,27 +23,24 @@ struct Material {
 in vec4 worldPosition;
 in vec2 passTextureCoord;
 in vec3 passNormal;
-in flat int passTextureId;
+//in vec2 textureOffset;
+//in flat int passTextureId;
 
 uniform AmbientLight ambient;
 uniform DirectionalLight directional;
 uniform PointLight pointlights[2];
 uniform Material material;
 uniform vec3 cameraPosition;
-uniform sampler2D blockTextures[2];
+uniform sampler2D textureMap;
 
 out vec4 outColor;
 
 vec4 computeAmbientColor() {
-    if (passTextureId == 100000) {
-        discard;
-    } else {
-        return texture(blockTextures[passTextureId], passTextureCoord);
-    }
+    return texture(textureMap, passTextureCoord);
 }
 
 vec4 computeDirectionalColor() {
-    vec4 textureColor = texture(blockTextures[passTextureId], passTextureCoord);
+    vec4 textureColor = texture(textureMap, passTextureCoord);
 
     // Diffuse
     vec3 lightDirection = normalize(directional.direction);

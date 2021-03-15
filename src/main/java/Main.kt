@@ -1,7 +1,8 @@
 import chunks.Biome
 import chunks.ChunkGenerator
-import chunks.Selector
-import chunks.blocks.ChunkRenderer
+import chunks.ChunkManager
+import chunks.ChunkRenderer
+import chunks.blocks.Selector
 import devices.Key
 import devices.Timer
 import devices.Window
@@ -30,18 +31,21 @@ object Main {
 
         RenderTargetManager.init(window)
 
-        val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0f, ChunkGenerator.TERRAIN_HEIGHT.toFloat(), 0f))
+        val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, ChunkGenerator.TERRAIN_HEIGHT, 0))
 
         val ambientLight = AmbientLight(Color(0.25f, 0.25f, 0.25f))
         val directionalLight = DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector3(0.5f, 0.5f, 0.5f))
 
-        val chunks = 1
-        val x = 0
-        val z = 0
+        val renderDistance = 1
+        val chunkRenderer = ChunkRenderer()
+//        val chunks = 1
+//        val x = 0
+//        val z = 0
 //        for (x in -chunks until chunks) {
 //            for (z in -chunks until chunks) {
-//                println("$x $z")
-                ChunkRenderer += ChunkGenerator.generateChunk(Vector3(x, 0, z), Biome.PLANES, 0)
+
+//                ChunkManager += ChunkGenerator.generateChunk(x, z, Biome.PLANES, 0)
+//                ChunkManager += ChunkGenerator.generateChunk(Vector3(x, 0, 1), Biome.PLANES, 0)
 //            }
 //        }
 
@@ -52,7 +56,7 @@ object Main {
         val selector = Selector()
 
         timer.reset()
-        mouse.capture()
+        mouse.release()
 
         while (!window.isClosed()) {
             window.poll()
@@ -73,12 +77,15 @@ object Main {
 
             skyBox.render(camera)
 //            player.update(keyboard, mouse, timer.getDelta())
-            camera.update(keyboard, mouse, timer.getDelta())
+
+            if (mouse.isCaptured()) {
+                camera.update(keyboard, mouse, timer.getDelta())
+            }
 //            camera.followPlayer(player)
 
-            ChunkRenderer.render(camera, ambientLight, directionalLight)
-
-//            selector.findSelectedItem(camera)
+            val chunks = ChunkManager.update(camera.position)
+            chunkRenderer.render(chunks, camera, ambientLight, directionalLight)
+//            selector.findSelectedItem(window, chunkRenderer, chunks, camera)
 
             window.synchronize()
             timer.update()

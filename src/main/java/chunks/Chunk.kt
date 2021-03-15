@@ -1,69 +1,53 @@
 package chunks
 
+import chunks.ChunkGenerator.CHUNK_SIZE
 import chunks.blocks.Block
 import chunks.blocks.BlockType
-import graphics.samplers.Sampler
-import graphics.shaders.ShaderProgram
-import graphics.textures.ImageMap
+import math.vectors.Vector2
 import math.vectors.Vector3
 
-class Chunk(private val place: Vector3, blocksData: ArrayList<Pair<BlockType, Vector3>>) {
+class Chunk(val chunkX: Int, val chunkZ: Int, private val blocks: ArrayList<Pair<BlockType, Vector3>>) {
 
     private val block = Block()
-    private val samplers = ArrayList<Pair<ImageMap?, Sampler>>()
-    private val storedBlockTypes = ArrayList<Pair<BlockType, Int>>()
-
-    private val blocks = ArrayList<Pair<BlockType, Vector3>>()
     private val visibleBlocks = ArrayList<Pair<BlockType, Vector3>>()
-
-    val numberOfBlocks = blocksData.size
+    private var instanceData = FloatArray(0)
+    private var untexturedData = FloatArray(0)
 
     init {
-        for (blockData in blocksData) {
-            if (blockData.first != BlockType.AIR) {
-                if (storedBlockTypes.none { storedBlock -> storedBlock.first == blockData.first}) {
-                    storedBlockTypes += Pair(blockData.first, samplers.size)
-                    samplers += Pair(blockData.first.textures, Sampler(samplers.size))
-                }
-            }
-
-            blocks += blockData
-        }
-
         determineVisibleBlocks()
-        block.chunkChanged()
-    }
-
-    fun render(shaderProgram: ShaderProgram) {
-        for (sampler in samplers) {
-            if (sampler.first != null) {
-                sampler.second.bind(sampler.first!!)
-            }
-        }
-        shaderProgram.set("place", place)
-        var positions = FloatArray(0)
-
         for (block in visibleBlocks) {
             if (block.first == BlockType.AIR) {
                 continue
             }
-            val textureIndex = storedBlockTypes.findLast { storedBlock ->
-                storedBlock.first == block.first
-            }?.second ?: throw IllegalArgumentException("No block found with type ${block.first}")
-            
-            positions += textureIndex.toFloat()
-            positions += block.second.toArray()
+
+            instanceData += block.second.toArray()
+            instanceData += block.first.getOffsets()
+
+            untexturedData += block.second.toArray()
         }
 
-        block.render(visibleBlocks.size, positions)
+        block.initAttributes()
+    }
+
+    fun getNumberOfBlocks() = visibleBlocks.size
+
+    fun getPosition() = Vector2(chunkX, chunkZ)
+
+    fun getCenter() = Vector2(chunkX + CHUNK_SIZE / 2, chunkZ + CHUNK_SIZE / 2)
+
+    fun render() {
+        block.render(visibleBlocks.size, instanceData)
+    }
+
+    fun renderUnTextured() {
+        block.renderUnTextured(visibleBlocks.size, untexturedData)
     }
 
     private fun determineVisibleBlocks(): ArrayList<Pair<BlockType, Vector3>> {
         visibleBlocks.clear()
-
-        for (x in 0 until ChunkGenerator.CHUNK_SIZE) {
+        for (x in chunkX until chunkX + ChunkGenerator.CHUNK_SIZE) {
             for (y in 0 until ChunkGenerator.MAX_HEIGHT) {
-                for (z in 0 until ChunkGenerator.CHUNK_SIZE) {
+                for (z in chunkZ until chunkZ + ChunkGenerator.CHUNK_SIZE) {
 
                     val currentBlock = blocks.findLast { block ->
                         block.second == Vector3(x, y, z)
@@ -73,7 +57,7 @@ class Chunk(private val place: Vector3, blocksData: ArrayList<Pair<BlockType, Ve
                         continue
                     }
 
-                    if (x == 0 || x == ChunkGenerator.CHUNK_SIZE - 1) {
+                    if (x == chunkX || x == chunkX + ChunkGenerator.CHUNK_SIZE - 1) {
                         visibleBlocks += currentBlock
                         continue
                     }
@@ -81,7 +65,7 @@ class Chunk(private val place: Vector3, blocksData: ArrayList<Pair<BlockType, Ve
                         visibleBlocks += currentBlock
                         continue
                     }
-                    if (z == 0 || z == ChunkGenerator.CHUNK_SIZE - 1) {
+                    if (z == chunkZ || z == chunkZ + ChunkGenerator.CHUNK_SIZE - 1) {
                         visibleBlocks += currentBlock
                         continue
                     }
@@ -92,7 +76,6 @@ class Chunk(private val place: Vector3, blocksData: ArrayList<Pair<BlockType, Ve
                 }
             }
         }
-
         return visibleBlocks
     }
 

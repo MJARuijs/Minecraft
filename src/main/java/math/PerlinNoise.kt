@@ -13,6 +13,8 @@ class PerlinNoise(
 
     private val random = Random()
 
+    operator fun get(x: Int, y: Int) = get(x.toFloat(), y.toFloat())
+
     operator fun get(x: Float, y: Float): Float {
 
         var height = 0.0f
