@@ -12,7 +12,7 @@ object ChunkManager {
 
     private val chunks = ArrayList<Chunk>()
 
-    var chunkRenderDistance = 3
+    var chunkRenderDistance = 1
 
     operator fun plusAssign(chunk: Chunk) {
         chunks += chunk

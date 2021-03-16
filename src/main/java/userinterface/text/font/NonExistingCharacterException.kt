@@ -1,0 +1,1 @@
+package userinterface.text.fontclass NonExistingCharacterException(message: String) : IllegalArgumentException(message)

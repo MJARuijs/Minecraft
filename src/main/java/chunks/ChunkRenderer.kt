@@ -1,5 +1,6 @@
 package chunks
 
+import chunks.blocks.BlockType
 import graphics.Camera
 import graphics.GraphicsContext
 import graphics.GraphicsOption
@@ -8,6 +9,7 @@ import graphics.lights.DirectionalLight
 import graphics.samplers.Sampler
 import graphics.shaders.ShaderProgram
 import graphics.textures.ImageMap
+import math.vectors.Vector3
 import resources.images.ImageCache
 
 class ChunkRenderer {
@@ -18,17 +20,23 @@ class ChunkRenderer {
 
     private val sampler = Sampler(0)
 
-    fun render(chunks: ArrayList<Chunk>, camera: Camera, ambientLight: AmbientLight, directionalLight: DirectionalLight) {
-        GraphicsContext.enable(GraphicsOption.ALPHA_BLENDING)
+    fun render(chunks: ArrayList<Chunk>, camera: Camera, ambientLight: AmbientLight, directionalLight: DirectionalLight, selectedBlock: Pair<Chunk, Vector3>? = null) {
+        GraphicsContext.enable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
+
 
         sampler.bind(blockTexture)
 
         shaderProgram.start()
         shaderProgram.set("projection", camera.projectionMatrix)
         shaderProgram.set("view", camera.viewMatrix)
-//        shaderProgram.set("chunkHeight", ChunkGenerator.MAX_HEIGHT)
-//        shaderProgram.set("chunkSize", ChunkGenerator.CHUNK_SIZE)
         shaderProgram.set("textureMap", sampler.index)
+
+        if (selectedBlock == null) {
+            shaderProgram.set("selected", false)
+        } else {
+            shaderProgram.set("selected", true)
+            shaderProgram.set("selectedBlockPosition", selectedBlock.second)
+        }
 
         ambientLight.apply(shaderProgram)
         directionalLight.apply(shaderProgram)
@@ -38,32 +46,31 @@ class ChunkRenderer {
         }
 
         shaderProgram.stop()
-        GraphicsContext.disable(GraphicsOption.ALPHA_BLENDING)
+        GraphicsContext.disable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
     }
 
-    fun renderColorCoded(chunks: ArrayList<Chunk>, camera: Camera): Float {
-
-        var totalNumberOfSolidBlocks = 0
+    fun renderSubset(camera: Camera, chunks: ArrayList<Chunk>, constraint: (Pair<BlockType, Vector3>) -> Boolean): Float {
+        var totalNumberOfVisibleBlocks = 0
 
         for (chunk in chunks) {
-            totalNumberOfSolidBlocks += chunk.getNumberOfBlocks()
+            val size = chunk.determineSubset(constraint)
+
+            totalNumberOfVisibleBlocks += size
         }
 
-        val stepSize = (1.0f / totalNumberOfSolidBlocks)
+        val stepSize = (1.0f / totalNumberOfVisibleBlocks)
 
         colorCodedProgram.start()
         colorCodedProgram.set("projection", camera.projectionMatrix)
         colorCodedProgram.set("view", camera.viewMatrix)
-//        colorCodedProgram.set("chunkHeight", ChunkGenerator.MAX_HEIGHT)
-//        colorCodedProgram.set("chunkSize", ChunkGenerator.CHUNK_SIZE)
         colorCodedProgram.set("stepSize", stepSize)
 
         var previousBlockCount = 0f
 
         for (chunk in chunks) {
             colorCodedProgram.set("idOffset", previousBlockCount)
-            previousBlockCount += chunk.getNumberOfBlocks()
-            chunk.renderUnTextured()
+            previousBlockCount += chunk.getSubsetSize()
+            chunk.renderSubset()
         }
 
         colorCodedProgram.stop()

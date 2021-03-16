@@ -107,7 +107,7 @@ class Mouse(private val window: Window) {
         
         xScroll = 0.0f
         yScroll = 0.0f
-    
+
         while (events.isNotEmpty()) {
             val event = events.pop()
             when (event.action) {

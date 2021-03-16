@@ -1,24 +1,50 @@
 package chunks.blocks
 
 import chunks.Chunk
+import chunks.ChunkGenerator.CHUNK_SIZE
 import chunks.ChunkRenderer
 import devices.Window
 import graphics.Camera
 import graphics.rendertarget.RenderTargetManager
+import graphics.textures.ColorMap
+import math.vectors.Vector3
+import math.vectors.Vector4
 import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL11.glClearColor
+import org.lwjgl.opengl.GL11.glReadBuffer
+import org.lwjgl.opengl.GL30.GL_COLOR_ATTACHMENT0
+import org.lwjgl.opengl.GL30.GL_COLOR_ATTACHMENT1
 import util.FloatUtils
 import kotlin.math.roundToInt
 
 class Selector {
 
-    fun findSelectedItem(window: Window, chunkRenderer: ChunkRenderer, chunks: ArrayList<Chunk>, camera: Camera) {
+    private val reach = 8.0f
+    private var lastSelected: Pair<Chunk, Vector3>? = null
+    private lateinit var texture: ColorMap
+
+    fun getLastSelected() = lastSelected
+
+    fun getTexture() = texture
+
+    fun findSelectedItem(window: Window, chunkRenderer: ChunkRenderer, chunks: ArrayList<Chunk>, camera: Camera): Pair<Chunk, Vector3>? {
         val fbo = RenderTargetManager.get()
         fbo.start()
         fbo.clear()
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f)
-        val stepSize = chunkRenderer.renderColorCoded(chunks, camera)
+
+        val reachableChunks = ArrayList<Chunk>()
+
+        for (chunk in chunks) {
+            if ((camera.position.xz() - chunk.getCenter()).length() <= CHUNK_SIZE * 2) {
+                reachableChunks += chunk
+            }
+        }
+
+        val stepSize = chunkRenderer.renderSubset(camera, reachableChunks) { visibleBlock ->
+            (visibleBlock.second - camera.position).length() < reach
+        }
 
         val x = window.width / 2
         val y = window.height / 2
@@ -34,17 +60,43 @@ class Selector {
                 pixelData
         )
 
+        fbo.stop()
         val r = FloatUtils.roundToDecimal(pixelData.get(), 3)
         val g = FloatUtils.roundToDecimal(pixelData.get(), 3)
         val b = FloatUtils.roundToDecimal(pixelData.get(), 3)
 
         val id = decodeId(r, g, b, stepSize)
-        println(id)
-        println("$r, $g, $b")
-        println()
-        println()
-        fbo.renderToScreen()
-//        fbo.stop()
+
+        if (id == -1) {
+            lastSelected = null
+            return  null
+        }
+
+        var blockCount = 0
+
+        for (chunk in reachableChunks) {
+            if (id < chunk.getSubsetSize() + blockCount) {
+                val blockPosition = chunk.getSubsetPosition(id - blockCount)
+                lastSelected = Pair(chunk, blockPosition)
+                return lastSelected
+            } else {
+                blockCount += chunk.getSubsetSize()
+            }
+
+        }
+
+        return lastSelected
+    }
+
+    fun determineSelectedFace(camera: Camera, position: Vector3): Face {
+        val clipCoords = Vector4(0f, 0f, -1f, 1f)
+        val eyeSpace = camera.projectionMatrix.inverse().dot(clipCoords)
+        eyeSpace.z = -1f
+        eyeSpace.w = 0f
+
+        val ray = camera.viewMatrix.inverse().dot(eyeSpace).xyz().normal()
+
+        return Face.TOP
     }
 
     private fun decodeId(r: Float, g: Float, b: Float, stepSize: Float): Int {

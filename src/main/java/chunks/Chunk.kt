@@ -5,16 +5,84 @@ import chunks.blocks.Block
 import chunks.blocks.BlockType
 import math.vectors.Vector2
 import math.vectors.Vector3
+import kotlin.math.roundToInt
 
 class Chunk(val chunkX: Int, val chunkZ: Int, private val blocks: ArrayList<Pair<BlockType, Vector3>>) {
 
     private val block = Block()
-    private val visibleBlocks = ArrayList<Pair<BlockType, Vector3>>()
     private var instanceData = FloatArray(0)
     private var untexturedData = FloatArray(0)
 
+    private val instancePositions = ArrayList<Vector3>()
+    private val subsetBlockPositions = ArrayList<Vector3>()
+
+    private val visibleBlocks = ArrayList<Pair<BlockType, Vector3>>()
+
     init {
+        block.initAttributes()
+
         determineVisibleBlocks()
+        determineInstanceData()
+    }
+
+    fun getSubsetSize() = subsetBlockPositions.size
+
+    fun getPosition() = Vector2(chunkX, chunkZ)
+
+    fun getCenter() = Vector2(chunkX + CHUNK_SIZE / 2, chunkZ + CHUNK_SIZE / 2)
+
+    fun containsBlock(position: Vector3) = containsBlock(position.x.roundToInt(), position.z.roundToInt())
+
+    fun containsBlock(x: Int, z: Int): Boolean {
+        if (x < chunkX || x > chunkX + CHUNK_SIZE) {
+            return false
+        }
+        if (z < chunkZ || z > chunkZ + CHUNK_SIZE) {
+            return false
+        }
+
+        return true
+    }
+
+    fun getSubsetPosition(i: Int) = subsetBlockPositions[i]
+
+    fun removeBlock(position: Vector3) {
+        blocks.removeIf { block ->
+            block.second == position
+        }
+
+        determineVisibleBlocks()
+        determineInstanceData()
+    }
+
+    fun render() {
+        block.render(visibleBlocks.size, instanceData)
+    }
+
+    fun renderSubset() {
+        var subsetData = FloatArray(0)
+        for (block in subsetBlockPositions) {
+            subsetData += block.toArray()
+        }
+        block.renderUnTextured(subsetBlockPositions.size, subsetData)
+    }
+
+    fun determineSubset(constraint: (Pair<BlockType, Vector3>) -> Boolean): Int {
+        subsetBlockPositions.clear()
+
+        for (visibleBlock in visibleBlocks) {
+            if (constraint(visibleBlock)) {
+                subsetBlockPositions += visibleBlock.second
+            }
+        }
+
+        return subsetBlockPositions.size
+    }
+
+    private fun determineInstanceData() {
+        instanceData = FloatArray(0)
+        untexturedData = FloatArray(0)
+
         for (block in visibleBlocks) {
             if (block.first == BlockType.AIR) {
                 continue
@@ -25,39 +93,23 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val blocks: ArrayList<Pair
 
             untexturedData += block.second.toArray()
         }
-
-        block.initAttributes()
-    }
-
-    fun getNumberOfBlocks() = visibleBlocks.size
-
-    fun getPosition() = Vector2(chunkX, chunkZ)
-
-    fun getCenter() = Vector2(chunkX + CHUNK_SIZE / 2, chunkZ + CHUNK_SIZE / 2)
-
-    fun render() {
-        block.render(visibleBlocks.size, instanceData)
-    }
-
-    fun renderUnTextured() {
-        block.renderUnTextured(visibleBlocks.size, untexturedData)
     }
 
     private fun determineVisibleBlocks(): ArrayList<Pair<BlockType, Vector3>> {
         visibleBlocks.clear()
-        for (x in chunkX until chunkX + ChunkGenerator.CHUNK_SIZE) {
+        for (x in chunkX until chunkX + CHUNK_SIZE) {
             for (y in 0 until ChunkGenerator.MAX_HEIGHT) {
-                for (z in chunkZ until chunkZ + ChunkGenerator.CHUNK_SIZE) {
+                for (z in chunkZ until chunkZ + CHUNK_SIZE) {
 
                     val currentBlock = blocks.findLast { block ->
                         block.second == Vector3(x, y, z)
-                    } ?: throw IllegalArgumentException("No block found at $x $y $z")
+                    } ?: continue
 
                     if (currentBlock.first == BlockType.AIR) {
                         continue
                     }
 
-                    if (x == chunkX || x == chunkX + ChunkGenerator.CHUNK_SIZE - 1) {
+                    if (x == chunkX || x == chunkX + CHUNK_SIZE - 1) {
                         visibleBlocks += currentBlock
                         continue
                     }
@@ -65,7 +117,7 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val blocks: ArrayList<Pair
                         visibleBlocks += currentBlock
                         continue
                     }
-                    if (z == chunkZ || z == chunkZ + ChunkGenerator.CHUNK_SIZE - 1) {
+                    if (z == chunkZ || z == chunkZ + CHUNK_SIZE - 1) {
                         visibleBlocks += currentBlock
                         continue
                     }

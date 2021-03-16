@@ -13,16 +13,14 @@ layout(location = 9) in vec2 bottomTextureOffset;
 
 uniform mat4 projection;
 uniform mat4 view;
-//uniform int chunkHeight;
-//uniform int chunkSize;
-//uniform vec3 place;
+uniform bool selected;
+uniform vec3 selectedBlockPosition;
 
 out vec4 worldPosition;
 out vec4 shadowCoords;
 out vec2 passTextureCoord;
 out vec3 passNormal;
-
-//out vec2 textureOffset;
+out vec3 passInstancePosition;
 
 void main() {
     mat4 model;
@@ -36,6 +34,7 @@ void main() {
     model[3][2] = instancePosition.z;
 
     passNormal = normalize(mat3(model) * inNormal);
+    passInstancePosition = instancePosition;
     passTextureCoord = (inTextureCoord / 16.0);
 
     if (passNormal.x == 1.0) {

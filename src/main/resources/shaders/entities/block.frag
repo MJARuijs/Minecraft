@@ -14,24 +14,18 @@ struct PointLight {
     vec3 position;
 };
 
-struct Material {
-    vec4 diffuse;
-    vec4 specular;
-    float shininess;
-};
-
 in vec4 worldPosition;
 in vec2 passTextureCoord;
 in vec3 passNormal;
-//in vec2 textureOffset;
-//in flat int passTextureId;
+in vec3 passInstancePosition;
 
 uniform AmbientLight ambient;
 uniform DirectionalLight directional;
 uniform PointLight pointlights[2];
-uniform Material material;
 uniform vec3 cameraPosition;
 uniform sampler2D textureMap;
+uniform vec3 selectedBlockPosition;
+uniform bool selected;
 
 out vec4 outColor;
 
@@ -69,11 +63,29 @@ vec4 computePointsColor() {
     return vec4(0);
 }
 
-void main() {
-    vec4 ambientColor = computeAmbientColor();
-    vec4 directionalColor = computeDirectionalColor();
-//    vec4 pointColor = computePointsColor();
+bool equals(vec3 one, vec3 two) {
+    if (abs(one.x - two.x) > 0.0005) {
+        return false;
+    }
 
-    outColor = ambientColor + directionalColor;
-    outColor = clamp(outColor, 0.0, 1.0);
+    if (abs(one.y - two.y) > 0.0005) {
+        return false;
+    }
+
+    if (abs(one.z - two.z) > 0.0005) {
+        return false;
+    }
+
+    return true;
+}
+
+void main() {
+    if (selected && equals(passInstancePosition, selectedBlockPosition)) {
+        outColor = vec4(1.0, 0.0, 0.0, 1.0);
+    } else {
+        vec4 ambientColor = computeAmbientColor();
+        vec4 directionalColor = computeDirectionalColor();
+        outColor = ambientColor + directionalColor;
+        outColor = clamp(outColor, 0.0, 1.0);
+    }
 }
