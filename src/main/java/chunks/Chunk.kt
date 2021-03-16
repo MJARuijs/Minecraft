@@ -33,7 +33,7 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val blocks: ArrayList<Pair
 
     fun containsBlock(position: Vector3) = containsBlock(position.x.roundToInt(), position.z.roundToInt())
 
-    fun containsBlock(x: Int, z: Int): Boolean {
+    private fun containsBlock(x: Int, z: Int): Boolean {
         if (x < chunkX || x > chunkX + CHUNK_SIZE) {
             return false
         }

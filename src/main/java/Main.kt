@@ -85,7 +85,7 @@ object Main {
 
             val selectedBlock = selector.getLastSelected()
             doMainRenderPass(selectedBlock)
-
+            selector.render(camera)
             ui.update(mouse, timer.getDelta())
             ui.draw(window.width, window.height)
 
@@ -109,13 +109,22 @@ object Main {
             camera.update(keyboard, mouse, timer.getDelta())
         }
 
-        if (mouse.isPressed(Button.LEFT)) {
-            val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera)
-            if (selectedBlock != null) {
-                for (chunk in chunks) {
-                    if (chunk.containsBlock(selectedBlock.second)) {
-                        chunk.removeBlock(selectedBlock.second)
+        if (mouse.isCaptured()) {
+            if (mouse.isPressed(Button.LEFT)) {
+                val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera)
+                if (selectedBlock != null) {
+                    for (chunk in chunks) {
+                        if (chunk.containsBlock(selectedBlock.second)) {
+                            chunk.removeBlock(selectedBlock.second)
+                        }
                     }
+                }
+            }
+
+            if (mouse.isPressed(Button.RIGHT)) {
+                val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera)
+                if (selectedBlock != null) {
+                    val face = selector.determineSelectedFace(camera, selectedBlock.second)
                 }
             }
         }

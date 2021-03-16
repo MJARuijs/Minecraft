@@ -81,11 +81,12 @@ bool equals(vec3 one, vec3 two) {
 
 void main() {
     if (selected && equals(passInstancePosition, selectedBlockPosition)) {
-        outColor = vec4(1.0, 0.0, 0.0, 1.0);
+        outColor = vec4(passNormal, 1.0);
     } else {
         vec4 ambientColor = computeAmbientColor();
         vec4 directionalColor = computeDirectionalColor();
         outColor = ambientColor + directionalColor;
         outColor = clamp(outColor, 0.0, 1.0);
+
     }
 }
