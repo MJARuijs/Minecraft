@@ -22,8 +22,7 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private var highestBlock: Int, pri
 
     private val visibleBlocks = ArrayList<Pair<BlockType, Vector3>>()
 
-    var initialized = false
-        private set
+    private var initialized = false
 
     init {
         determineVisibleBlocks()

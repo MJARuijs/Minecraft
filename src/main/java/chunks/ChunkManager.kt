@@ -19,9 +19,7 @@ object ChunkManager {
 
     private var chunksInProgress = HashSet<Vector2>()
     private val generator = ChunkGenerator()
-//    private val generatedChunks = ArrayList<ChunkData>()
-    private val generatedChunks2 = ArrayList<Chunk>()
-//    private val newChunks = ArrayList<Vector2>()
+    private val newChunks = ArrayList<Vector2>()
 
     private val locked = AtomicBoolean(false)
 
@@ -49,26 +47,23 @@ object ChunkManager {
         val start = System.currentTimeMillis()
         val visibleChunks = ArrayList<Chunk>()
 
-//        if (c.isNotEmpty()) {
+        if (newChunks.isNotEmpty()) {
             while (locked.get()) {
                 Thread.sleep(1)
             }
 
             locked.set(true)
+            val initializedChunks = ArrayList<Vector2>()
             for (chunk in chunks) {
-                if (!chunk.initialized) {
+                if (newChunks.contains(chunk.getPosition())) {
                     chunk.initBlock()
+                    initializedChunks += chunk.getPosition()
                 }
             }
-//            for (data in generatedChunks) {
-//                val chunk = Chunk(data)
-//                chunks += chunk
-//                visibleChunks += chunk
-//            }
-            locked.set(false)
 
-//            generatedChunks.clear()
-//        }
+            newChunks.removeAll(initializedChunks)
+            locked.set(false)
+        }
 
         val end = System.currentTimeMillis()
 
@@ -99,26 +94,17 @@ object ChunkManager {
                     if (!chunksInProgress.contains(Vector2(x, z))) {
                         chunksInProgress.add(Vector2(x, z))
                         Thread {
-//                            println("${Thread.currentThread().id} creating $x $z")
                             val newData = generator.generateChunkData(x, z, Biome.PLANES, 0)
-//                            println("Done generating $x $z ${chunksInProgress.size}")
-
+                            newChunks += Vector2(x, z)
                             while (locked.get()) {
                                 Thread.sleep(10)
                             }
 
                             locked.set(true)
-
                             chunks += Chunk(newData)
-
-//                            generatedChunks += newData
                             locked.set(false)
                         }.start()
-//                    val newChunk = generator.generateChunk(x, z, Biome.PLANES, 0)
-//                    chunks += newChunk
-//                    visibleChunks += newChunk
                     }
-
                 } else {
                     visibleChunks += chunk
                 }
@@ -127,9 +113,8 @@ object ChunkManager {
 
         val delay = end - start
         if (delay > 100) {
-            println("hoi ${end - start}")
+//            println("hoi ${end - start}")
         }
-
 
         return visibleChunks
     }
