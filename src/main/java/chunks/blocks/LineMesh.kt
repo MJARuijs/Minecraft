@@ -23,7 +23,7 @@ class LineMesh(val vertices: FloatArray) {
 
     fun draw() {
         glBindVertexArray(vao)
-        glDrawArrays(GL_LINES, 0, vertices.size)
+        glDrawArrays(GL_QUADS, 0, vertices.size)
         glBindVertexArray(0)
     }
 

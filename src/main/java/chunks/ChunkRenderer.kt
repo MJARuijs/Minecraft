@@ -23,7 +23,6 @@ class ChunkRenderer {
     fun render(chunks: ArrayList<Chunk>, camera: Camera, ambientLight: AmbientLight, directionalLight: DirectionalLight, selectedBlock: Pair<Chunk, Vector3>? = null) {
         GraphicsContext.enable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
 
-
         sampler.bind(blockTexture)
 
         shaderProgram.start()
@@ -42,7 +41,7 @@ class ChunkRenderer {
         directionalLight.apply(shaderProgram)
 
         for (chunk in chunks) {
-            chunk.render()
+            chunk.render(shaderProgram)
         }
 
         shaderProgram.stop()

@@ -1,10 +1,8 @@
 package chunks
 
-import chunks.ChunkGenerator.CHUNK_SIZE
-import chunks.blocks.BlockType
-import math.vectors.Vector2
+import chunks.ChunkGenerator.Companion.CHUNK_SIZE
+import chunks.blocks.Face
 import math.vectors.Vector3
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.math.sign
@@ -15,10 +13,52 @@ object ChunkManager {
 
     private val chunks = ArrayList<Chunk>()
 
-    private val requiredChunks = ArrayList<Vector2>()
-    private val newChunks = ConcurrentHashMap<Vector2, ArrayList<Pair<BlockType, Vector3>>>()
-
     var chunkRenderDistance = 1
+
+//    private var position = Vector3()
+    private val generator = ChunkGenerator()
+
+//    init {
+//        startThread()
+//    }
+//
+//    fun updatePosition(position: Vector3) {
+//        this.position = position
+//    }
+//
+//    fun getChunks() = chunks
+//
+//    fun startThread() {
+//        println(Thread.currentThread().id)
+////        val newChunk = ChunkSender.takeChunk()
+////        if (newChunk != null) {
+////            chunks += Chunk(newChunk)
+////        }
+////        update(position)
+//        while (true) {
+//
+//            val newChunk = ChunkSender.takeChunk()
+//            if (newChunk != null) {
+//                chunks += Chunk(newChunk)
+//            }
+//            update(position)
+//            if (!Main.doMainLoop()) {
+//                return
+//            }
+//        }
+//    }
+
+    fun newBlockPosition(position: Vector3, face: Face): Vector3 {
+        return when (face) {
+            Face.FRONT  -> position + Vector3(0, 0, 1)
+            Face.BACK   -> position + Vector3(0, 0, -1)
+            Face.LEFT   -> position + Vector3(-1, 0, 0)
+            Face.RIGHT  -> position + Vector3(1, 0, 0)
+            Face.TOP    -> position + Vector3(0, 1, 0)
+            Face.BOTTOM -> position + Vector3(0, -1, 0)
+            Face.ALL -> position
+        }
+    }
 
     operator fun plusAssign(chunk: Chunk) {
         chunks += chunk
@@ -28,7 +68,10 @@ object ChunkManager {
         chunks -= chunk
     }
 
+    var first = true
+
     fun update(position: Vector3): ArrayList<Chunk> {
+        val start = System.currentTimeMillis()
         val removableChunks = ArrayList<Chunk>()
         val renderDistance = (chunkRenderDistance + 1) * CHUNK_SIZE
 
@@ -56,21 +99,9 @@ object ChunkManager {
                 }
 
                 if (chunk == null) {
-//                    println("computing $x $z")
-//                    if (!requiredChunks.contains(Vector2(x, z))) {
-//                        requiredChunks += Vector2(x, z)
-//                        Thread {
-//                            newChunks[Vector2(x, z)] = ChunkGenerator.generateChunkData(x, z, Biome.PLANES, 0, ::onChunkGenerated).third
-////                            println("Finished $x $z")
-//                        }.start()
-//                    }
+//                    ChunkSender.requestChunk(x, z)
 
-//                    Thread {
-//                        ChunkGenerator.generateChunkData(x, z, Biome.PLANES, 0)
-//                    }.start()
-
-                    val newChunk = ChunkGenerator.generateChunk(x, z, Biome.PLANES, 0)
-//                    val newChunk = Chunk(x, z, ArrayList())
+                    val newChunk = generator.generateChunk(x, z, Biome.PLANES, 0)
                     chunks += newChunk
                     visibleChunks += newChunk
                 } else {
@@ -78,30 +109,11 @@ object ChunkManager {
                 }
             }
         }
-
+        if (first) {
+            first = false
+            val end = System.currentTimeMillis()
+            println(end - start)
+        }
         return visibleChunks
     }
-
-    fun processNewChunks(): Boolean {
-        if (requiredChunks.isEmpty()) {
-            return true
-        }
-
-        for (chunk in newChunks) {
-            chunks += Chunk(chunk.key, chunk.value)
-            requiredChunks -= chunk.key
-        }
-
-        if (requiredChunks.isEmpty()) {
-            return true
-        }
-
-        return false
-    }
-
-    private fun onChunkGenerated(x: Int, z: Int, blocks: ArrayList<Pair<BlockType, Vector3>>) {
-//        requiredChunks.remove(Vector2(x, z))
-//        chunks += Chunk(x, z, blocks)
-    }
-
 }

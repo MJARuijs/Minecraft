@@ -4,12 +4,12 @@ layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec2 inTextureCoord;
 layout(location = 2) in vec3 inNormal;
 layout(location = 3) in vec3 instancePosition;
-layout(location = 4) in vec2 frontTextureOffset;
-layout(location = 5) in vec2 backTextureOffset;
-layout(location = 6) in vec2 rightTextureOffset;
-layout(location = 7) in vec2 leftTextureOffset;
-layout(location = 8) in vec2 topTextureOffset;
-layout(location = 9) in vec2 bottomTextureOffset;
+layout(location = 4) in vec3 frontTextureOffset;
+layout(location = 5) in vec3 backTextureOffset;
+layout(location = 6) in vec3 rightTextureOffset;
+layout(location = 7) in vec3 leftTextureOffset;
+layout(location = 8) in vec3 topTextureOffset;
+layout(location = 9) in vec3 bottomTextureOffset;
 
 uniform mat4 projection;
 uniform mat4 view;
@@ -18,7 +18,7 @@ uniform vec3 selectedBlockPosition;
 
 out vec4 worldPosition;
 out vec4 shadowCoords;
-out vec2 passTextureCoord;
+out vec3 passTextureCoord;
 out vec3 passNormal;
 out vec3 passInstancePosition;
 
@@ -35,22 +35,22 @@ void main() {
 
     passNormal = normalize(mat3(model) * inNormal);
     passInstancePosition = instancePosition;
-    passTextureCoord = (inTextureCoord / 16.0);
+    passTextureCoord = vec3(inTextureCoord / 16.0, 0);
 
-    if (passNormal.x == 1.0) {
+    if (passNormal.x == 1) {
         passTextureCoord += rightTextureOffset;
-    } else if (passNormal.x == -1.0) {
+    } else if (passNormal.x == -1) {
         passTextureCoord += leftTextureOffset;
-    } else if (passNormal.y == 1.0) {
+    } else if (passNormal.y == 1) {
         passTextureCoord += topTextureOffset;
-    } else if (passNormal.y == -1.0) {
+    } else if (passNormal.y == -1) {
         passTextureCoord += bottomTextureOffset;
-    } else if (passNormal.z == 1.0) {
+    } else if (passNormal.z == 1) {
         passTextureCoord += frontTextureOffset;
-    } else if (passNormal.z == -1.0) {
+    } else if (passNormal.z == -1) {
         passTextureCoord += backTextureOffset;
     } else {
-        passTextureCoord = vec2(0.0, 0.0);
+        passTextureCoord = vec3(0, 0, 0);
     }
 
     worldPosition = model * vec4(inPosition, 1.0);

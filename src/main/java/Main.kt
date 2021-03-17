@@ -17,14 +17,18 @@ import math.vectors.Vector3
 import player.Player
 import userinterface.UIColor
 import userinterface.UIPage
+import userinterface.UniversalParameters
 import userinterface.UserInterface
 import userinterface.items.Item
+import userinterface.items.TextBox
 import userinterface.items.backgrounds.TexturedBackground
 import userinterface.layout.constraints.ConstraintDirection
 import userinterface.layout.constraints.ConstraintSet
 import userinterface.layout.constraints.constrainttypes.AspectRatioConstraint
 import userinterface.layout.constraints.constrainttypes.CenterConstraint
+import userinterface.layout.constraints.constrainttypes.PixelConstraint
 import userinterface.layout.constraints.constrainttypes.RelativeConstraint
+import userinterface.text.font.FontLoader
 
 object Main {
     private val window = Window("Minecraft", GraphicsContext::resize)
@@ -42,14 +46,16 @@ object Main {
     private val selector = Selector()
     private val skyBox = SkyBox("textures/sky/box", camera.zFar)
 
-    private val chunks = ArrayList<Chunk>()
+    private var chunks = ArrayList<Chunk>()
 
     private val ui = UserInterface(window.aspectRatio)
+    val page = UIPage("page")
 
     @JvmStatic
     fun main(args: Array<String>) {
         GraphicsContext.init(Color(0.25f, 0.25f, 0.25f))
         GraphicsContext.enable(GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING, GraphicsOption.TEXTURE_MAPPING)
+        UniversalParameters.init(window.aspectRatio, FontLoader(window.aspectRatio).load("fonts/candara.png"))
 
         RenderTargetManager.init(window)
 
@@ -58,7 +64,12 @@ object Main {
         timer.reset()
         mouse.release()
 
-        val page = UIPage("page")
+        val textBox = TextBox("fps", ConstraintSet(
+                PixelConstraint(ConstraintDirection.TO_LEFT),
+                PixelConstraint(ConstraintDirection.TO_TOP),
+                RelativeConstraint(ConstraintDirection.VERTICAL, 0.1f),
+                AspectRatioConstraint(ConstraintDirection.HORIZONTAL, 1.5f)
+        ), "fps", window.aspectRatio, 1.0f)
 
         val crossHair = Item("crossHair", ConstraintSet(
                 CenterConstraint(ConstraintDirection.HORIZONTAL),
@@ -67,31 +78,33 @@ object Main {
                 AspectRatioConstraint(ConstraintDirection.HORIZONTAL, 1.0f)
         ), TexturedBackground("textures/userinterface/crosshair.jpg", null, UIColor.GREY))
 
+        page += textBox
         page += crossHair
+
         ui += page
         ui.showPage("page")
 
-        val startTime = System.currentTimeMillis()
-        val chunk = ChunkGenerator.generateChunk(0, 0, Biome.PLANES, 0)
-        val endTime = System.currentTimeMillis()
 
-        println("Time: ${endTime - startTime}")
+//        val chunk = ChunkGenerator().generateChunk(0, 0, Biome.PLANES, 0)
+//        chunks.add(chunk)
+//        ChunkManager.startThread()
 
-        chunks += chunk
         while (!window.isClosed()) {
-
             window.poll()
 
-//            chunks = ChunkManager.update(camera.position)
-//            ChunkManager.processNewChunks()
+//            ChunkManager.updatePosition(camera.position)
+//            chunks = ChunkManager.getChunks()
             processInput()
+
+            chunks = ChunkManager.update(camera.position)
+//            chunks.add(chunk)
 
 //            player.update(keyboard, mouse, timer.getDelta())
 //            camera.followPlayer(player)
 
             val selectedBlock = selector.getLastSelected()
             doMainRenderPass(selectedBlock)
-            selector.render(camera)
+
             ui.update(mouse, timer.getDelta())
             ui.draw(window.width, window.height)
 
@@ -127,13 +140,14 @@ object Main {
                 }
             }
 
-            if (mouse.isPressed(Button.RIGHT)) {
+            if (mouse.isPressed(Button.RIGHT) || keyboard.isPressed(Key.V)) {
                 val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera)
                 if (selectedBlock != null) {
+                    val face = selector.determineSelectedFace(camera, selectedBlock.second) ?: return
+                    val newPosition = ChunkManager.newBlockPosition(selectedBlock.second, face)
                     for (chunk in chunks) {
-                        if (chunk.containsBlock(selectedBlock.second)) {
-                            val face = selector.determineSelectedFace(camera, selectedBlock.second)?: continue
-                            chunk.addBlock(BlockType.DIRT, selectedBlock.second, face)
+                        if (chunk.containsBlock(newPosition)) {
+                            chunk.addBlock(BlockType.GRASS, newPosition)
                         }
                     }
                 }

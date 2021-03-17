@@ -15,7 +15,7 @@ struct PointLight {
 };
 
 in vec4 worldPosition;
-in vec2 passTextureCoord;
+in vec3 passTextureCoord;
 in vec3 passNormal;
 in vec3 passInstancePosition;
 
@@ -26,30 +26,29 @@ uniform vec3 cameraPosition;
 uniform sampler2D textureMap;
 uniform vec3 selectedBlockPosition;
 uniform bool selected;
+uniform vec4 overlayColor;
 
 out vec4 outColor;
 
-vec4 computeAmbientColor() {
-    return texture(textureMap, passTextureCoord);
+vec4 computeAmbientColor(vec4 color) {
+    return color;
 }
 
-vec4 computeDirectionalColor() {
-    vec4 textureColor = texture(textureMap, passTextureCoord);
-
+vec4 computeDirectionalColor(vec4 color) {
     // Diffuse
     vec3 lightDirection = normalize(directional.direction);
     vec3 normal = normalize(passNormal);
 
     float brightness = clamp(dot(lightDirection, normal), 0.0, 1.0);
 
-    vec4 diffuseColor = brightness * textureColor * directional.color;
+    vec4 diffuseColor = brightness * color * directional.color;
 
     // Specular
     vec3 position = worldPosition.xyz;
     vec3 reflectionVector = 2 * (dot(lightDirection, normal)) * normal - lightDirection;
     vec3 toCameraVector = normalize(cameraPosition - position);
 
-    vec4 specularColor = textureColor * directional.color * clamp(pow(dot(reflectionVector, toCameraVector), 0.0), 0.0, 1.0);
+    vec4 specularColor = color * directional.color * clamp(pow(dot(reflectionVector, toCameraVector), 0.0), 0.0, 1.0);
 
     return diffuseColor;
 }
@@ -80,13 +79,21 @@ bool equals(vec3 one, vec3 two) {
 }
 
 void main() {
-    vec4 ambientColor = computeAmbientColor();
-    vec4 directionalColor = computeDirectionalColor();
+    vec4 color = texture(textureMap, passTextureCoord.xy);
+    if (passTextureCoord.z > 0.5) {
+        float strength = color.r;
+        color.rgb = overlayColor.rgb * strength;
+    }
+
+    vec4 ambientColor = computeAmbientColor(color);
+    vec4 directionalColor = computeDirectionalColor(color);
 
     outColor = ambientColor + directionalColor;
     outColor = clamp(outColor, 0.0, 1.0);
 
-    if (selected && equals(passInstancePosition, selectedBlockPosition)) {
-        outColor -= vec4(0.1, 0.1, 0.1, 0.0);
-    }
+//    if (selected && equals(passInstancePosition, selectedBlockPosition)) {
+//        outColor -= vec4(0.1, 0.1, 0.1, 0.0);
+//    }
+
+
 }

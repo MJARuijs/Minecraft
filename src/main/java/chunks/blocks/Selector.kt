@@ -1,7 +1,7 @@
 package chunks.blocks
 
 import chunks.Chunk
-import chunks.ChunkGenerator.CHUNK_SIZE
+import chunks.ChunkGenerator.Companion.CHUNK_SIZE
 import chunks.ChunkRenderer
 import devices.Window
 import graphics.Camera
@@ -10,7 +10,6 @@ import graphics.shaders.ShaderProgram
 import math.vectors.Vector3
 import math.vectors.Vector4
 import org.lwjgl.BufferUtils
-import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL11.*
 import util.FloatUtils
 import kotlin.math.roundToInt
@@ -21,8 +20,6 @@ class Selector {
     private var lastSelected: Pair<Chunk, Vector3>? = null
 
     private val shaderProgram = ShaderProgram.load("shaders/line.vert", "shaders/line.frag")
-
-    private val meshes = ArrayList<LineMesh>()
 
     fun getLastSelected() = lastSelected
 
@@ -48,17 +45,10 @@ class Selector {
         val y = window.height / 2
 
         val pixelData = BufferUtils.createFloatBuffer(3)
-        GL11.glReadPixels(
-                x,
-                y,
-                1,
-                1,
-                GL11.GL_RGB,
-                GL11.GL_FLOAT,
-                pixelData
-        )
+        glReadPixels(x, y, 1, 1, GL_RGB, GL_FLOAT, pixelData)
 
         fbo.stop()
+
         val r = FloatUtils.roundToDecimal(pixelData.get(), 3)
         val g = FloatUtils.roundToDecimal(pixelData.get(), 3)
         val b = FloatUtils.roundToDecimal(pixelData.get(), 3)
@@ -67,7 +57,7 @@ class Selector {
 
         if (id == -1) {
             lastSelected = null
-            return  null
+            return null
         }
 
         var blockCount = 0
@@ -116,17 +106,16 @@ class Selector {
         return closestFace
     }
 
-    fun render(camera: Camera) {
-        shaderProgram.start()
-        glLineWidth(2.0f)
-        shaderProgram.set("projection", camera.projectionMatrix)
-        shaderProgram.set("view", camera.viewMatrix)
-        for (mesh in meshes) {
-            mesh.draw()
-        }
-        shaderProgram.stop()
-
-    }
+//    fun render(camera: Camera) {
+//        shaderProgram.start()
+//        glLineWidth(2.0f)
+//        shaderProgram.set("projection", camera.projectionMatrix)
+//        shaderProgram.set("view", camera.viewMatrix)
+//        for (mesh in meshes) {
+//            mesh.draw()
+//        }
+//        shaderProgram.stop()
+//    }
 
     private fun decodeId(r: Float, g: Float, b: Float, stepSize: Float): Int {
         if (g == 0.0f && b == 0.0f) {

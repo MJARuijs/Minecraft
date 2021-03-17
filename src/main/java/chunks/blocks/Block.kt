@@ -14,12 +14,12 @@ class Block {
         mesh.initInstancedBuffers(
                 Layout(Primitive.TRIANGLE,
                         Attribute(3, 3),
-                        Attribute(4, 2),
-                        Attribute(5, 2),
-                        Attribute(6, 2),
-                        Attribute(7, 2),
-                        Attribute(8, 2),
-                        Attribute(9, 2)
+                        Attribute(4, 3),
+                        Attribute(5, 3),
+                        Attribute(6, 3),
+                        Attribute(7, 3),
+                        Attribute(8, 3),
+                        Attribute(9, 3)
                 )
         )
 

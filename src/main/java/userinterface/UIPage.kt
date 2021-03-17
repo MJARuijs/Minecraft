@@ -13,6 +13,15 @@ class UIPage(id: String, private val background: Background = UniversalParameter
         quad.draw()
         children.forEach { child -> child.draw(shaderProgram, iconProgram, textProgram, aspectRatio, null) }
     }
+
+    fun getChild(id: String): Item? {
+        for (child in children) {
+            if (child.id == id) {
+                return child
+            }
+        }
+        return null
+    }
     
     override fun apply(layout: UILayout, duration: Float) {
         children.forEach { child ->
