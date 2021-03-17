@@ -95,21 +95,25 @@ object Main {
 //            ChunkManager.updatePosition(camera.position)
 //            chunks = ChunkManager.getChunks()
             processInput()
+            val start = System.currentTimeMillis()
 
             chunks = ChunkManager.update(camera.position)
 //            chunks.add(chunk)
 
 //            player.update(keyboard, mouse, timer.getDelta())
 //            camera.followPlayer(player)
+            val end = System.currentTimeMillis()
 
             val selectedBlock = selector.getLastSelected()
             doMainRenderPass(selectedBlock)
 
             ui.update(mouse, timer.getDelta())
             ui.draw(window.width, window.height)
+//            println("Delay: ${end - start} ${chunks.size}")
 
             window.synchronize()
             timer.update()
+//            println(1.0f / timer.getDelta())
         }
 
         window.destroy()

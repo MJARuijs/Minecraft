@@ -14,7 +14,7 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private var highestBlock: Int, pri
 
     constructor(data: ChunkData) : this(data.x, data.z, data.highestBlock, data.biome, data.blocks)
 
-    private val block = Block()
+    private lateinit var block: Block
     private var instanceData = FloatArray(0)
     private var untexturedData = FloatArray(0)
 
@@ -22,11 +22,18 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private var highestBlock: Int, pri
 
     private val visibleBlocks = ArrayList<Pair<BlockType, Vector3>>()
 
-    init {
-        block.initAttributes()
+    var initialized = false
+        private set
 
+    init {
         determineVisibleBlocks()
         determineInstanceData()
+    }
+
+    fun initBlock() {
+        block = Block()
+        block.initAttributes()
+        initialized = true
     }
 
     fun getSubsetSize() = subsetBlockPositions.size
@@ -79,7 +86,12 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private var highestBlock: Int, pri
 
     fun render(shaderProgram: ShaderProgram) {
         shaderProgram.set("overlayColor", biome.overlayColor)
-        block.render(visibleBlocks.size, instanceData)
+        if (initialized) {
+            block.render(visibleBlocks.size, instanceData)
+        } else {
+            initBlock()
+            block.render(visibleBlocks.size, instanceData)
+        }
     }
 
     fun renderSubset() {
@@ -87,7 +99,12 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private var highestBlock: Int, pri
         for (block in subsetBlockPositions) {
             subsetData += block.toArray()
         }
-        block.renderUnTextured(subsetBlockPositions.size, subsetData)
+        if (initialized) {
+            block.renderUnTextured(subsetBlockPositions.size, subsetData)
+        } else {
+            initBlock()
+            block.renderUnTextured(subsetBlockPositions.size, subsetData)
+        }
     }
 
     fun determineSubset(constraint: (Pair<BlockType, Vector3>) -> Boolean): Int {
