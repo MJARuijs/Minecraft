@@ -3,17 +3,19 @@ package chunks
 import chunks.ChunkGenerator.CHUNK_SIZE
 import chunks.blocks.Block
 import chunks.blocks.BlockType
+import chunks.blocks.Face
 import math.vectors.Vector2
 import math.vectors.Vector3
 import kotlin.math.roundToInt
 
 class Chunk(val chunkX: Int, val chunkZ: Int, private val blocks: ArrayList<Pair<BlockType, Vector3>>) {
 
+    constructor(vector2: Vector2, blocks: ArrayList<Pair<BlockType, Vector3>>) : this(vector2.x.roundToInt(), vector2.y.roundToInt(), blocks)
+
     private val block = Block()
     private var instanceData = FloatArray(0)
     private var untexturedData = FloatArray(0)
 
-    private val instancePositions = ArrayList<Vector3>()
     private val subsetBlockPositions = ArrayList<Vector3>()
 
     private val visibleBlocks = ArrayList<Pair<BlockType, Vector3>>()
@@ -33,6 +35,8 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val blocks: ArrayList<Pair
 
     fun containsBlock(position: Vector3) = containsBlock(position.x.roundToInt(), position.z.roundToInt())
 
+    fun getSubsetPosition(i: Int) = subsetBlockPositions[i]
+
     private fun containsBlock(x: Int, z: Int): Boolean {
         if (x < chunkX || x > chunkX + CHUNK_SIZE) {
             return false
@@ -44,7 +48,19 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val blocks: ArrayList<Pair
         return true
     }
 
-    fun getSubsetPosition(i: Int) = subsetBlockPositions[i]
+    fun addBlock(type: BlockType, position: Vector3, face: Face) {
+        blocks += when (face) {
+            Face.FRONT -> Pair(type, position + Vector3(0, 0, 1))
+            Face.BACK -> Pair(type, position + Vector3(0, 0, -1))
+            Face.LEFT -> Pair(type, position + Vector3(-1, 0, 0))
+            Face.RIGHT -> Pair(type, position + Vector3(1, 0, 0))
+            Face.TOP -> Pair(type, position + Vector3(0, 1, 0))
+            Face.BOTTOM -> Pair(type, position + Vector3(0, -1, 0))
+        }
+
+        determineVisibleBlocks()
+        determineInstanceData()
+    }
 
     fun removeBlock(position: Vector3) {
         blocks.removeIf { block ->
@@ -132,7 +148,8 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val blocks: ArrayList<Pair
     }
 
     private fun isNeighbourBlockSolid(x: Float, y: Float, z: Float): Boolean {
-        return checkNeighbourBlockType(x, y, z) != BlockType.AIR
+        val neighbourBlockType = checkNeighbourBlockType(x, y, z) ?: return false
+        return neighbourBlockType != BlockType.AIR
     }
 
     private fun checkNeighbourBlockType(x: Float, y: Float, z: Float): BlockType? {

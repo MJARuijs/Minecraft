@@ -1,7 +1,5 @@
-import chunks.Chunk
-import chunks.ChunkGenerator
-import chunks.ChunkManager
-import chunks.ChunkRenderer
+import chunks.*
+import chunks.blocks.BlockType
 import chunks.blocks.Selector
 import devices.Button
 import devices.Key
@@ -44,7 +42,7 @@ object Main {
     private val selector = Selector()
     private val skyBox = SkyBox("textures/sky/box", camera.zFar)
 
-    private var chunks = ArrayList<Chunk>()
+    private val chunks = ArrayList<Chunk>()
 
     private val ui = UserInterface(window.aspectRatio)
 
@@ -58,7 +56,7 @@ object Main {
         val player = Player()
 
         timer.reset()
-        mouse.capture()
+        mouse.release()
 
         val page = UIPage("page")
 
@@ -73,11 +71,19 @@ object Main {
         ui += page
         ui.showPage("page")
 
+        val startTime = System.currentTimeMillis()
+        val chunk = ChunkGenerator.generateChunk(0, 0, Biome.PLANES, 0)
+        val endTime = System.currentTimeMillis()
+
+        println("Time: ${endTime - startTime}")
+
+        chunks += chunk
         while (!window.isClosed()) {
+
             window.poll()
 
-            chunks = ChunkManager.update(camera.position)
-
+//            chunks = ChunkManager.update(camera.position)
+//            ChunkManager.processNewChunks()
             processInput()
 
 //            player.update(keyboard, mouse, timer.getDelta())
@@ -124,7 +130,12 @@ object Main {
             if (mouse.isPressed(Button.RIGHT)) {
                 val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera)
                 if (selectedBlock != null) {
-                    val face = selector.determineSelectedFace(camera, selectedBlock.second)
+                    for (chunk in chunks) {
+                        if (chunk.containsBlock(selectedBlock.second)) {
+                            val face = selector.determineSelectedFace(camera, selectedBlock.second)?: continue
+                            chunk.addBlock(BlockType.DIRT, selectedBlock.second, face)
+                        }
+                    }
                 }
             }
         }
