@@ -1,7 +1,9 @@
 package chunks
 
 import chunks.blocks.BlockType
+import math.Noise
 import math.PerlinNoise
+import org.joml.SimplexNoise
 import math.vectors.Vector3
 
 class ChunkGenerator {
@@ -9,7 +11,7 @@ class ChunkGenerator {
     companion object {
         const val CHUNK_SIZE = 16
         const val TERRAIN_HEIGHT = 20
-        const val MAX_HEIGHT = 30
+        const val MAX_HEIGHT = 256
     }
 
     fun generateChunkData(biomeX: Int, biomeZ: Int, biome: Biome, seed: Long): ChunkData {

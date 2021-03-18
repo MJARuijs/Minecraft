@@ -15,13 +15,13 @@ object ChunkManager {
 
     private val chunks = ArrayList<Chunk>()
 
-    var chunkRenderDistance = 1
-
     private var chunksInProgress = HashSet<Vector2>()
     private val generator = ChunkGenerator()
     private val newChunks = ArrayList<Vector2>()
 
     private val locked = AtomicBoolean(false)
+
+    var chunkRenderDistance = 2
 
     fun newBlockPosition(position: Vector3, face: Face): Vector3 {
         return when (face) {
@@ -35,17 +35,12 @@ object ChunkManager {
         }
     }
 
-    operator fun plusAssign(chunk: Chunk) {
-        chunks += chunk
-    }
-
-    operator fun minusAssign(chunk: Chunk) {
-        chunks -= chunk
-    }
-
     fun update(position: Vector3): ArrayList<Chunk> {
         val start = System.currentTimeMillis()
         val visibleChunks = ArrayList<Chunk>()
+
+        val removableChunks = ArrayList<Chunk>()
+        val renderDistance = (chunkRenderDistance + 1) * CHUNK_SIZE
 
         if (newChunks.isNotEmpty()) {
             while (locked.get()) {
@@ -62,21 +57,19 @@ object ChunkManager {
             }
 
             newChunks.removeAll(initializedChunks)
+
+            for (chunk in chunks) {
+                if ((chunk.getCenter() - position.xz()).length() > CHUNK_SIZE * (MAX_DISTANCE + 1)) {
+                    removableChunks += chunk
+                }
+            }
+
+            chunks.removeAll(removableChunks)
+
             locked.set(false)
         }
 
         val end = System.currentTimeMillis()
-
-        val removableChunks = ArrayList<Chunk>()
-        val renderDistance = (chunkRenderDistance + 1) * CHUNK_SIZE
-
-        for (chunk in chunks) {
-            if ((chunk.getCenter() - position.xz()).length() > CHUNK_SIZE * (MAX_DISTANCE + 1)) {
-                removableChunks += chunk
-            }
-        }
-
-        chunks.removeAll(removableChunks)
 
         val roundedX = position.x.roundToInt()
         val roundedZ = position.z.roundToInt()
