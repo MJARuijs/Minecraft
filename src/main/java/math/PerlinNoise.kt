@@ -6,8 +6,8 @@ import kotlin.math.pow
 
 class PerlinNoise(
         private val octaves: Int,
-        private val amplitude: Float,
-        private val roughness: Float,
+        private val amplitude: Double,
+        private val roughness: Double,
         private val seed: Long = Random().nextInt(1000000).toLong()
 ) {
 
@@ -16,18 +16,19 @@ class PerlinNoise(
     operator fun get(x: Int, y: Int) = get(x.toFloat(), y.toFloat())
 
     operator fun get(x: Float, y: Float): Float {
+        var height = 0.0
+//        val delta = power(2.0f, (octaves - 1.0f))
+        val delta = 2.0.pow(octaves - 1.0)
 
-        var height = 0.0f
-        val delta = power(2.0f, (octaves - 1.0f))
-
-        for (index in 0 until octaves) {
-            val exponent = index.toFloat()
-            val frequency = power(2.0f, exponent) / delta
-            val amplitude = power(roughness, exponent) * amplitude
+        for (i in 0 until octaves) {
+            val exponent = i.toDouble()
+            val frequency = (2.0.pow(exponent) / delta).toFloat()
+            val amplitude = (roughness.pow(exponent)) * amplitude
             height += getInterpolated(x * frequency, y * frequency) * amplitude
+//            height += getInterpolated(x / 8, y / 8) * amplitude
         }
 
-        return height
+        return height.toFloat()
     }
 
     private fun getInterpolated(x: Float, y: Float): Float {
@@ -66,8 +67,6 @@ class PerlinNoise(
         random.setSeed(seed + (x * 49632) + (y * 325176))
         return (random.nextFloat() * 2.0f) - 1.0f
     }
-
-    private fun power(base: Float, exponent: Float) = base.toDouble().pow(exponent.toDouble()).toFloat()
 
     private fun interpolate(a: Float, b: Float, blend: Float): Float {
         val theta = blend * Math.PI.toFloat()

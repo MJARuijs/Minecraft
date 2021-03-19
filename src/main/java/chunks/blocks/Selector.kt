@@ -6,7 +6,6 @@ import chunks.ChunkRenderer
 import devices.Window
 import graphics.Camera
 import graphics.rendertarget.RenderTargetManager
-import graphics.shaders.ShaderProgram
 import math.vectors.Vector3
 import math.vectors.Vector4
 import org.lwjgl.BufferUtils
@@ -18,8 +17,6 @@ class Selector {
 
     private val reach = 8.0f
     private var lastSelected: Pair<Chunk, Vector3>? = null
-
-    private val shaderProgram = ShaderProgram.load("shaders/line.vert", "shaders/line.frag")
 
     fun getLastSelected() = lastSelected
 

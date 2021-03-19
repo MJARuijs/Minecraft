@@ -41,6 +41,7 @@ object Main {
 
     private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, ChunkGenerator.TERRAIN_HEIGHT, 0))
 
+    private val chunkManager = ChunkManager()
     private val chunkRenderer = ChunkRenderer()
 
     private val selector = Selector()
@@ -49,7 +50,7 @@ object Main {
     private var chunks = ArrayList<Chunk>()
 
     private val ui = UserInterface(window.aspectRatio)
-    val page = UIPage("page")
+    private val page = UIPage("page")
 
     @JvmStatic
     fun main(args: Array<String>) {
@@ -85,31 +86,27 @@ object Main {
         ui.showPage("page")
 
 
-//        val chunk = ChunkGenerator().generateChunk(0, 0, Biome.PLANES, 0)
-//        chunks.add(chunk)
+        val chunk = Chunk(ChunkGenerator().generateChunkData(0, 0, Biome.PLANES, 0))
+//        println(chunk.getPosition())
+//        println(chunk.getCenter())
+        chunks.add(chunk)
 //        ChunkManager.startThread()
 
         while (!window.isClosed()) {
             window.poll()
 
-//            ChunkManager.updatePosition(camera.position)
-//            chunks = ChunkManager.getChunks()
             processInput()
-            val start = System.currentTimeMillis()
 
-            chunks = ChunkManager.update(camera.position)
-//            chunks.add(chunk)
+            updateChunkManager()
 
-//            player.update(keyboard, mouse, timer.getDelta())
-//            camera.followPlayer(player)
-            val end = System.currentTimeMillis()
+            player.update(keyboard, mouse, timer.getDelta())
+            camera.followPlayer(player)
 
             val selectedBlock = selector.getLastSelected()
             doMainRenderPass(selectedBlock)
 
             ui.update(mouse, timer.getDelta())
             ui.draw(window.width, window.height)
-//            println("Delay: ${end - start} ${chunks.size}")
 
             window.synchronize()
             timer.update()
@@ -117,6 +114,11 @@ object Main {
         }
 
         window.destroy()
+    }
+
+    private fun updateChunkManager() {
+        chunkManager.updatePosition(camera.position)
+        chunks = chunkManager.determineVisibleChunks()
     }
 
     private fun processInput() {
@@ -128,8 +130,12 @@ object Main {
             window.close()
         }
 
-        if (mouse.isCaptured()) {
-            camera.update(keyboard, mouse, timer.getDelta())
+//        if (mouse.isCaptured()) {
+//            camera.update(keyboard, mouse, timer.getDelta())
+//        }
+
+        if (keyboard.isPressed(Key.F)) {
+            println(camera.position.xz())
         }
 
         if (mouse.isCaptured()) {
@@ -148,7 +154,7 @@ object Main {
                 val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera)
                 if (selectedBlock != null) {
                     val face = selector.determineSelectedFace(camera, selectedBlock.second) ?: return
-                    val newPosition = ChunkManager.newBlockPosition(selectedBlock.second, face)
+                    val newPosition = chunkManager.newBlockPosition(selectedBlock.second, face)
                     for (chunk in chunks) {
                         if (chunk.containsBlock(newPosition)) {
                             chunk.addBlock(BlockType.GRASS, newPosition)

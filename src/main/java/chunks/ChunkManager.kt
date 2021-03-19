@@ -5,23 +5,38 @@ import chunks.blocks.Face
 import math.vectors.Vector2
 import math.vectors.Vector3
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.math.abs
-import kotlin.math.roundToInt
-import kotlin.math.sign
+import kotlin.math.*
 
-object ChunkManager {
+class ChunkManager {
 
-    private const val MAX_DISTANCE = 2
+    private val maxDistance = 2
 
-    private val chunks = ArrayList<Chunk>()
-
-    private var chunksInProgress = HashSet<Vector2>()
     private val generator = ChunkGenerator()
-    private val newChunks = ArrayList<Vector2>()
-
+    private val chunks = ArrayList<Chunk>()
     private val locked = AtomicBoolean(false)
 
-    var chunkRenderDistance = 2
+    private var currentX = 0
+    private var currentZ = 0
+
+    private var renderDistance = 2
+
+    private var chunksInProgress = HashSet<Vector2>()
+
+    init {
+        update()
+    }
+
+    fun updatePosition(position: Vector3) {
+        val chunkX = floor((position.x + (CHUNK_SIZE / 2)) / CHUNK_SIZE).toInt()
+        val chunkZ = floor((position.z + (CHUNK_SIZE / 2)) / CHUNK_SIZE).toInt()
+        if (chunkX != currentX || chunkZ != currentZ) {
+            currentX = chunkX
+            currentZ = chunkZ
+            Thread {
+                update()
+            }.start()
+        }
+    }
 
     fun newBlockPosition(position: Vector3, face: Face): Vector3 {
         return when (face) {
@@ -35,80 +50,85 @@ object ChunkManager {
         }
     }
 
-    fun update(position: Vector3): ArrayList<Chunk> {
-        val start = System.currentTimeMillis()
+    fun determineVisibleChunks(): ArrayList<Chunk> {
         val visibleChunks = ArrayList<Chunk>()
 
-        val removableChunks = ArrayList<Chunk>()
-        val renderDistance = (chunkRenderDistance + 1) * CHUNK_SIZE
+        for (x in (currentX - renderDistance) * CHUNK_SIZE until (currentX + renderDistance) * CHUNK_SIZE step CHUNK_SIZE) {
+            for (z in (currentZ - renderDistance) * CHUNK_SIZE until (currentZ + renderDistance) * CHUNK_SIZE step CHUNK_SIZE) {
+                var chunk: Chunk? = null
 
-        if (newChunks.isNotEmpty()) {
-            while (locked.get()) {
-                Thread.sleep(1)
-            }
-
-            locked.set(true)
-            val initializedChunks = ArrayList<Vector2>()
-            for (chunk in chunks) {
-                if (newChunks.contains(chunk.getPosition())) {
-                    chunk.initBlock()
-                    initializedChunks += chunk.getPosition()
-                }
-            }
-
-            newChunks.removeAll(initializedChunks)
-
-            for (chunk in chunks) {
-                if ((chunk.getCenter() - position.xz()).length() > CHUNK_SIZE * (MAX_DISTANCE + 1)) {
-                    removableChunks += chunk
-                }
-            }
-
-            chunks.removeAll(removableChunks)
-
-            locked.set(false)
-        }
-
-        val end = System.currentTimeMillis()
-
-        val roundedX = position.x.roundToInt()
-        val roundedZ = position.z.roundToInt()
-
-        val minX = (abs(roundedX) / CHUNK_SIZE) * sign(position.x).toInt() * CHUNK_SIZE
-        val minZ = (abs(roundedZ) / CHUNK_SIZE) * sign(position.z).toInt() * CHUNK_SIZE
-
-        for (x in minX - renderDistance until minX + renderDistance step CHUNK_SIZE) {
-            for (z in minZ - renderDistance until minZ + renderDistance step CHUNK_SIZE) {
-                val chunk = chunks.findLast { chunk ->
-                    chunk.chunkX == x && chunk.chunkZ == z
-                }
-
-                if (chunk == null) {
-                    if (!chunksInProgress.contains(Vector2(x, z))) {
-                        chunksInProgress.add(Vector2(x, z))
-                        Thread {
-                            val newData = generator.generateChunkData(x, z, Biome.PLANES, 0)
-                            newChunks += Vector2(x, z)
-                            while (locked.get()) {
-                                Thread.sleep(10)
-                            }
-
-                            locked.set(true)
-                            chunks += Chunk(newData)
-                            locked.set(false)
-                        }.start()
+                for (i in 0 until chunks.size) {
+                    if (chunks[i].chunkX == x && chunks[i].chunkZ == z) {
+                        chunk = chunks[i]
+                        break
                     }
-                } else {
+                }
+
+                if (chunk != null) {
                     visibleChunks += chunk
                 }
             }
         }
 
-        val delay = end - start
-        if (delay > 100) {
-//            println("hoi ${end - start}")
+        return visibleChunks
+    }
+
+    private fun update() {
+
+        //TODO: Implement removing chunks that are too far away
+//        for (chunk in chunks) {
+//
+//        }
+
+        for (x in 0 until (maxDistance) * CHUNK_SIZE step CHUNK_SIZE) {
+            for (z in 0 until (maxDistance) * CHUNK_SIZE step CHUNK_SIZE) {
+                Thread {
+                    generate(currentX * CHUNK_SIZE + x, currentZ * CHUNK_SIZE + z)
+                }.start()
+                Thread {
+                    generate(currentX * CHUNK_SIZE + x, currentZ * CHUNK_SIZE - z)
+                }.start()
+                Thread {
+                    generate(currentX * CHUNK_SIZE - x, currentZ * CHUNK_SIZE - z)
+                }.start()
+                Thread {
+                    generate(currentX * CHUNK_SIZE - x, currentZ * CHUNK_SIZE - z)
+                }.start()
+            }
+        }
+    }
+
+    private fun generate(x: Int, z: Int) {
+        if (!chunksInProgress.contains(Vector2(x, z))) {
+
+            requestLock()
+            val chunk = chunks.findLast { chunk ->
+                chunk.chunkX == x && chunk.chunkZ == z
+            }
+            releaseLock()
+
+            if (chunk == null) {
+                chunksInProgress.add(Vector2(x, z))
+                val newData = generator.generateChunkData(x, z, Biome.PLANES, 0)
+
+                requestLock()
+                chunks += Chunk(newData)
+                releaseLock()
+
+                chunksInProgress.remove(Vector2(x, z))
+            }
+        }
+    }
+
+    private fun requestLock() {
+        while (locked.get()) {
+            Thread.sleep(10)
         }
 
-        return visibleChunks
+        locked.set(true)
+    }
+
+    private fun releaseLock() {
+        locked.set(false)
     }
 }

@@ -1,16 +1,14 @@
 package chunks
 
 import chunks.blocks.BlockType
-import math.Noise
 import math.PerlinNoise
-import org.joml.SimplexNoise
 import math.vectors.Vector3
 
 class ChunkGenerator {
 
     companion object {
         const val CHUNK_SIZE = 16
-        const val TERRAIN_HEIGHT = 20
+        const val TERRAIN_HEIGHT = 15
         const val MAX_HEIGHT = 256
     }
 

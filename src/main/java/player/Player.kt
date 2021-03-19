@@ -50,9 +50,9 @@ class Player(val height: Float = 1.8f) {
 
         if (keyboard.isDown(Key.SPACE)) {
             translation.y -= 1.0f
-            if (actions.none { action -> action is Jump }) {
-                actions += Jump(getYLevel() + 1.1f)
-            }
+//            if (actions.none { action -> action is Jump }) {
+//                actions += Jump(getYLevel() + 1.1f)
+//            }
         }
 
         if (keyboard.isDown(Key.LEFT_SHIFT)) {
@@ -68,7 +68,7 @@ class Player(val height: Float = 1.8f) {
         rotation.x = min(max(-PI.toFloat() / 2.0f, rotation.x), PI.toFloat() / 2.0f)
         rotation.y = (mouse.x.toFloat() * mouseSpeed) % (2.0f * PI.toFloat())
 
-        performActions(delta)
+//        performActions(delta)
     }
 
     private fun performActions(delta: Float) {

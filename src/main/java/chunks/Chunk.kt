@@ -14,30 +14,28 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private var highestBlock: Int, pri
 
     constructor(data: ChunkData) : this(data.x, data.z, data.highestBlock, data.biome, data.blocks)
 
-    private lateinit var block: Block
     private var instanceData = FloatArray(0)
     private var untexturedData = FloatArray(0)
-
     private val subsetBlockPositions = ArrayList<Vector3>()
 
     private val visibleBlocks = ArrayList<Pair<BlockType, Vector3>>()
 
     private var initialized = false
 
+    private lateinit var block: Block
+
     init {
         determineVisibleBlocks()
         determineInstanceData()
     }
 
-    fun initBlock() {
+    private fun initBlock() {
         block = Block()
         block.initAttributes()
         initialized = true
     }
 
     fun getSubsetSize() = subsetBlockPositions.size
-
-    fun getPosition() = Vector2(chunkX, chunkZ)
 
     fun getCenter() = Vector2(chunkX + CHUNK_SIZE / 2, chunkZ + CHUNK_SIZE / 2)
 
@@ -46,10 +44,10 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private var highestBlock: Int, pri
     fun containsBlock(position: Vector3) = containsBlock(position.x.roundToInt(), position.z.roundToInt())
 
     private fun containsBlock(x: Int, z: Int): Boolean {
-        if (x < chunkX || x >= chunkX + CHUNK_SIZE) {
+        if (x < chunkX  || x >= chunkX + CHUNK_SIZE) {
             return false
         }
-        if (z < chunkZ || z >= chunkZ + CHUNK_SIZE) {
+        if (z < chunkZ || z >= chunkZ + CHUNK_SIZE ) {
             return false
         }
         return true
@@ -156,10 +154,9 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private var highestBlock: Int, pri
 
     private fun determineVisibleBlocks(): ArrayList<Pair<BlockType, Vector3>> {
         visibleBlocks.clear()
-
-        for (x in chunkX until chunkX + CHUNK_SIZE) {
+        for (x in chunkX  until chunkX + CHUNK_SIZE) {
             for (y in 0 .. highestBlock) {
-                for (z in chunkZ until chunkZ + CHUNK_SIZE) {
+                for (z in chunkZ  until chunkZ + CHUNK_SIZE) {
 
                     val currentBlock = blocks.findLast { block ->
                         block.second == Vector3(x, y, z)
@@ -188,6 +185,7 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private var highestBlock: Int, pri
                 }
             }
         }
+
         return visibleBlocks
     }
 
