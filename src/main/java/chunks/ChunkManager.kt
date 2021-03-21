@@ -23,7 +23,7 @@ class ChunkManager {
     private var chunksInProgress = HashSet<Vector2>()
 
     init {
-        update()
+//        update()
     }
 
     fun updatePosition(position: Vector3) {
@@ -109,10 +109,10 @@ class ChunkManager {
 
             if (chunk == null) {
                 chunksInProgress.add(Vector2(x, z))
-                val newData = generator.generateChunkData(x, z, Biome.PLANES, 0)
+                val newChunk = generator.generate(x, z, Biome.PLANES, 0)
 
                 requestLock()
-                chunks += Chunk(newData)
+                chunks += newChunk
                 releaseLock()
 
                 chunksInProgress.remove(Vector2(x, z))

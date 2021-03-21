@@ -11,7 +11,7 @@ object Timer {
         return id
     }
 
-    fun end(id: Int): Long {
+    fun getDelay(id: Int): Long {
         val timer = timers.find { timer -> timer.first == id } ?: return -1
         return System.currentTimeMillis() - timer.second
     }

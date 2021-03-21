@@ -1,4 +1,5 @@
 import chunks.*
+import chunks.ChunkGenerator.Companion.TERRAIN_HEIGHT
 import chunks.blocks.BlockType
 import chunks.blocks.Selector
 import devices.Button
@@ -60,7 +61,7 @@ object Main {
 
         RenderTargetManager.init(window)
 
-        val player = Player()
+        val player = Player(Vector3(0, TERRAIN_HEIGHT, 0))
 
         timer.reset()
         mouse.release()
@@ -85,19 +86,17 @@ object Main {
         ui += page
         ui.showPage("page")
 
-
-        val chunk = Chunk(ChunkGenerator().generateChunkData(0, 0, Biome.PLANES, 0))
-//        println(chunk.getPosition())
-//        println(chunk.getCenter())
-        chunks.add(chunk)
-//        ChunkManager.startThread()
+        Thread {
+            val chunk = ChunkGenerator().generate(0, 0, Biome.PLANES, 0)
+            chunks.add(chunk)
+        }.start()
 
         while (!window.isClosed()) {
             window.poll()
 
             processInput()
 
-            updateChunkManager()
+//            updateChunkManager()
 
             player.update(keyboard, mouse, timer.getDelta())
             camera.followPlayer(player)
@@ -110,7 +109,6 @@ object Main {
 
             window.synchronize()
             timer.update()
-//            println(1.0f / timer.getDelta())
         }
 
         window.destroy()

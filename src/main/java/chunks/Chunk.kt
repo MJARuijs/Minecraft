@@ -8,14 +8,13 @@ import chunks.blocks.Face
 import graphics.shaders.ShaderProgram
 import math.vectors.Vector2
 import math.vectors.Vector3
+import util.Timer
 import kotlin.math.roundToInt
 
-class Chunk(val chunkX: Int, val chunkZ: Int, private var highestBlock: Int, private val biome: Biome, private val blocks: ArrayList<Pair<BlockType, Vector3>>) {
+class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, val blocks: ArrayList<Pair<BlockType, Vector3>> = ArrayList(), private var highestBlock: Int = 0) {
 
-    constructor(data: ChunkData) : this(data.x, data.z, data.highestBlock, data.biome, data.blocks)
-
-    private var instanceData = FloatArray(0)
-    private var untexturedData = FloatArray(0)
+    private var instanceFloatData = FloatArray(0)
+    private var untexturedFloatData = FloatArray(0)
     private val subsetBlockPositions = ArrayList<Vector3>()
 
     private val visibleBlocks = ArrayList<Pair<BlockType, Vector3>>()
@@ -25,7 +24,7 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private var highestBlock: Int, pri
     private lateinit var block: Block
 
     init {
-        determineVisibleBlocks()
+        visibleBlocks += blocks
         determineInstanceData()
     }
 
@@ -41,9 +40,12 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private var highestBlock: Int, pri
 
     fun getSubsetPosition(i: Int) = subsetBlockPositions[i]
 
-    fun containsBlock(position: Vector3) = containsBlock(position.x.roundToInt(), position.z.roundToInt())
+    fun containsBlock(position: Vector3) = containsBlock(position.x.roundToInt(), position.y.roundToInt(), position.z.roundToInt())
 
-    private fun containsBlock(x: Int, z: Int): Boolean {
+    private fun containsBlock(x: Int, y: Int, z: Int): Boolean {
+        if (y < 0 || y > MAX_HEIGHT) {
+            return false
+        }
         if (x < chunkX  || x >= chunkX + CHUNK_SIZE) {
             return false
         }
@@ -51,6 +53,12 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private var highestBlock: Int, pri
             return false
         }
         return true
+    }
+
+    fun add(newBlocks: ArrayList<Pair<BlockType, Vector3>>) {
+        blocks += newBlocks
+        determineVisibleBlocks()
+        determineInstanceData()
     }
 
     fun addBlock(type: BlockType, position: Vector3) {
@@ -84,10 +92,10 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private var highestBlock: Int, pri
     fun render(shaderProgram: ShaderProgram) {
         shaderProgram.set("overlayColor", biome.overlayColor)
         if (initialized) {
-            block.render(visibleBlocks.size, instanceData)
+            block.render(visibleBlocks.size, instanceFloatData)
         } else {
             initBlock()
-            block.render(visibleBlocks.size, instanceData)
+            block.render(visibleBlocks.size, instanceFloatData)
         }
     }
 
@@ -117,19 +125,21 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private var highestBlock: Int, pri
     }
 
     private fun determineInstanceData() {
-        instanceData = FloatArray(0)
-        untexturedData = FloatArray(0)
+        instanceFloatData = FloatArray(0)
+        untexturedFloatData = FloatArray(0)
 
+        val id = Timer.start()
         for (block in visibleBlocks) {
             if (block.first == BlockType.AIR) {
                 continue
             }
 
-            instanceData += block.second.toArray()
-            instanceData += block.first.getOffsets()
+            instanceFloatData += block.second.toArray()
+            instanceFloatData += block.first.getOffsets()
 
-            untexturedData += block.second.toArray()
+            untexturedFloatData += block.second.toArray()
         }
+        println("Delay: ${Timer.getDelay(id)}")
     }
 
     private fun addSurroundingBlocks(position: Vector3) {
@@ -152,14 +162,15 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private var highestBlock: Int, pri
         }
     }
 
-    private fun determineVisibleBlocks(): ArrayList<Pair<BlockType, Vector3>> {
+    private fun determineVisibleBlocksOld(): ArrayList<Pair<BlockType, Vector3>> {
         visibleBlocks.clear()
+        println("DETERMINING")
         for (x in chunkX  until chunkX + CHUNK_SIZE) {
             for (y in 0 .. highestBlock) {
                 for (z in chunkZ  until chunkZ + CHUNK_SIZE) {
 
                     val currentBlock = blocks.findLast { block ->
-                        block.second == Vector3(x, y, z)
+                        block.second == Vector3(x, 0, 0)
                     } ?: continue
 
                     if (currentBlock.first == BlockType.AIR) {
@@ -185,42 +196,82 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private var highestBlock: Int, pri
                 }
             }
         }
-
+        println("DONE")
         return visibleBlocks
     }
 
-    private fun isNeighbourBlockSolid(x: Float, y: Float, z: Float): Boolean {
-        val neighbourBlockType = checkNeighbourBlockType(x, y, z) ?: return false
+    private fun determineVisibleBlocks(): ArrayList<Pair<BlockType, Vector3>> {
+//        visibleBlocks.clear()
+        println("DETERMINING ${blocks.size} ${visibleBlocks.size}")
+        for (currentBlock in blocks) {
+            val x = currentBlock.second.x.toInt()
+            val y = currentBlock.second.y.toInt()
+            val z = currentBlock.second.z.toInt()
+
+            if (currentBlock.first == BlockType.AIR) {
+                continue
+            }
+
+            if (x == chunkX || x == chunkX + CHUNK_SIZE - 1) {
+                visibleBlocks += currentBlock
+                continue
+            }
+            if (y == 0 || y == highestBlock - 1) {
+                visibleBlocks += currentBlock
+                continue
+            }
+            if (z == chunkZ || z == chunkZ + CHUNK_SIZE - 1) {
+                visibleBlocks += currentBlock
+                continue
+            }
+
+            if (!areAllNeighboursSolid(currentBlock.second)) {
+                visibleBlocks += currentBlock
+            }
+        }
+        println("DONE ${visibleBlocks.size}")
+        return visibleBlocks
+    }
+
+    private fun isBlockSolid(x: Int, y: Int, z: Int): Boolean {
+        val neighbourBlockType = getBlockType(x, y, z) ?: return false
         return neighbourBlockType != BlockType.AIR
     }
 
-    private fun checkNeighbourBlockType(x: Float, y: Float, z: Float): BlockType? {
+    private fun getBlockType(x: Int, y: Int, z: Int): BlockType? {
         return blocks.findLast { block ->
             block.second == Vector3(x, y, z)
         }?.first
     }
 
-    private fun areAllNeighboursSolid(position: Vector3) = areAllNeighboursSolid(position.x, position.y, position.z)
+    private fun areAllNeighboursSolid(position: Vector3) = areAllNeighboursSolid(position.x.toInt(), position.y.toInt(), position.z.toInt())
 
-    private fun areAllNeighboursSolid(x: Float, y: Float, z: Float): Boolean {
-        if (!isNeighbourBlockSolid(x - 1.0f, y, z)) {
-            return false
+    private fun areAllNeighboursSolid(x: Int, y: Int, z: Int): Boolean {
+        return getTransparentNeighbours(x, y, z).isEmpty()
+    }
+
+    private fun getTransparentNeighbours(position: Vector3) = getTransparentNeighbours(position.x.toInt(), position.y.toInt(), position.z.toInt())
+
+    private fun getTransparentNeighbours(x: Int, y: Int, z: Int): ArrayList<Vector3> {
+        val transparentNeighbours = ArrayList<Vector3>()
+        if (!isBlockSolid(x - 1, y, z)) {
+            transparentNeighbours += Vector3(x - 1, y, z)
         }
-        if (!isNeighbourBlockSolid(x + 1.0f, y, z)) {
-            return false
+        if (!isBlockSolid(x + 1, y, z)) {
+            transparentNeighbours += Vector3(x + 1, y, z)
         }
-        if (!isNeighbourBlockSolid(x, y - 1.0f, z)) {
-            return false
+        if (!isBlockSolid(x, y - 1, z)) {
+            transparentNeighbours += Vector3(x, y - 1, z)
         }
-        if (!isNeighbourBlockSolid(x, y + 1.0f, z)) {
-            return false
+        if (!isBlockSolid(x, y + 1, z)) {
+            transparentNeighbours += Vector3(x, y + 1, z)
         }
-        if (!isNeighbourBlockSolid(x, y, z - 1.0f)) {
-            return false
+        if (!isBlockSolid(x, y, z - 1)) {
+            transparentNeighbours += Vector3(x, y, z - 1)
         }
-        if (!isNeighbourBlockSolid(x, y, z + 1.0f)) {
-            return false
+        if (!isBlockSolid(x, y, z + 1)) {
+            transparentNeighbours += Vector3(x, y, z + 1)
         }
-        return true
+        return transparentNeighbours
     }
 }

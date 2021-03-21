@@ -9,10 +9,7 @@ import kotlin.math.PI
 import kotlin.math.max
 import kotlin.math.min
 
-class Player(val height: Float = 1.8f) {
-
-    var position = Vector3(0, 18, 0)
-        private set
+class Player(var position: Vector3 = Vector3(0, 18, 0), val height: Float = 1.8f) {
 
     var rotation = Vector3()
         private set
