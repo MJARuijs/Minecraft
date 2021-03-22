@@ -87,8 +87,8 @@ object Main {
         ui.showPage("page")
 
         Thread {
-            val chunk = ChunkGenerator().generate(0, 0, Biome.PLANES, 0)
-            chunks.add(chunk)
+//            val chunk = ChunkGenerator().generate(0, 0, Biome.PLANES, 0)
+//            chunks.add(chunk)
         }.start()
 
         while (!window.isClosed()) {
@@ -96,7 +96,7 @@ object Main {
 
             processInput()
 
-//            updateChunkManager()
+            updateChunkManager()
 
             if (mouse.isCaptured()) {
                 player.update(keyboard, mouse, timer.getDelta())

@@ -3,6 +3,7 @@ package chunks
 import chunks.blocks.BlockType
 import math.PerlinNoise
 import math.vectors.Vector3
+import kotlin.math.max
 
 class ChunkGenerator {
 
@@ -12,20 +13,36 @@ class ChunkGenerator {
         const val MAX_HEIGHT = 256
     }
 
+    private val heights = Array(CHUNK_SIZE) { Array(CHUNK_SIZE) { 0 } }
+
+    private var chunkX = 0
+    private var chunkZ = 0
+    private lateinit var noise: PerlinNoise
+
     fun generate(chunkX: Int, chunkZ: Int, biome: Biome, seed: Long): Chunk {
-        val noise = PerlinNoise(biome.octaves, biome.amplitude, biome.roughness, seed)
+        println("Generating $chunkX $chunkZ")
+        this.chunkX = chunkX
+        this.chunkZ = chunkZ
+        this.noise = PerlinNoise(biome.octaves, biome.amplitude, biome.roughness, seed)
+
+        for (x in 0 until CHUNK_SIZE) {
+            for (z in 0 until CHUNK_SIZE) {
+                heights[x][z] = 0
+            }
+        }
+
+//        val noise =
         var highestBlock = 0
 
-        val heights = Array(CHUNK_SIZE) { Array(CHUNK_SIZE) { 0 } }
         val blocks = ArrayList<Pair<BlockType, Vector3>>()
 
         for (x in 0 until CHUNK_SIZE) {
             for (z in 0 until CHUNK_SIZE) {
                 val worldX = chunkX + x
                 val worldZ = chunkZ + z
-                val h = noise[worldX, worldZ].toInt()
-                val height = TERRAIN_HEIGHT + h
-                heights[x][z] = height
+
+                val height = get(x, z)
+
                 if (height > highestBlock) {
                     highestBlock = height
                 }
@@ -35,14 +52,15 @@ class ChunkGenerator {
                         val position = Vector3(worldX, y, worldZ)
                         blocks += when {
                             y == height -> Pair(BlockType.GRASS, position)
-                            y < height - 4 -> Pair(BlockType.STONE, position)
                             y < 2 -> Pair(BlockType.BEDROCK, position)
+                            y < height - 4 -> Pair(BlockType.STONE, position)
                             else -> Pair(BlockType.DIRT, position)
                         }
                     }
                 } else {
                     val position = Vector3(worldX, height, worldZ)
                     blocks += Pair(BlockType.GRASS, position)
+                    blocks += addBlocksBelow(x, z)
                 }
             }
         }
@@ -57,18 +75,19 @@ class ChunkGenerator {
                     val worldX = chunkX + x
                     val worldZ = chunkZ + z
 
-                    val height = heights[x][z]
+                    val height = get(x, z)
 
                     for (y in 0 until height) {
                         val position = Vector3(worldX, y, worldZ)
-                        val newBlock = when {
-                            y < height - 4 -> Pair(BlockType.STONE, position)
-                            y < 2 -> Pair(BlockType.BEDROCK, position)
-                            else -> Pair(BlockType.DIRT, position)
+                        if (blocks.none { block -> block.second == position }) {
+                            val newBlock = when {
+                                y < 2 -> Pair(BlockType.BEDROCK, position)
+                                y < height - 4 -> Pair(BlockType.STONE, position)
+                                else -> Pair(BlockType.DIRT, position)
+                            }
+                            newBlocks += newBlock
                         }
-                        newBlocks += newBlock
                     }
-
                 }
             }
             chunk.add(newBlocks)
@@ -76,5 +95,39 @@ class ChunkGenerator {
         }.start()
 
         return chunk
+    }
+
+    private fun addBlocksBelow(x: Int, z: Int): ArrayList<Pair<BlockType, Vector3>> {
+        val blocksBelow = ArrayList<Pair<BlockType, Vector3>>()
+        val height = get(x, z)
+        val leftHeight = get(x - 1, z)
+        val rightHeight = get(x + 1, z)
+        val frontHeight = get(x, z + 1)
+        val behindHeight = get(x, z - 1)
+
+        val leftDifference = height - leftHeight
+        val rightDifference = height - rightHeight
+        val frontDifference = height - frontHeight
+        val behindDifference = height - behindHeight
+
+        val largestDifference = max(max(max(leftDifference, rightDifference), frontDifference), behindDifference)
+
+        for (y in 1 until largestDifference) {
+            val type = when {
+                height - y < 2 -> BlockType.BEDROCK
+                height - y < height - 4 -> BlockType.STONE
+                else -> BlockType.DIRT
+            }
+            blocksBelow += Pair(type, Vector3(x + chunkX, height - y, z + chunkZ))
+        }
+
+        return blocksBelow
+    }
+
+    private fun get(x: Int, z: Int): Int {
+        if (heights[x][z] == 0) {
+            heights[x][z] = noise[x + chunkX, z + chunkZ].toInt() + TERRAIN_HEIGHT
+        }
+        return heights[x][z]
     }
 }

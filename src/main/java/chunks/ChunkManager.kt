@@ -23,7 +23,7 @@ class ChunkManager {
     private var chunksInProgress = HashSet<Vector2>()
 
     init {
-//        update()
+        update()
     }
 
     fun updatePosition(position: Vector3) {
@@ -100,7 +100,6 @@ class ChunkManager {
 
     private fun generate(x: Int, z: Int) {
         if (!chunksInProgress.contains(Vector2(x, z))) {
-
             requestLock()
             val chunk = chunks.findLast { chunk ->
                 chunk.chunkX == x && chunk.chunkZ == z
@@ -109,7 +108,7 @@ class ChunkManager {
 
             if (chunk == null) {
                 chunksInProgress.add(Vector2(x, z))
-                val newChunk = generator.generate(x, z, Biome.PLANES, 0)
+                val newChunk = ChunkGenerator().generate(x, z, Biome.PLANES, 0)
 
                 requestLock()
                 chunks += newChunk
