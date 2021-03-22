@@ -83,7 +83,7 @@ class ChunkGenerator {
             }
         }
 
-        val chunk = Chunk(chunkX, chunkZ, biome, data, highestBlock)
+        val chunk = Chunk(chunkX, chunkZ, biome, id, data, highestBlock)
 
         Thread {
             var newData = FloatArray(0)
@@ -113,7 +113,7 @@ class ChunkGenerator {
 
             chunk.add(newData, newTimerId)
         }.start()
-        println("Done $chunkX, $chunkZ ${Timer.getDelay(id)}")
+//        println("Done $chunkX, $chunkZ")
 
         return chunk
     }

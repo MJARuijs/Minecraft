@@ -12,7 +12,7 @@ import util.Timer
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.roundToInt
 
-class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private var instanceFloatData: FloatArray, private var highestBlock: Int = 0) {
+class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, val timerId: Int, private var instanceFloatData: FloatArray, private var highestBlock: Int = 0) {
 //    val blocks: ArrayList<Pair<BlockType, Vector3>> = ArrayList(),
 //    private var instanceFloatData = FloatArray(0)
 
@@ -30,6 +30,7 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private 
 
     init {
 //        initInstanceData()
+        println("Delay: ${Timer.getDelay(timerId)}")
     }
 
     private fun initBlock() {
