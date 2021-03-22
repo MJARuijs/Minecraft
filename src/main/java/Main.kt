@@ -98,7 +98,9 @@ object Main {
 
 //            updateChunkManager()
 
-            player.update(keyboard, mouse, timer.getDelta())
+            if (mouse.isCaptured()) {
+                player.update(keyboard, mouse, timer.getDelta())
+            }
             camera.followPlayer(player)
 
             val selectedBlock = selector.getLastSelected()

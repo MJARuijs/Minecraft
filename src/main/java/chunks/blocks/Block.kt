@@ -35,6 +35,20 @@ class Block {
         mesh.draw(instances)
     }
 
+    fun renderSize(size: Int, instancePositions: FloatArray) {
+        mesh.updateInstanceData(instancePositions)
+        mesh.draw(instancePositions.size / size)
+    }
+
+//    fun render(instances: Int, instanceData: List<FloatArray>) {
+//        var data = FloatArray(0)
+//        instanceData.forEach { d ->
+//            data += d
+//        }
+//        mesh.updateInstanceData(data)
+//        mesh.draw(instances)
+//    }
+
     fun renderUnTextured(instances: Int, instancePositions: FloatArray) {
         unTexturedMesh.updateInstanceData(instancePositions)
         unTexturedMesh.draw(instances)

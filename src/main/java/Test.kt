@@ -1,21 +1,25 @@
+import math.vectors.Vector3
+
 object Test {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        val start = System.currentTimeMillis()
-        println("A")
 
-        Thread {
-            for (i in 0 until 10000) {
-                println(i)
-//            x += i
-//            x -= i
-            }
-        }.start()
+        val positions = ArrayList<Vector3>()
+        positions += Vector3(0.0f, 0.0f, 1.0f)
+        positions += Vector3(0.0f, 2.0f, 1.0f)
+        positions += Vector3(0.0f, 0.0f, 3.0f)
 
-        val end = System.currentTimeMillis()
+        val list = ArrayList<FloatArray>(0)
+        val arr = FloatArray(0)
 
-        println("B: ${end - start}")
+        val t: FloatArray = positions.map {
+            it.toArray()
+        }.flatMap { it.toList() }.toFloatArray()
+
+        println(list.size)
+        println(t.size)
+
     }
 
 }
