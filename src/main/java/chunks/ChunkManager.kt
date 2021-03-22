@@ -79,7 +79,41 @@ class ChunkManager {
 //        for (chunk in chunks) {
 //
 //        }
-
+//        Thread {
+//            generate(0, 0)
+//        }.start()
+//
+//        Thread {
+//            generate(0, 16)
+//        }.start()
+//
+//        Thread {
+//            generate(0, -16)
+//        }.start()
+//
+//        Thread {
+//            generate(16, 0)
+//        }.start()
+//
+//        Thread {
+//            generate(16, 16)
+//        }.start()
+//
+//        Thread {
+//            generate(16, -16)
+//        }.start()
+//
+//        Thread {
+//            generate(-16, 0)
+//        }.start()
+//
+//        Thread {
+//            generate(-16, 16)
+//        }.start()
+//
+//        Thread {
+//            generate(-16, -16)
+//        }.start()
         for (x in 0 until (maxDistance) * CHUNK_SIZE step CHUNK_SIZE) {
             for (z in 0 until (maxDistance) * CHUNK_SIZE step CHUNK_SIZE) {
                 Thread {

@@ -34,8 +34,8 @@ class Selector {
             }
         }
 
-        val stepSize = chunkRenderer.renderSubset(camera, reachableChunks) { visibleBlock ->
-            (visibleBlock.second - camera.position).length() < reach
+        val stepSize = chunkRenderer.renderSubset(camera, reachableChunks) { blockPosition ->
+            (blockPosition - camera.position).length() < reach
         }
 
         val x = window.width / 2

@@ -48,7 +48,7 @@ class ChunkRenderer {
         GraphicsContext.disable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
     }
 
-    fun renderSubset(camera: Camera, chunks: ArrayList<Chunk>, constraint: (Pair<BlockType, Vector3>) -> Boolean): Float {
+    fun renderSubset(camera: Camera, chunks: ArrayList<Chunk>, constraint: (Vector3) -> Boolean): Float {
         var totalNumberOfVisibleBlocks = 0
 
         for (chunk in chunks) {
