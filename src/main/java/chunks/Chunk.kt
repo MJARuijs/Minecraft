@@ -8,30 +8,20 @@ import chunks.blocks.Face
 import graphics.shaders.ShaderProgram
 import math.vectors.Vector2
 import math.vectors.Vector3
-import util.Timer
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.roundToInt
 
-class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, val timerId: Int, private var instanceFloatData: FloatArray, private var highestBlock: Int = 0) {
-//    val blocks: ArrayList<Pair<BlockType, Vector3>> = ArrayList(),
-//    private var instanceFloatData = FloatArray(0)
+class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private var visibleInstanceData: FloatArray, private var highestBlock: Int = 0) {
 
     private val instanceSize = 21
 
     private var untexturedFloatData = FloatArray(0)
+    private var hiddenInstanceData = FloatArray(0)
 
     private val subsetBlockPositions = ArrayList<Vector3>()
 
     private var initialized = false
 
-    private val locked = AtomicBoolean(false)
-
     private lateinit var block: Block
-
-    init {
-//        initInstanceData()
-        println("Delay: ${Timer.getDelay(timerId)}")
-    }
 
     private fun initBlock() {
         block = Block()
@@ -60,100 +50,79 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, val time
         return true
     }
 
-//    fun add(newBlocks: ArrayList<Pair<BlockType, Vector3>>) {
-//        blocks += newBlocks
-//    }
-
-    fun add(newData: FloatArray, timerId: Int) {
-        instanceFloatData += newData
-        println("Add Delay: ${Timer.getDelay(timerId)}")
+    fun add(newData: FloatArray) {
+        hiddenInstanceData += newData
     }
 
     fun addBlock(type: BlockType, position: Vector3) {
         if (containsBlock(position) && position.y >= 0 && position.y < MAX_HEIGHT) {
             val newBlock = Pair(type, position)
-//            blocks += newBlock
 
             if (position.y.toInt() >= highestBlock) {
                 highestBlock = position.y.toInt()
             }
 
-            removeSurroundingBlocks(position)
             addBlockData(newBlock)
+            removeSurroundingBlocks(position)
         }
     }
 
     fun removeBlock(position: Vector3) {
-        val index = getBlockIndex(position)
+        val index = getBlockIndex(position, visibleInstanceData)
         if (index != -1) {
-            for (i in index + 3 until index + instanceSize) {
-                instanceFloatData[i] = -1f
+            val lastBlockIndex = visibleInstanceData.size - instanceSize
+            for (i in 0 until instanceSize) {
+                visibleInstanceData[index + i] = visibleInstanceData[lastBlockIndex + i]
             }
+
+            visibleInstanceData = visibleInstanceData.sliceArray(0 until visibleInstanceData.size - instanceSize)
         }
 
         addSurroundingBlocks(position)
-        makeBlockInvisible(position)
     }
 
     private fun addBlockData(block: Pair<BlockType, Vector3>) {
-        instanceFloatData += block.second.toArray()
-        instanceFloatData += block.first.getOffsets()
+        visibleInstanceData += block.second.toArray()
+        visibleInstanceData += block.first.getOffsets()
 
         untexturedFloatData += block.second.toArray()
-    }
-
-    private fun addBlockData(data: FloatArray) {
-        instanceFloatData += data
-
-        untexturedFloatData += data[0]
-        untexturedFloatData += data[1]
-        untexturedFloatData += data[2]
-    }
-
-    private fun makeBlockInvisible(position: Vector3) {
-        for (i in instanceFloatData.indices step instanceSize) {
-            val x = instanceFloatData[i]
-            val y = instanceFloatData[i + 1]
-            val z = instanceFloatData[i + 2]
-
-            if (position == Vector3(x, y, z)) {
-                for (j in 0 until instanceSize - 3) {
-                    instanceFloatData[i + j] = -1f
-                }
-            }
-        }
     }
 
     fun render(shaderProgram: ShaderProgram) {
         shaderProgram.set("overlayColor", biome.overlayColor)
         if (initialized) {
-            block.render(instanceFloatData.size / instanceSize, instanceFloatData)
+            block.render(visibleInstanceData.size / instanceSize, visibleInstanceData)
         } else {
             initBlock()
-            block.render(instanceFloatData.size / instanceSize, instanceFloatData)
+            block.render(visibleInstanceData.size / instanceSize, visibleInstanceData)
         }
     }
 
     fun renderSubset() {
-        var subsetData = FloatArray(0)
+        val subsetData = FloatArray(subsetBlockPositions.size * 3)
+        var i = 0
         for (block in subsetBlockPositions) {
-            subsetData += block.toArray()
+            subsetData[i] = block.x
+            subsetData[i + 1] = block.y
+            subsetData[i + 2] = block.z
+            i += 3
         }
         if (initialized) {
-            block.renderUnTextured(subsetBlockPositions.size, subsetData)
+            block.renderUnTextured(subsetData.size / 3, subsetData)
         } else {
             initBlock()
-            block.renderUnTextured(subsetBlockPositions.size, subsetData)
+            block.renderUnTextured(subsetData.size / 3, subsetData)
         }
     }
 
     fun determineSubset(constraint: (Vector3) -> Boolean): Int {
         subsetBlockPositions.clear()
 
-        for (i in instanceFloatData.indices step instanceSize) {
-            val x = instanceFloatData[i]
-            val y = instanceFloatData[i + 1]
-            val z = instanceFloatData[i + 2]
+        for (i in visibleInstanceData.indices step instanceSize) {
+            val x = visibleInstanceData[i]
+            val y = visibleInstanceData[i + 1]
+            val z = visibleInstanceData[i + 2]
+
             val position = Vector3(x, y, z)
             if (constraint(position)) {
                 subsetBlockPositions += position
@@ -163,11 +132,11 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, val time
         return subsetBlockPositions.size
     }
 
-    private fun getBlockIndex(position: Vector3): Int {
-        for (i in instanceFloatData.indices step instanceSize) {
-            val x = instanceFloatData[i]
-            val y = instanceFloatData[i + 1]
-            val z = instanceFloatData[i + 2]
+    private fun getBlockIndex(position: Vector3, data: FloatArray): Int {
+        for (i in data.indices step instanceSize) {
+            val x = data[i]
+            val y = data[i + 1]
+            val z = data[i + 2]
 
             if (position == Vector3(x, y, z)) {
                 return i
@@ -181,15 +150,20 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, val time
             if (side == Face.ALL) {
                 continue
             }
-//            val block = blocks.find { block -> block.second == position + side.normal }
-            val index = getBlockIndex(position + side.normal)
+
+            val index = getBlockIndex(position + side.normal, hiddenInstanceData)
             if (index != -1) {
-//                val blockId =
-                val data = FloatArray(instanceSize)
+                val lastHiddenIndex = hiddenInstanceData.size - instanceSize
+                untexturedFloatData += hiddenInstanceData[index]
+                untexturedFloatData += hiddenInstanceData[index + 1]
+                untexturedFloatData += hiddenInstanceData[index + 2]
+
                 for (i in 0 until instanceSize) {
-                    data[i] = instanceFloatData[i + index]
+                    visibleInstanceData += hiddenInstanceData[index + i]
+                    hiddenInstanceData[index + i] = hiddenInstanceData[lastHiddenIndex + i]
                 }
-                addBlockData(data)
+
+                hiddenInstanceData = hiddenInstanceData.sliceArray(0 until hiddenInstanceData.size - instanceSize)
             }
         }
     }
@@ -200,29 +174,33 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, val time
                 continue
             }
 
-//            val block = blocks.find { block -> block.second == position + side.normal } ?: continue
-//            if (areAllNeighboursSolid(block.second)) {
-//                makeBlockInvisible(block.second)
-//            }
+            val index = getBlockIndex(position + side.normal, visibleInstanceData)
+            if (index != -1) {
+                if (areAllNeighboursSolid(position + side.normal)) {
+                    val newHiddenData = FloatArray(instanceSize)
+                    val lastBlockIndex = visibleInstanceData.size - instanceSize
+                    for (i in 0 until instanceSize) {
+                        newHiddenData[i] = visibleInstanceData[index + i]
+                        visibleInstanceData[index + i] = visibleInstanceData[lastBlockIndex + i]
+                    }
+
+                    hiddenInstanceData += newHiddenData
+                    visibleInstanceData = visibleInstanceData.sliceArray(0 until visibleInstanceData.size - instanceSize)
+                }
+            }
         }
     }
 
     private fun isBlockSolid(x: Int, y: Int, z: Int): Boolean {
-        return getBlockIndex(Vector3(x, y, z)) != -1
-    }
+        val isVisible = getBlockIndex(Vector3(x, y, z), visibleInstanceData) != -1
+        val isNotVisible = getBlockIndex(Vector3(x, y, z), hiddenInstanceData) != -1
 
-//    private fun getBlockType(x: Int, y: Int, z: Int): BlockType? {
-//
-//        return getBlockIndex(Vector3(x, y, x))
-//    }
+        return isVisible || isNotVisible
+    }
 
     private fun areAllNeighboursSolid(position: Vector3) = areAllNeighboursSolid(position.x.toInt(), position.y.toInt(), position.z.toInt())
 
     private fun areAllNeighboursSolid(x: Int, y: Int, z: Int): Boolean {
-        return getTransparentNeighbours(x, y, z)
-    }
-
-    private fun getTransparentNeighbours(x: Int, y: Int, z: Int): Boolean {
         if (!isBlockSolid(x - 1, y, z)) {
             return false
         }
@@ -243,25 +221,4 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, val time
         }
         return true
     }
-
-
-//    private fun initInstanceData() {
-//        instanceFloatData = FloatArray(0)
-//        untexturedFloatData = FloatArray(0)
-//
-//        val id = Timer.start()
-//        for (block in blocks) {
-//            if (block.first == BlockType.AIR) {
-//                continue
-//            }
-//
-//            while (locked.get()) {
-//                Thread.sleep(0)
-//            }
-//
-//            addBlockData(block)
-//        }
-//        println("Delay: ${Timer.getDelay(id)} ")
-//    }
-
 }

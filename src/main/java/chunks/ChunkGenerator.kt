@@ -3,26 +3,25 @@ package chunks
 import chunks.blocks.BlockType
 import math.PerlinNoise
 import math.vectors.Vector3
-import util.Timer
 import kotlin.math.max
 
 class ChunkGenerator {
 
     companion object {
         const val CHUNK_SIZE = 16
-        const val TERRAIN_HEIGHT = 60
+        const val TERRAIN_HEIGHT = 50
         const val MAX_HEIGHT = 256
     }
 
     private val heights = Array(CHUNK_SIZE) { Array(CHUNK_SIZE) { 0 } }
+    private val data = FloatArray(CHUNK_SIZE * CHUNK_SIZE * MAX_HEIGHT * 21)
 
     private var chunkX = 0
     private var chunkZ = 0
+
     private lateinit var noise: PerlinNoise
 
     fun generate(chunkX: Int, chunkZ: Int, biome: Biome, seed: Long): Chunk {
-        println("Generating $chunkX $chunkZ")
-        val id = Timer.start()
         this.chunkX = chunkX
         this.chunkZ = chunkZ
         this.noise = PerlinNoise(biome.octaves, biome.amplitude, biome.roughness, seed)
@@ -33,12 +32,10 @@ class ChunkGenerator {
             }
         }
 
-//        val noise =
         var highestBlock = 0
-
-//        val blocks = ArrayList<Pair<BlockType, Vector3>>()
         val positions = ArrayList<Vector3>()
-        var data = FloatArray(0)
+
+        var i = 0
 
         for (x in 0 until CHUNK_SIZE) {
             for (z in 0 until CHUNK_SIZE) {
@@ -55,39 +52,46 @@ class ChunkGenerator {
                     for (y in 0 .. height) {
                         val position = Vector3(worldX, y, worldZ)
                         positions += position
-                        data += position.toArray()
-                        data +=  when {
+                        data[i] = worldX.toFloat()
+                        data[i + 1] = y.toFloat()
+                        data[i + 2] = worldZ.toFloat()
+
+                        val blockData = when {
                             y == height -> BlockType.GRASS
                             y < 2 -> BlockType.BEDROCK
                             y < height - 4 -> BlockType.STONE
                             else -> BlockType.DIRT
                         }.getOffsets()
+
+                        for (j in blockData.indices) {
+                            data [i + j + 3] = blockData[j]
+                        }
+                        i += 21
                     }
                 } else {
                     val position = Vector3(worldX, height, worldZ)
-                    data += position.toArray()
-                    data += BlockType.GRASS.getOffsets()
                     positions += position
 
-                    val blocksBelow = addBlocksBelow(x, z)
-                    for (blockBelow in blocksBelow) {
-                        data += blockBelow.second.toArray()
-                        data += blockBelow.first.getOffsets()
-
-                        positions += blockBelow.second
+                    data[i] = worldX.toFloat()
+                    data[i + 1] = height.toFloat()
+                    data[i + 2] = worldZ.toFloat()
+                    val blockData = BlockType.GRASS.getOffsets()
+                    for (j in blockData.indices) {
+                        data[i + j + 3] = blockData[j]
                     }
 
-//                    blocks += Pair(BlockType.GRASS, position)
-//                    blocks += addBlocksBelow(x, z)
+                    i += 21
+                    i = addBlocksBelow(x, z, i)
                 }
             }
         }
 
-        val chunk = Chunk(chunkX, chunkZ, biome, id, data, highestBlock)
+        val chunk = Chunk(chunkX, chunkZ, biome, data.sliceArray(0 until i), highestBlock)
 
         Thread {
-            var newData = FloatArray(0)
-            val newTimerId = Timer.start()
+            val newData = FloatArray(CHUNK_SIZE * CHUNK_SIZE * MAX_HEIGHT * 21 - i)
+            i = 0
+
             for (x in 1 until CHUNK_SIZE - 1) {
                 for (z in 1 until CHUNK_SIZE - 1) {
                     val worldX = chunkX + x
@@ -99,27 +103,31 @@ class ChunkGenerator {
                         val position = Vector3(worldX, y, worldZ)
 
                         if (positions.none { blockPosition -> blockPosition == position }) {
-                            newData += position.toArray()
-                            newData += when {
-                                y < 2 ->BlockType.BEDROCK
+                            newData[i] = worldX.toFloat()
+                            newData[i + 1] = y.toFloat()
+                            newData[i + 2] = worldZ.toFloat()
+                            val blockData = when {
+                                y < 2 -> BlockType.BEDROCK
                                 y < height - 4 -> BlockType.STONE
                                 else -> BlockType.DIRT
                             }.getOffsets()
-                        }
 
+                            for (j in blockData.indices) {
+                                newData[i + j + 3] = blockData[j]
+                            }
+                            i += 21
+                        }
                     }
                 }
             }
 
-            chunk.add(newData, newTimerId)
+            chunk.add(newData.sliceArray(0 until i))
         }.start()
-//        println("Done $chunkX, $chunkZ")
 
         return chunk
     }
 
-    private fun addBlocksBelow(x: Int, z: Int): ArrayList<Pair<BlockType, Vector3>> {
-        val blocksBelow = ArrayList<Pair<BlockType, Vector3>>()
+    private fun addBlocksBelow(x: Int, z: Int, i: Int): Int {
         val height = get(x, z)
         val leftHeight = get(x - 1, z)
         val rightHeight = get(x + 1, z)
@@ -133,16 +141,31 @@ class ChunkGenerator {
 
         val largestDifference = max(max(max(leftDifference, rightDifference), frontDifference), behindDifference)
 
-        for (y in 1 until largestDifference) {
-            val type = when {
+        if (largestDifference <= 0) {
+            return i
+        }
+
+        var j = i
+
+        for (y in 0 until largestDifference - 1) {
+            val typeData = when {
                 height - y < 2 -> BlockType.BEDROCK
                 height - y < height - 4 -> BlockType.STONE
                 else -> BlockType.DIRT
+            }.getOffsets()
+
+            data[j ] = (x + chunkX).toFloat()
+            data[j  + 1] = (height - y - 1).toFloat()
+            data[j  + 2] = (z + chunkZ).toFloat()
+
+            for (k in typeData.indices) {
+                data[j + k + 3] = typeData[k]
             }
-            blocksBelow += Pair(type, Vector3(x + chunkX, height - y, z + chunkZ))
+
+            j += 21
         }
 
-        return blocksBelow
+        return j
     }
 
     private fun get(x: Int, z: Int): Int {

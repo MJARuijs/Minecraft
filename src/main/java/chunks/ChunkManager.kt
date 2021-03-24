@@ -9,9 +9,8 @@ import kotlin.math.*
 
 class ChunkManager {
 
-    private val maxDistance = 2
+    private val maxDistance = 4
 
-    private val generator = ChunkGenerator()
     private val chunks = ArrayList<Chunk>()
     private val locked = AtomicBoolean(false)
 
@@ -79,41 +78,7 @@ class ChunkManager {
 //        for (chunk in chunks) {
 //
 //        }
-//        Thread {
-//            generate(0, 0)
-//        }.start()
-//
-//        Thread {
-//            generate(0, 16)
-//        }.start()
-//
-//        Thread {
-//            generate(0, -16)
-//        }.start()
-//
-//        Thread {
-//            generate(16, 0)
-//        }.start()
-//
-//        Thread {
-//            generate(16, 16)
-//        }.start()
-//
-//        Thread {
-//            generate(16, -16)
-//        }.start()
-//
-//        Thread {
-//            generate(-16, 0)
-//        }.start()
-//
-//        Thread {
-//            generate(-16, 16)
-//        }.start()
-//
-//        Thread {
-//            generate(-16, -16)
-//        }.start()
+
         for (x in 0 until (maxDistance) * CHUNK_SIZE step CHUNK_SIZE) {
             for (z in 0 until (maxDistance) * CHUNK_SIZE step CHUNK_SIZE) {
                 Thread {

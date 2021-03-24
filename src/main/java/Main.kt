@@ -40,7 +40,7 @@ object Main {
     private val ambientLight = AmbientLight(Color(0.25f, 0.25f, 0.25f))
     private val directionalLight = DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector3(0.5f, 0.5f, 0.5f))
 
-    private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, ChunkGenerator.TERRAIN_HEIGHT, 0))
+    private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(13, TERRAIN_HEIGHT, 10))
 
     private val chunkManager = ChunkManager()
     private val chunkRenderer = ChunkRenderer()
@@ -53,6 +53,8 @@ object Main {
     private val ui = UserInterface(window.aspectRatio)
     private val page = UIPage("page")
 
+    private var renderColored = false
+
     @JvmStatic
     fun main(args: Array<String>) {
         GraphicsContext.init(Color(0.25f, 0.25f, 0.25f))
@@ -61,10 +63,7 @@ object Main {
 
         RenderTargetManager.init(window)
 
-        val player = Player(Vector3(0, TERRAIN_HEIGHT, 0))
-
-        timer.reset()
-        mouse.release()
+        val player = Player(Vector3(13, ChunkGenerator.TERRAIN_HEIGHT, 10))
 
         val textBox = TextBox("fps", ConstraintSet(
                 PixelConstraint(ConstraintDirection.TO_LEFT),
@@ -91,6 +90,14 @@ object Main {
 //            chunks.add(chunk)
         }.start()
 
+        val sampleSize = 40
+
+        val fps = FloatArray(sampleSize)
+        var i = 0
+
+        timer.reset()
+        mouse.capture()
+
         while (!window.isClosed()) {
             window.poll()
 
@@ -105,12 +112,24 @@ object Main {
 
             val selectedBlock = selector.getLastSelected()
             doMainRenderPass(selectedBlock)
-
+            selector.findSelectedItem(window, chunkRenderer, chunks, camera, renderColored)
             ui.update(mouse, timer.getDelta())
             ui.draw(window.width, window.height)
 
             window.synchronize()
             timer.update()
+
+            fps[i] = 1f / timer.getDelta()
+            i++
+            if (i == sampleSize) {
+                i = 0
+                var totalFps = 0f
+                for (j in 0 until sampleSize) {
+                    totalFps += fps[j]
+                }
+//                println("Average fps: ${totalFps / sampleSize}")
+            }
+//            println(1f / timer.getDelta())
         }
 
         window.destroy()
@@ -134,13 +153,17 @@ object Main {
 //            camera.update(keyboard, mouse, timer.getDelta())
 //        }
 
+        if (keyboard.isPressed(Key.T)) {
+            renderColored = !renderColored
+        }
+
         if (keyboard.isPressed(Key.F)) {
             println(camera.position.xz())
         }
 
         if (mouse.isCaptured()) {
             if (mouse.isPressed(Button.LEFT)) {
-                val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera)
+                val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera, false)
                 if (selectedBlock != null) {
                     for (chunk in chunks) {
                         if (chunk.containsBlock(selectedBlock.second)) {
@@ -151,7 +174,7 @@ object Main {
             }
 
             if (mouse.isPressed(Button.RIGHT) || keyboard.isPressed(Key.V)) {
-                val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera)
+                val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera, false)
                 if (selectedBlock != null) {
                     val face = selector.determineSelectedFace(camera, selectedBlock.second) ?: return
                     val newPosition = chunkManager.newBlockPosition(selectedBlock.second, face)

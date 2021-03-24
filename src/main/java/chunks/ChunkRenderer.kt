@@ -53,7 +53,6 @@ class ChunkRenderer {
 
         for (chunk in chunks) {
             val size = chunk.determineSubset(constraint)
-
             totalNumberOfVisibleBlocks += size
         }
 

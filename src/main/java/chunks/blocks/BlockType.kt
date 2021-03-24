@@ -1,7 +1,5 @@
 package chunks.blocks
 
-import math.vectors.Vector2
-
 enum class BlockType(private vararg val faceMaterials: FaceMaterial) {
 
     AIR,
@@ -69,10 +67,6 @@ enum class BlockType(private vararg val faceMaterials: FaceMaterial) {
     CYAN_WOOL(FaceMaterial(1, 13)),
     ORANGE_WOOL(FaceMaterial(2, 13)),
     LIGHT_GREY_WOOL(FaceMaterial(1, 14));
-
-//    STONE(Vector2(1, 0)),
-//    FURNACE(Vector2(12, 2), Vector2(13, 2), Vector2(13, 2), Vector2(13, 2), Vector2(14, 3), Vector2(14, 3)),
-//    TNT(Vector2(8, 0), Vector2(8, 0), Vector2(8, 0), Vector2(8, 0), Vector2(9, 0), Vector2(10, 0));
 
     fun getOffsets(): FloatArray {
         val textureOffsets = FloatArray(18)

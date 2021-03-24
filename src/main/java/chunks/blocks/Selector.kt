@@ -5,6 +5,8 @@ import chunks.ChunkGenerator.Companion.CHUNK_SIZE
 import chunks.ChunkRenderer
 import devices.Window
 import graphics.Camera
+import graphics.GraphicsContext
+import graphics.GraphicsOption
 import graphics.rendertarget.RenderTargetManager
 import math.vectors.Vector3
 import math.vectors.Vector4
@@ -20,7 +22,8 @@ class Selector {
 
     fun getLastSelected() = lastSelected
 
-    fun findSelectedItem(window: Window, chunkRenderer: ChunkRenderer, chunks: ArrayList<Chunk>, camera: Camera): Pair<Chunk, Vector3>? {
+    fun findSelectedItem(window: Window, chunkRenderer: ChunkRenderer, chunks: ArrayList<Chunk>, camera: Camera, render: Boolean): Pair<Chunk, Vector3>? {
+        GraphicsContext.enable(GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING)
         val fbo = RenderTargetManager.get()
         fbo.start()
         fbo.clear()
@@ -44,7 +47,13 @@ class Selector {
         val pixelData = BufferUtils.createFloatBuffer(3)
         glReadPixels(x, y, 1, 1, GL_RGB, GL_FLOAT, pixelData)
 
-        fbo.stop()
+        if (render) {
+            fbo.renderToScreen()
+        } else {
+            fbo.stop()
+        }
+
+        GraphicsContext.disable(GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING)
 
         val r = FloatUtils.roundToDecimal(pixelData.get(), 3)
         val g = FloatUtils.roundToDecimal(pixelData.get(), 3)

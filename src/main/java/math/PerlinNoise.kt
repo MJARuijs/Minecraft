@@ -15,6 +15,13 @@ class PerlinNoise(
 
     operator fun get(x: Int, y: Int) = get(x.toFloat(), y.toFloat())
 
+//    operator fun get(x: Int, y: Int): Float {
+//        if (x == 1 && y == 1) {
+//            return 3.0f
+//        }
+//        return 0.0f
+//    }
+
     operator fun get(x: Float, y: Float): Float {
         var height = 0.0
 //        val delta = power(2.0f, (octaves - 1.0f))

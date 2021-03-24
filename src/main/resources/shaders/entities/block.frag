@@ -79,11 +79,6 @@ bool equals(vec3 one, vec3 two) {
 }
 
 void main() {
-
-    if (passTextureCoord.z < -0.5) {
-        discard;
-    }
-
     vec4 color = texture(textureMap, passTextureCoord.xy);
     if (passTextureCoord.z > 0.5) {
         float strength = color.r;

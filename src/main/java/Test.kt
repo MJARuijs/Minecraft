@@ -5,20 +5,13 @@ object Test {
     @JvmStatic
     fun main(args: Array<String>) {
 
-        val positions = ArrayList<Vector3>()
-        positions += Vector3(0.0f, 0.0f, 1.0f)
-        positions += Vector3(0.0f, 2.0f, 1.0f)
-        positions += Vector3(0.0f, 0.0f, 3.0f)
+        val floats = floatArrayOf(1.0f, 0.0f, 2.0f)
 
-        val list = ArrayList<FloatArray>(0)
-        val arr = FloatArray(0)
+        val data = floats + floatArrayOf(2.0f, 5.0f)
 
-        val t: FloatArray = positions.map {
-            it.toArray()
-        }.flatMap { it.toList() }.toFloatArray()
-
-        println(list.size)
-        println(t.size)
+        for (v in data) {
+            println(v)
+        }
 
     }
 
