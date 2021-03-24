@@ -40,9 +40,10 @@ object Main {
     private val ambientLight = AmbientLight(Color(0.25f, 0.25f, 0.25f))
     private val directionalLight = DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector3(0.5f, 0.5f, 0.5f))
 
-    private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(13, TERRAIN_HEIGHT, 10))
+    private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, TERRAIN_HEIGHT, 0))
+    private val player = Player(Vector3(0, TERRAIN_HEIGHT, 0))
 
-    private val chunkManager = ChunkManager()
+    private val chunkManager = ChunkManager(player.position)
     private val chunkRenderer = ChunkRenderer()
 
     private val selector = Selector()
@@ -63,7 +64,6 @@ object Main {
 
         RenderTargetManager.init(window)
 
-        val player = Player(Vector3(13, ChunkGenerator.TERRAIN_HEIGHT, 10))
 
         val textBox = TextBox("fps", ConstraintSet(
                 PixelConstraint(ConstraintDirection.TO_LEFT),
@@ -129,7 +129,6 @@ object Main {
                 }
 //                println("Average fps: ${totalFps / sampleSize}")
             }
-//            println(1f / timer.getDelta())
         }
 
         window.destroy()
@@ -149,16 +148,12 @@ object Main {
             window.close()
         }
 
-//        if (mouse.isCaptured()) {
-//            camera.update(keyboard, mouse, timer.getDelta())
-//        }
-
         if (keyboard.isPressed(Key.T)) {
             renderColored = !renderColored
         }
 
         if (keyboard.isPressed(Key.F)) {
-            println(camera.position.xz())
+            println(camera.position)
         }
 
         if (mouse.isCaptured()) {
@@ -176,6 +171,7 @@ object Main {
             if (mouse.isPressed(Button.RIGHT) || keyboard.isPressed(Key.V)) {
                 val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera, false)
                 if (selectedBlock != null) {
+                    println(selectedBlock.second)
                     val face = selector.determineSelectedFace(camera, selectedBlock.second) ?: return
                     val newPosition = chunkManager.newBlockPosition(selectedBlock.second, face)
                     for (chunk in chunks) {

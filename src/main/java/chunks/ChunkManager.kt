@@ -4,24 +4,32 @@ import chunks.ChunkGenerator.Companion.CHUNK_SIZE
 import chunks.blocks.Face
 import math.vectors.Vector2
 import math.vectors.Vector3
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.collections.ArrayList
+import kotlin.collections.HashSet
 import kotlin.math.*
 
-class ChunkManager {
+class ChunkManager(x: Int, z: Int) {
 
-    private val maxDistance = 4
+    constructor(position: Vector3) : this(position.x.toInt(), position.z.toInt())
+
+    private val maxDistance = 10
+    private val preGenerateDistance = 4
 
     private val chunks = ArrayList<Chunk>()
     private val locked = AtomicBoolean(false)
-
-    private var currentX = 0
-    private var currentZ = 0
 
     private var renderDistance = 2
 
     private var chunksInProgress = HashSet<Vector2>()
 
+    private var currentX = 0
+    private var currentZ = 0
+
     init {
+        currentX = floor((x.toFloat() + (CHUNK_SIZE / 2)) / CHUNK_SIZE).toInt()
+        currentZ = floor((z.toFloat() + (CHUNK_SIZE / 2)) / CHUNK_SIZE).toInt()
         update()
     }
 
@@ -52,8 +60,8 @@ class ChunkManager {
     fun determineVisibleChunks(): ArrayList<Chunk> {
         val visibleChunks = ArrayList<Chunk>()
 
-        for (x in (currentX - renderDistance) * CHUNK_SIZE until (currentX + renderDistance) * CHUNK_SIZE step CHUNK_SIZE) {
-            for (z in (currentZ - renderDistance) * CHUNK_SIZE until (currentZ + renderDistance) * CHUNK_SIZE step CHUNK_SIZE) {
+        for (x in (currentX - renderDistance) * CHUNK_SIZE .. (currentX + renderDistance) * CHUNK_SIZE step CHUNK_SIZE) {
+            for (z in (currentZ - renderDistance) * CHUNK_SIZE .. (currentZ + renderDistance) * CHUNK_SIZE step CHUNK_SIZE) {
                 var chunk: Chunk? = null
 
                 for (i in 0 until chunks.size) {
@@ -73,25 +81,22 @@ class ChunkManager {
     }
 
     private fun update() {
+        val removableChunks = ArrayList<Chunk>()
+        for (chunk in chunks) {
+            val xDistance = abs(chunk.chunkX - currentX * CHUNK_SIZE)
+            val zDistance = abs(chunk.chunkZ - currentZ * CHUNK_SIZE)
+            if (xDistance > maxDistance * CHUNK_SIZE || zDistance > maxDistance * CHUNK_SIZE) {
+                removableChunks += chunk
+            }
+        }
 
-        //TODO: Implement removing chunks that are too far away
-//        for (chunk in chunks) {
-//
-//        }
+        chunks.removeAll(removableChunks)
 
-        for (x in 0 until (maxDistance) * CHUNK_SIZE step CHUNK_SIZE) {
-            for (z in 0 until (maxDistance) * CHUNK_SIZE step CHUNK_SIZE) {
+        val distance = preGenerateDistance * CHUNK_SIZE
+        for (x in -distance .. distance step CHUNK_SIZE) {
+            for (z in -distance .. distance step CHUNK_SIZE) {
                 Thread {
                     generate(currentX * CHUNK_SIZE + x, currentZ * CHUNK_SIZE + z)
-                }.start()
-                Thread {
-                    generate(currentX * CHUNK_SIZE + x, currentZ * CHUNK_SIZE - z)
-                }.start()
-                Thread {
-                    generate(currentX * CHUNK_SIZE - x, currentZ * CHUNK_SIZE - z)
-                }.start()
-                Thread {
-                    generate(currentX * CHUNK_SIZE - x, currentZ * CHUNK_SIZE - z)
                 }.start()
             }
         }
@@ -99,21 +104,20 @@ class ChunkManager {
 
     private fun generate(x: Int, z: Int) {
         if (!chunksInProgress.contains(Vector2(x, z))) {
-            requestLock()
-            val chunk = chunks.findLast { chunk ->
-                chunk.chunkX == x && chunk.chunkZ == z
-            }
-            releaseLock()
+            try {
+                if (chunks.none { chunk -> chunk.chunkX == x && chunk.chunkZ == z }) {
+                    chunksInProgress.add(Vector2(x, z))
+                    val newChunk = ChunkGenerator().generate(x, z, Biome.PLANES, 0)
 
-            if (chunk == null) {
-                chunksInProgress.add(Vector2(x, z))
-                val newChunk = ChunkGenerator().generate(x, z, Biome.PLANES, 0)
+                    requestLock()
+                    chunks += newChunk
+                    releaseLock()
 
-                requestLock()
-                chunks += newChunk
-                releaseLock()
-
-                chunksInProgress.remove(Vector2(x, z))
+                    chunksInProgress.remove(Vector2(x, z))
+                }
+            } catch (e: ConcurrentModificationException) {
+                println("ERROR $x, $z")
+                generate(x, z)
             }
         }
     }

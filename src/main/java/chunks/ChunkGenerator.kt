@@ -9,6 +9,7 @@ class ChunkGenerator {
 
     companion object {
         const val CHUNK_SIZE = 16
+        const val HALF_CHUNK_SIZE = CHUNK_SIZE / 2
         const val TERRAIN_HEIGHT = 50
         const val MAX_HEIGHT = 256
     }
@@ -22,8 +23,9 @@ class ChunkGenerator {
     private lateinit var noise: PerlinNoise
 
     fun generate(chunkX: Int, chunkZ: Int, biome: Biome, seed: Long): Chunk {
-        this.chunkX = chunkX
-        this.chunkZ = chunkZ
+        this.chunkX = chunkX - HALF_CHUNK_SIZE
+        this.chunkZ = chunkZ - HALF_CHUNK_SIZE
+
         this.noise = PerlinNoise(biome.octaves, biome.amplitude, biome.roughness, seed)
 
         for (x in 0 until CHUNK_SIZE) {
@@ -39,8 +41,8 @@ class ChunkGenerator {
 
         for (x in 0 until CHUNK_SIZE) {
             for (z in 0 until CHUNK_SIZE) {
-                val worldX = chunkX + x
-                val worldZ = chunkZ + z
+                val worldX = chunkX + x - HALF_CHUNK_SIZE
+                val worldZ = chunkZ + z - HALF_CHUNK_SIZE
 
                 val height = get(x, z)
 
@@ -94,8 +96,8 @@ class ChunkGenerator {
 
             for (x in 1 until CHUNK_SIZE - 1) {
                 for (z in 1 until CHUNK_SIZE - 1) {
-                    val worldX = chunkX + x
-                    val worldZ = chunkZ + z
+                    val worldX = chunkX + x - HALF_CHUNK_SIZE
+                    val worldZ = chunkZ + z - HALF_CHUNK_SIZE
 
                     val height = get(x, z)
 
@@ -170,8 +172,9 @@ class ChunkGenerator {
 
     private fun get(x: Int, z: Int): Int {
         if (heights[x][z] == 0) {
-            heights[x][z] = noise[x + chunkX, z + chunkZ].toInt() + TERRAIN_HEIGHT
+            heights[x][z] = TERRAIN_HEIGHT
         }
+//        noise[x + chunkX, z + chunkZ].toInt() +
         return heights[x][z]
     }
 }

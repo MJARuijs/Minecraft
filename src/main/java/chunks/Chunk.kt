@@ -1,6 +1,7 @@
 package chunks
 
 import chunks.ChunkGenerator.Companion.CHUNK_SIZE
+import chunks.ChunkGenerator.Companion.HALF_CHUNK_SIZE
 import chunks.ChunkGenerator.Companion.MAX_HEIGHT
 import chunks.blocks.Block
 import chunks.blocks.BlockType
@@ -33,6 +34,8 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private 
 
     fun getCenter() = Vector2(chunkX + CHUNK_SIZE / 2, chunkZ + CHUNK_SIZE / 2)
 
+    fun getPosition() = Vector2(chunkX, chunkZ)
+
     fun getSubsetPosition(i: Int) = subsetBlockPositions[i]
 
     fun containsBlock(position: Vector3) = containsBlock(position.x.roundToInt(), position.y.roundToInt(), position.z.roundToInt())
@@ -41,10 +44,10 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private 
         if (y < 0 || y > MAX_HEIGHT) {
             return false
         }
-        if (x < chunkX  || x >= chunkX + CHUNK_SIZE) {
+        if (x < chunkX - HALF_CHUNK_SIZE|| x >= chunkX + HALF_CHUNK_SIZE) {
             return false
         }
-        if (z < chunkZ || z >= chunkZ + CHUNK_SIZE ) {
+        if (z < chunkZ - HALF_CHUNK_SIZE || z >= chunkZ + HALF_CHUNK_SIZE) {
             return false
         }
         return true
