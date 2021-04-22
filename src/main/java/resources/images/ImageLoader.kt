@@ -4,7 +4,6 @@ import org.lwjgl.BufferUtils
 import org.lwjgl.stb.STBImage
 import resources.Loader
 import util.File
-import java.nio.ByteBuffer
 
 class ImageLoader: Loader<ImageData> {
 

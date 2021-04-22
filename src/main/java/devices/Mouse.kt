@@ -98,14 +98,16 @@ class Mouse(private val window: Window) {
             capture()
         }
     }
-    
+
+    fun isCaptured() = captured
+
     fun update() {
         pressed.clear()
         released.clear()
         
         xScroll = 0.0f
         yScroll = 0.0f
-    
+
         while (events.isNotEmpty()) {
             val event = events.pop()
             when (event.action) {

@@ -1,0 +1,1 @@
+package userinterface.animation.effectsimport userinterface.MovableUIContainerimport userinterface.animation.Animationimport userinterface.items.Itemabstract class Effect(val duration: Float) {        abstract fun applyOn(item: Item): ArrayList<Animation>        abstract fun removeFrom(item: Item): ArrayList<Animation>    }

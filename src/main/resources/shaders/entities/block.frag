@@ -14,48 +14,47 @@ struct PointLight {
     vec3 position;
 };
 
-struct Material {
-    vec4 diffuse;
-    vec4 specular;
-    float shininess;
-};
-
 in vec4 worldPosition;
-in vec2 passTextureCoord;
+in vec3 passTextureCoord;
 in vec3 passNormal;
-in flat int passTextureId;
+in vec3 passInstancePosition;
+in vec2 passBreakTextureCoord;
 
 uniform AmbientLight ambient;
-uniform DirectionalLight sun;
+uniform DirectionalLight directional;
 uniform PointLight pointlights[2];
-uniform Material material;
 uniform vec3 cameraPosition;
-uniform sampler2D blockTextures[2];
+
+uniform sampler2D textureMap;
+
+uniform vec3 selectedBlockPosition;
+uniform vec3 breakingPosition;
+
+uniform bool breaking;
+uniform bool selected;
+uniform vec4 overlayColor;
 
 out vec4 outColor;
 
-vec4 computeAmbientColor() {
-
-    vec4 textureColor = texture(blockTextures[0], passTextureCoord);
-    return textureColor;
+vec4 computeAmbientColor(vec4 color) {
+    return color * ambient.color;
 }
 
-vec4 computeDirectionalColor() {
-
+vec4 computeDirectionalColor(vec4 color) {
     // Diffuse
-    vec3 lightDirection = normalize(sun.direction);
+    vec3 lightDirection = normalize(directional.direction);
     vec3 normal = normalize(passNormal);
 
     float brightness = clamp(dot(lightDirection, normal), 0.0, 1.0);
 
-    vec4 diffuseColor = brightness * material.diffuse * sun.color;
+    vec4 diffuseColor = brightness * color * directional.color;
 
     // Specular
     vec3 position = worldPosition.xyz;
     vec3 reflectionVector = 2 * (dot(lightDirection, normal)) * normal - lightDirection;
     vec3 toCameraVector = normalize(cameraPosition - position);
 
-    vec4 specularColor = material.specular * sun.color * clamp(pow(dot(reflectionVector, toCameraVector), material.shininess), 0.0, 1.0);
+    vec4 specularColor = color * directional.color * clamp(pow(dot(reflectionVector, toCameraVector), 0.0), 0.0, 1.0);
 
     return diffuseColor;
 }
@@ -69,10 +68,40 @@ vec4 computePointsColor() {
     return vec4(0);
 }
 
-void main() {
-    vec4 ambientColor = computeAmbientColor();
-//    vec4 directionalColor = computeDirectionalColor();
-//    vec4 pointColor = computePointsColor();
+bool equals(vec3 one, vec3 two) {
+    if (abs(one.x - two.x) > 0.0005) {
+        return false;
+    }
 
-    outColor = ambientColor;
-    outColor = clamp(outColor, 0.0, 1.0);}
+    if (abs(one.y - two.y) > 0.0005) {
+        return false;
+    }
+
+    if (abs(one.z - two.z) > 0.0005) {
+        return false;
+    }
+
+    return true;
+}
+
+void main() {
+    vec4 color = texture(textureMap, passTextureCoord.xy);
+    if (passTextureCoord.z > 0.5) {
+        float strength = color.r;
+        color.rgb = overlayColor.rgb * strength;
+    }
+
+    vec4 ambientColor = computeAmbientColor(color);
+    vec4 directionalColor = computeDirectionalColor(color);
+
+    outColor = vec4(0, 0, 0, 1);
+    outColor += ambientColor + directionalColor;
+    outColor = clamp(outColor, 0.0, 1.0);
+
+    if (breaking && equals(passInstancePosition, breakingPosition)) {
+        vec4 breakColor = texture(textureMap, passBreakTextureCoord);
+        if (breakColor.a > 0.5) {
+            outColor.rgb -= breakColor.rgb * 0.5;
+        }
+    }
+}

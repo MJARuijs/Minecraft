@@ -1,0 +1,1 @@
+#version 450 corelayout(location = 0) in vec2 inPosition;uniform vec2 translation;uniform float size;uniform float aspectRatio;void main() {    vec2 position = translation;    position.x /= aspectRatio;    position += inPosition * size;    gl_Position = vec4(position, 0, 1);}

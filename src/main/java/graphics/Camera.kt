@@ -5,6 +5,7 @@ import devices.Keyboard
 import devices.Mouse
 import math.matrices.Matrix4
 import math.vectors.Vector3
+import player.Player
 import kotlin.math.PI
 import kotlin.math.max
 import kotlin.math.min
@@ -35,6 +36,11 @@ class Camera(
 
     val rotationMatrix: Matrix4
         get() = Matrix4().rotateY(-rotation.y).rotateX(-rotation.x)
+
+    fun followPlayer(player: Player) {
+        position = player.position + Vector3(0f, player.height, 0f)
+        rotation = player.rotation
+    }
 
     fun update(keyboard: Keyboard, mouse: Mouse, delta: Float) {
 
