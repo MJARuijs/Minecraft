@@ -20,8 +20,6 @@ class Selector {
     private val reach = 8.0f
     private var lastSelected: Pair<Chunk, Vector3>? = null
 
-    fun getLastSelected() = lastSelected
-
     fun findSelectedItem(window: Window, chunkRenderer: ChunkRenderer, chunks: ArrayList<Chunk>, camera: Camera, render: Boolean): Pair<Chunk, Vector3>? {
         GraphicsContext.enable(GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING)
         val fbo = RenderTargetManager.get()
@@ -60,7 +58,9 @@ class Selector {
         val b = FloatUtils.roundToDecimal(pixelData.get(), 3)
 
         val id = decodeId(r, g, b, stepSize)
-
+        if (render) {
+            println(id)
+        }
         if (id == -1) {
             lastSelected = null
             return null

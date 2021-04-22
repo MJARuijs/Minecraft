@@ -15,10 +15,12 @@ uniform mat4 projection;
 uniform mat4 view;
 uniform bool selected;
 uniform vec3 selectedBlockPosition;
+uniform vec2 breakingTextureCoordinates;
 
 out vec4 worldPosition;
 out vec4 shadowCoords;
 out vec3 passTextureCoord;
+out vec2 passBreakTextureCoord;
 out vec3 passNormal;
 out vec3 passInstancePosition;
 
@@ -36,6 +38,9 @@ void main() {
     passNormal = normalize(mat3(model) * inNormal);
     passInstancePosition = instancePosition;
     passTextureCoord = vec3(inTextureCoord / 16.0, 0);
+
+    passBreakTextureCoord = inTextureCoord / 16.0;
+    passBreakTextureCoord += breakingTextureCoordinates;
 
     if (passNormal.x == 1) {
         passTextureCoord += rightTextureOffset;

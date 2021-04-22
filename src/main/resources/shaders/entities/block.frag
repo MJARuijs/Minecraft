@@ -18,20 +18,26 @@ in vec4 worldPosition;
 in vec3 passTextureCoord;
 in vec3 passNormal;
 in vec3 passInstancePosition;
+in vec2 passBreakTextureCoord;
 
 uniform AmbientLight ambient;
 uniform DirectionalLight directional;
 uniform PointLight pointlights[2];
 uniform vec3 cameraPosition;
+
 uniform sampler2D textureMap;
+
 uniform vec3 selectedBlockPosition;
+uniform vec3 breakingPosition;
+
+uniform bool breaking;
 uniform bool selected;
 uniform vec4 overlayColor;
 
 out vec4 outColor;
 
 vec4 computeAmbientColor(vec4 color) {
-    return color;
+    return color * ambient.color;
 }
 
 vec4 computeDirectionalColor(vec4 color) {
@@ -88,12 +94,14 @@ void main() {
     vec4 ambientColor = computeAmbientColor(color);
     vec4 directionalColor = computeDirectionalColor(color);
 
-    outColor = ambientColor + directionalColor;
+    outColor = vec4(0, 0, 0, 1);
+    outColor += ambientColor + directionalColor;
     outColor = clamp(outColor, 0.0, 1.0);
 
-//    if (selected && equals(passInstancePosition, selectedBlockPosition)) {
-//        outColor -= vec4(0.1, 0.1, 0.1, 0.0);
-//    }
-
-
+    if (breaking && equals(passInstancePosition, breakingPosition)) {
+        vec4 breakColor = texture(textureMap, passBreakTextureCoord);
+        if (breakColor.a > 0.5) {
+            outColor.rgb -= breakColor.rgb * 0.5;
+        }
+    }
 }

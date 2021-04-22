@@ -2,27 +2,22 @@ package chunks
 
 import chunks.ChunkGenerator.Companion.CHUNK_SIZE
 import chunks.blocks.Face
-import math.vectors.Vector2
 import math.vectors.Vector3
 import java.util.*
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.collections.ArrayList
-import kotlin.collections.HashSet
-import kotlin.math.*
+import kotlin.math.abs
+import kotlin.math.floor
 
 class ChunkManager(x: Int, z: Int) {
 
     constructor(position: Vector3) : this(position.x.toInt(), position.z.toInt())
 
-    private val maxDistance = 10
-    private val preGenerateDistance = 4
+    private var maxDistance = 1
+    private var preGenerateDistance = 1
 
     private val chunks = ArrayList<Chunk>()
-    private val locked = AtomicBoolean(false)
 
-    private var renderDistance = 2
-
-    private var chunksInProgress = HashSet<Vector2>()
+    private var renderDistance = 1
 
     private var currentX = 0
     private var currentZ = 0
@@ -33,9 +28,32 @@ class ChunkManager(x: Int, z: Int) {
         update()
     }
 
+    fun getRenderDistance() = renderDistance
+
+    fun setRenderDistance(newRenderDistance: Int) {
+        if (newRenderDistance < 0) {
+            return
+        }
+        renderDistance = newRenderDistance
+
+        if (preGenerateDistance < renderDistance) {
+            preGenerateDistance = renderDistance
+        }
+        if (maxDistance < renderDistance) {
+            maxDistance = renderDistance
+        }
+
+        update()
+    }
+
     fun updatePosition(position: Vector3) {
         val chunkX = floor((position.x + (CHUNK_SIZE / 2)) / CHUNK_SIZE).toInt()
         val chunkZ = floor((position.z + (CHUNK_SIZE / 2)) / CHUNK_SIZE).toInt()
+
+        for (chunk in chunks) {
+            chunk.update()
+        }
+
         if (chunkX != currentX || chunkZ != currentZ) {
             currentX = chunkX
             currentZ = chunkZ
@@ -80,6 +98,12 @@ class ChunkManager(x: Int, z: Int) {
         return visibleChunks
     }
 
+    fun stopBreaking() {
+        for (chunk in chunks) {
+            chunk.stopBreaking()
+        }
+    }
+
     private fun update() {
         val removableChunks = ArrayList<Chunk>()
         for (chunk in chunks) {
@@ -103,34 +127,12 @@ class ChunkManager(x: Int, z: Int) {
     }
 
     private fun generate(x: Int, z: Int) {
-        if (!chunksInProgress.contains(Vector2(x, z))) {
-            try {
-                if (chunks.none { chunk -> chunk.chunkX == x && chunk.chunkZ == z }) {
-                    chunksInProgress.add(Vector2(x, z))
-                    val newChunk = ChunkGenerator().generate(x, z, Biome.PLANES, 0)
-
-                    requestLock()
-                    chunks += newChunk
-                    releaseLock()
-
-                    chunksInProgress.remove(Vector2(x, z))
-                }
-            } catch (e: ConcurrentModificationException) {
-                println("ERROR $x, $z")
-                generate(x, z)
+        try {
+            if (chunks.none { chunk -> chunk.chunkX == x && chunk.chunkZ == z }) {
+                chunks += ChunkGenerator().generate(x, z, Biome.PLANES, 0)
             }
+        } catch (e: ConcurrentModificationException) {
+            generate(x, z)
         }
-    }
-
-    private fun requestLock() {
-        while (locked.get()) {
-            Thread.sleep(10)
-        }
-
-        locked.set(true)
-    }
-
-    private fun releaseLock() {
-        locked.set(false)
     }
 }

@@ -9,6 +9,9 @@ import chunks.blocks.Face
 import graphics.shaders.ShaderProgram
 import math.vectors.Vector2
 import math.vectors.Vector3
+import tools.ToolMaterial
+import tools.ToolType
+import kotlin.math.floor
 import kotlin.math.roundToInt
 
 class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private var visibleInstanceData: FloatArray, private var highestBlock: Int = 0) {
@@ -24,6 +27,12 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private 
 
     private lateinit var block: Block
 
+    private var breakingStartTime = -1L
+    private var breakingEndTime = -1L
+
+    private var breakingPosition: Vector3? = null
+    private var breakingTextureId = -1
+
     private fun initBlock() {
         block = Block()
         block.initAttributes()
@@ -33,8 +42,6 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private 
     fun getSubsetSize() = subsetBlockPositions.size
 
     fun getCenter() = Vector2(chunkX + CHUNK_SIZE / 2, chunkZ + CHUNK_SIZE / 2)
-
-    fun getPosition() = Vector2(chunkX, chunkZ)
 
     fun getSubsetPosition(i: Int) = subsetBlockPositions[i]
 
@@ -72,6 +79,7 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private 
 
     fun removeBlock(position: Vector3) {
         val index = getBlockIndex(position, visibleInstanceData)
+
         if (index != -1) {
             val lastBlockIndex = visibleInstanceData.size - instanceSize
             for (i in 0 until instanceSize) {
@@ -91,8 +99,68 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private 
         untexturedFloatData += block.second.toArray()
     }
 
-    fun render(shaderProgram: ShaderProgram) {
+    fun startBreakingBlock(blockPosition: Vector3, usedTool: ToolType, toolMaterial: ToolMaterial) {
+        val index = getBlockIndex(blockPosition, visibleInstanceData)
+        if (index == -1) {
+            return
+        }
+
+        val u = visibleInstanceData[index + 3]
+        val v = visibleInstanceData[index + 4]
+        val blockType = BlockType.getType(u, v)
+        val blockHardness = blockType.hardness
+
+        if (blockHardness == -1f) {
+            return
+        }
+
+        val breakTime = if (blockType.bestTool == usedTool) {
+            (blockHardness * 1500f / toolMaterial.speedMultiplier).roundToInt()
+        } else {
+            (blockHardness * 1500f).roundToInt()
+        }
+
+        breakingStartTime = System.currentTimeMillis()
+        breakingEndTime = breakingStartTime + breakTime
+        breakingPosition = blockPosition
+    }
+
+    fun stopBreaking() {
+        breakingStartTime = -1
+        breakingEndTime = -1
+        breakingTextureId = -1
+        breakingPosition = null
+    }
+
+    fun update() {
+        if (breakingEndTime != -1L) {
+            val currentTime = System.currentTimeMillis()
+            val progressTime = currentTime - breakingStartTime
+            val totalTime = breakingEndTime - breakingStartTime
+
+            breakingTextureId = floor((progressTime.toFloat() / totalTime.toFloat()) * 9).toInt()
+
+            if (currentTime >= breakingEndTime) {
+                removeBlock(breakingPosition!!)
+                breakingStartTime = -1
+                breakingEndTime = -1
+                breakingTextureId = -1
+                breakingPosition = null
+            }
+        }
+    }
+
+    fun render(shaderProgram: ShaderProgram, breakingTextureCoordinates: ArrayList<Vector2>) {
         shaderProgram.set("overlayColor", biome.overlayColor)
+
+        if (breakingPosition != null) {
+            shaderProgram.set("breaking", true)
+            shaderProgram.set("breakingPosition", breakingPosition!!)
+            shaderProgram.set("breakingTextureCoordinates", breakingTextureCoordinates[breakingTextureId])
+        } else {
+            shaderProgram.set("breaking", false)
+        }
+
         if (initialized) {
             block.render(visibleInstanceData.size / instanceSize, visibleInstanceData)
         } else {

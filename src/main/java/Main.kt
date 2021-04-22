@@ -15,7 +15,8 @@ import graphics.lights.DirectionalLight
 import graphics.rendertarget.RenderTargetManager
 import math.Color
 import math.vectors.Vector3
-import player.Player
+import tools.ToolMaterial
+import tools.ToolType
 import userinterface.UIColor
 import userinterface.UIPage
 import userinterface.UniversalParameters
@@ -37,13 +38,16 @@ object Main {
     private val mouse = window.mouse
     private val timer = Timer()
 
-    private val ambientLight = AmbientLight(Color(0.25f, 0.25f, 0.25f))
-    private val directionalLight = DirectionalLight(Color(1.0f, 1.0f, 1.0f), Vector3(0.5f, 0.5f, 0.5f))
+    private val lightValue = 0.75f
+    private val directionalValue = 0.5f
 
-    private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, TERRAIN_HEIGHT, 0))
-    private val player = Player(Vector3(0, TERRAIN_HEIGHT, 0))
+    private val ambientLight = AmbientLight(Color(lightValue, lightValue, lightValue))
+    private val directionalLight = DirectionalLight(Color(directionalValue, directionalValue, directionalValue), Vector3(0.5f, 0.5f, 0.5f))
 
-    private val chunkManager = ChunkManager(player.position)
+    private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(-50, TERRAIN_HEIGHT, -14))
+//    private val player = Player(Vector3(-80, TERRAIN_HEIGHT, 0))
+
+    private val chunkManager = ChunkManager(camera.position)
     private val chunkRenderer = ChunkRenderer()
 
     private val selector = Selector()
@@ -97,7 +101,6 @@ object Main {
 
         timer.reset()
         mouse.capture()
-
         while (!window.isClosed()) {
             window.poll()
 
@@ -105,14 +108,14 @@ object Main {
 
             updateChunkManager()
 
-            if (mouse.isCaptured()) {
-                player.update(keyboard, mouse, timer.getDelta())
-            }
-            camera.followPlayer(player)
+//            if (mouse.isCaptured()) {
+//                player.update(keyboard, mouse, timer.getDelta())
+//            }
+//            camera.followPlayer(player)
 
-            val selectedBlock = selector.getLastSelected()
+            val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera, renderColored)
             doMainRenderPass(selectedBlock)
-            selector.findSelectedItem(window, chunkRenderer, chunks, camera, renderColored)
+
             ui.update(mouse, timer.getDelta())
             ui.draw(window.width, window.height)
 
@@ -148,12 +151,24 @@ object Main {
             window.close()
         }
 
-        if (keyboard.isPressed(Key.T)) {
-            renderColored = !renderColored
+        if (mouse.isCaptured()) {
+            camera.update(keyboard, mouse, timer.getDelta())
         }
 
         if (keyboard.isPressed(Key.F)) {
             println(camera.position)
+        }
+
+        if (keyboard.isPressed(Key.UP)) {
+            chunkManager.setRenderDistance(chunkManager.getRenderDistance() + 1)
+        }
+
+        if (keyboard.isPressed(Key.T)) {
+            renderColored = !renderColored
+        }
+
+        if (keyboard.isPressed(Key.DOWN)) {
+            chunkManager.setRenderDistance(chunkManager.getRenderDistance() - 1)
         }
 
         if (mouse.isCaptured()) {
@@ -162,7 +177,7 @@ object Main {
                 if (selectedBlock != null) {
                     for (chunk in chunks) {
                         if (chunk.containsBlock(selectedBlock.second)) {
-                            chunk.removeBlock(selectedBlock.second)
+                            chunk.startBreakingBlock(selectedBlock.second, ToolType.PICK_AXE, ToolMaterial.GOLD)
                         }
                     }
                 }
@@ -171,7 +186,6 @@ object Main {
             if (mouse.isPressed(Button.RIGHT) || keyboard.isPressed(Key.V)) {
                 val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera, false)
                 if (selectedBlock != null) {
-                    println(selectedBlock.second)
                     val face = selector.determineSelectedFace(camera, selectedBlock.second) ?: return
                     val newPosition = chunkManager.newBlockPosition(selectedBlock.second, face)
                     for (chunk in chunks) {
@@ -180,6 +194,10 @@ object Main {
                         }
                     }
                 }
+            }
+
+            if (mouse.isReleased(Button.LEFT)) {
+                chunkManager.stopBreaking()
             }
         }
     }

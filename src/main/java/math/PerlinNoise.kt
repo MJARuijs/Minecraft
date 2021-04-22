@@ -13,37 +13,33 @@ class PerlinNoise(
 
     private val random = Random()
 
-    operator fun get(x: Int, y: Int) = get(x.toFloat(), y.toFloat())
+    operator fun get(x: Int, z: Int) = get(x.toFloat(), z.toFloat())
 
-//    operator fun get(x: Int, y: Int): Float {
-//        if (x == 1 && y == 1) {
-//            return 3.0f
-//        }
-//        return 0.0f
-//    }
-
-    operator fun get(x: Float, y: Float): Float {
+    operator fun get(x: Float, z: Float): Float {
         var height = 0.0
-//        val delta = power(2.0f, (octaves - 1.0f))
         val delta = 2.0.pow(octaves - 1.0)
 
         for (i in 0 until octaves) {
             val exponent = i.toDouble()
             val frequency = (2.0.pow(exponent) / delta).toFloat()
             val amplitude = (roughness.pow(exponent)) * amplitude
-            height += getInterpolated(x * frequency, y * frequency) * amplitude
-//            height += getInterpolated(x / 8, y / 8) * amplitude
+            height += getInterpolatedNoise(x * frequency, z * frequency) * amplitude
         }
 
         return height.toFloat()
     }
 
-    private fun getInterpolated(x: Float, y: Float): Float {
+    private fun getNoise(x: Int, z: Int): Float {
+        random.setSeed(x * 49632 + z * 325176 + seed)
+        return random.nextFloat()
+    }
 
-        val v1 = getSmooth(x, y)
-        val v2 = getSmooth(x + 1, y)
-        val v3 = getSmooth(x, y + 1)
-        val v4 = getSmooth(x + 1, y + 1)
+    private fun getInterpolatedNoise(x: Float, y: Float): Float {
+
+        val v1 = getSmoothNoise(x, y)
+        val v2 = getSmoothNoise(x + 1, y)
+        val v3 = getSmoothNoise(x, y + 1)
+        val v4 = getSmoothNoise(x + 1, y + 1)
 
         val i1 = interpolate(v1, v2, x % 1.0f)
         val i2 = interpolate(v3, v4, x % 1.0f)
@@ -51,28 +47,22 @@ class PerlinNoise(
         return interpolate(i1, i2, y % 1.0f)
     }
 
-    private fun getSmooth(x: Float, y: Float) = getSmooth(x.toInt(), y.toInt())
+    private fun getSmoothNoise(x: Float, y: Float) = getSmoothNoise(x.toInt(), y.toInt())
 
-    private fun getSmooth(x: Int, y: Int): Float {
+    private fun getSmoothNoise(x: Int, y: Int): Float {
+        val corners = (getNoise(x - 1, y - 1)
+                + getNoise(x + 1, y - 1)
+                + getNoise(x - 1, y + 1)
+                + getNoise(x + 1, y + 1)) / 16f
 
-        val corners = (getRandom(x - 1, y - 1)
-                + getRandom(x + 1, y - 1)
-                + getRandom(x - 1, y + 1)
-                + getRandom(x + 1, y + 1)) / 16f
+        val sides = (getNoise(x - 1, y)
+                + getNoise(x + 1, y)
+                + getNoise(x, y - 1)
+                + getNoise(x, y + 1)) / 8f
 
-        val sides = (getRandom(x - 1, y)
-                + getRandom(x + 1, y)
-                + getRandom(x, y - 1)
-                + getRandom(x, y + 1)) / 8f
-
-        val center = getRandom(x, y) / 4f
+        val center = getNoise(x, y) / 4f
 
         return corners + sides + center
-    }
-
-    private fun getRandom(x: Int, y: Int): Float {
-        random.setSeed(seed + (x * 49632) + (y * 325176))
-        return (random.nextFloat() * 2.0f) - 1.0f
     }
 
     private fun interpolate(a: Float, b: Float, blend: Float): Float {
@@ -80,5 +70,4 @@ class PerlinNoise(
         val factor = (1.0f - cos(theta)) * 0.5f
         return a * (1.0f - factor) + b * factor
     }
-
 }

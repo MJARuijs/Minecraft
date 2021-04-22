@@ -1,6 +1,5 @@
 package chunks
 
-import chunks.blocks.BlockType
 import graphics.Camera
 import graphics.GraphicsContext
 import graphics.GraphicsOption
@@ -9,6 +8,7 @@ import graphics.lights.DirectionalLight
 import graphics.samplers.Sampler
 import graphics.shaders.ShaderProgram
 import graphics.textures.ImageMap
+import math.vectors.Vector2
 import math.vectors.Vector3
 import resources.images.ImageCache
 
@@ -17,18 +17,25 @@ class ChunkRenderer {
     private val shaderProgram = ShaderProgram.load("shaders/entities/block.vert", "shaders/entities/block.frag")
     private val colorCodedProgram = ShaderProgram.load("shaders/entities/colorCodedBlock.vert", "shaders/entities/colorCodedBlock.frag")
     private val blockTexture = ImageMap(ImageCache.get("textures/blocks/blocks.png"))
+    private val breakTextures = ArrayList<Vector2>()
 
-    private val sampler = Sampler(0)
+    private val blockSampler = Sampler(0)
+
+    init {
+        for (i in 0 until 9) {
+            breakTextures += Vector2(i.toFloat() / 16f, 15f / 16f)
+        }
+    }
 
     fun render(chunks: ArrayList<Chunk>, camera: Camera, ambientLight: AmbientLight, directionalLight: DirectionalLight, selectedBlock: Pair<Chunk, Vector3>? = null) {
         GraphicsContext.enable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
 
-        sampler.bind(blockTexture)
+        blockSampler.bind(blockTexture)
 
         shaderProgram.start()
         shaderProgram.set("projection", camera.projectionMatrix)
         shaderProgram.set("view", camera.viewMatrix)
-        shaderProgram.set("textureMap", sampler.index)
+        shaderProgram.set("textureMap", blockSampler.index)
 
         if (selectedBlock == null) {
             shaderProgram.set("selected", false)
@@ -41,7 +48,7 @@ class ChunkRenderer {
         directionalLight.apply(shaderProgram)
 
         for (chunk in chunks) {
-            chunk.render(shaderProgram)
+            chunk.render(shaderProgram, breakTextures)
         }
 
         shaderProgram.stop()
