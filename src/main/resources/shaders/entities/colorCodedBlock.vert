@@ -23,15 +23,6 @@ vec3 encodeId(int id) {
     } else if (value < 4.0) {
         return vec3(value - 3.0, 0.0, 1.0);
     }
-//    else if (value < 4.0) { // yellow
-//        return vec3(value - 3.0, 1.0, 0.0);
-//    } else if (value < 5.0) {
-//        return vec3(1.0, value - 4.0, 0.0);
-//    } else if (value < 6.0) {
-//        return vec3(0.0, value - 5.0, 1.0);
-//    } else if (value < 7.0) {
-//        return vec3(value - 6.0, value - 6.0, value - 6.0);
-//    }
 
     return vec3(0.0, 0.0, 0.0);
 }

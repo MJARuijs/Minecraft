@@ -25,13 +25,21 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private 
 
     private var initialized = false
 
-    private lateinit var block: Block
-
     private var breakingStartTime = -1L
     private var breakingEndTime = -1L
 
     private var breakingPosition: Vector3? = null
     private var breakingTextureId = -1
+
+    private lateinit var block: Block
+
+    init {
+        for (i in visibleInstanceData.indices step instanceSize) {
+            untexturedFloatData += visibleInstanceData[i]
+            untexturedFloatData += visibleInstanceData[i + 1]
+            untexturedFloatData += visibleInstanceData[i + 2]
+        }
+    }
 
     private fun initBlock() {
         block = Block()
@@ -78,18 +86,25 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private 
     }
 
     fun removeBlock(position: Vector3) {
-        val index = getBlockIndex(position, visibleInstanceData)
-
-        if (index != -1) {
-            val lastBlockIndex = visibleInstanceData.size - instanceSize
-            for (i in 0 until instanceSize) {
-                visibleInstanceData[index + i] = visibleInstanceData[lastBlockIndex + i]
-            }
-
-            visibleInstanceData = visibleInstanceData.sliceArray(0 until visibleInstanceData.size - instanceSize)
-        }
+        visibleInstanceData = removeData(position, visibleInstanceData, instanceSize)
+        untexturedFloatData = removeData(position, untexturedFloatData, 3)
 
         addSurroundingBlocks(position)
+    }
+
+    private fun removeData(position: Vector3, data: FloatArray, stepSize: Int): FloatArray {
+        val index = getBlockIndex(position, data, stepSize)
+
+        if (index != -1) {
+            val lastBlockIndex = data.size - stepSize
+            for (i in 0 until stepSize) {
+                data[index + i] = data[lastBlockIndex + i]
+            }
+
+            return data.sliceArray(0 until data.size - stepSize)
+        }
+
+        return data
     }
 
     private fun addBlockData(block: Pair<BlockType, Vector3>) {
@@ -100,7 +115,7 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private 
     }
 
     fun startBreakingBlock(blockPosition: Vector3, usedTool: ToolType, toolMaterial: ToolMaterial) {
-        val index = getBlockIndex(blockPosition, visibleInstanceData)
+        val index = getBlockIndex(blockPosition, visibleInstanceData, instanceSize)
         if (index == -1) {
             return
         }
@@ -150,7 +165,7 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private 
         }
     }
 
-    fun render(shaderProgram: ShaderProgram, breakingTextureCoordinates: ArrayList<Vector2>) {
+    fun render(shaderProgram: ShaderProgram, breakingTextureCoordinates: ArrayList<Vector2> = ArrayList()) {
         shaderProgram.set("overlayColor", biome.overlayColor)
 
         if (breakingPosition != null) {
@@ -169,6 +184,15 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private 
         }
     }
 
+    fun renderUntextured() {
+        if (initialized) {
+            block.renderUnTextured(untexturedFloatData.size / 3, untexturedFloatData)
+        } else {
+            initBlock()
+            block.renderUnTextured(untexturedFloatData.size / 3, untexturedFloatData)
+        }
+    }
+
     fun renderSubset() {
         val subsetData = FloatArray(subsetBlockPositions.size * 3)
         var i = 0
@@ -178,6 +202,7 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private 
             subsetData[i + 2] = block.z
             i += 3
         }
+
         if (initialized) {
             block.renderUnTextured(subsetData.size / 3, subsetData)
         } else {
@@ -189,12 +214,13 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private 
     fun determineSubset(constraint: (Vector3) -> Boolean): Int {
         subsetBlockPositions.clear()
 
-        for (i in visibleInstanceData.indices step instanceSize) {
-            val x = visibleInstanceData[i]
-            val y = visibleInstanceData[i + 1]
-            val z = visibleInstanceData[i + 2]
+        for (i in untexturedFloatData.indices step 3) {
+            val x = untexturedFloatData[i]
+            val y = untexturedFloatData[i + 1]
+            val z = untexturedFloatData[i + 2]
 
             val position = Vector3(x, y, z)
+
             if (constraint(position)) {
                 subsetBlockPositions += position
             }
@@ -203,8 +229,8 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private 
         return subsetBlockPositions.size
     }
 
-    private fun getBlockIndex(position: Vector3, data: FloatArray): Int {
-        for (i in data.indices step instanceSize) {
+    private fun getBlockIndex(position: Vector3, data: FloatArray, stepSize: Int): Int {
+        for (i in data.indices step stepSize) {
             val x = data[i]
             val y = data[i + 1]
             val z = data[i + 2]
@@ -222,7 +248,7 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private 
                 continue
             }
 
-            val index = getBlockIndex(position + side.normal, hiddenInstanceData)
+            val index = getBlockIndex(position + side.normal, hiddenInstanceData, instanceSize)
             if (index != -1) {
                 val lastHiddenIndex = hiddenInstanceData.size - instanceSize
                 untexturedFloatData += hiddenInstanceData[index]
@@ -245,7 +271,7 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private 
                 continue
             }
 
-            val index = getBlockIndex(position + side.normal, visibleInstanceData)
+            val index = getBlockIndex(position + side.normal, visibleInstanceData, instanceSize)
             if (index != -1) {
                 if (areAllNeighboursSolid(position + side.normal)) {
                     val newHiddenData = FloatArray(instanceSize)
@@ -263,8 +289,8 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private 
     }
 
     private fun isBlockSolid(x: Int, y: Int, z: Int): Boolean {
-        val isVisible = getBlockIndex(Vector3(x, y, z), visibleInstanceData) != -1
-        val isNotVisible = getBlockIndex(Vector3(x, y, z), hiddenInstanceData) != -1
+        val isVisible = getBlockIndex(Vector3(x, y, z), visibleInstanceData, instanceSize) != -1
+        val isNotVisible = getBlockIndex(Vector3(x, y, z), hiddenInstanceData, instanceSize) != -1
 
         return isVisible || isNotVisible
     }

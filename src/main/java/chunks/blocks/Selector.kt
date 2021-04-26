@@ -22,10 +22,10 @@ class Selector {
 
     fun findSelectedItem(window: Window, chunkRenderer: ChunkRenderer, chunks: ArrayList<Chunk>, camera: Camera, render: Boolean): Pair<Chunk, Vector3>? {
         GraphicsContext.enable(GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING)
-        val fbo = RenderTargetManager.get()
-        fbo.start()
-        fbo.clear()
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f)
+
+        val renderTarget = RenderTargetManager.get()
+        renderTarget.start()
+        renderTarget.clear()
 
         val reachableChunks = ArrayList<Chunk>()
 
@@ -46,9 +46,9 @@ class Selector {
         glReadPixels(x, y, 1, 1, GL_RGB, GL_FLOAT, pixelData)
 
         if (render) {
-            fbo.renderToScreen()
+//            renderTarget.renderToScreen()
         } else {
-            fbo.stop()
+            renderTarget.stop()
         }
 
         GraphicsContext.disable(GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING)
@@ -58,9 +58,7 @@ class Selector {
         val b = FloatUtils.roundToDecimal(pixelData.get(), 3)
 
         val id = decodeId(r, g, b, stepSize)
-        if (render) {
-            println(id)
-        }
+
         if (id == -1) {
             lastSelected = null
             return null

@@ -4,9 +4,10 @@ import graphics.Camera
 import graphics.GraphicsContext
 import graphics.GraphicsOption
 import graphics.lights.AmbientLight
-import graphics.lights.DirectionalLight
+import graphics.lights.Sun
 import graphics.samplers.Sampler
 import graphics.shaders.ShaderProgram
+import graphics.shadows.ShadowData
 import graphics.textures.ImageMap
 import math.vectors.Vector2
 import math.vectors.Vector3
@@ -16,6 +17,7 @@ class ChunkRenderer {
 
     private val shaderProgram = ShaderProgram.load("shaders/entities/block.vert", "shaders/entities/block.frag")
     private val colorCodedProgram = ShaderProgram.load("shaders/entities/colorCodedBlock.vert", "shaders/entities/colorCodedBlock.frag")
+
     private val blockTexture = ImageMap(ImageCache.get("textures/blocks/blocks.png"))
     private val breakTextures = ArrayList<Vector2>()
 
@@ -27,7 +29,7 @@ class ChunkRenderer {
         }
     }
 
-    fun render(chunks: ArrayList<Chunk>, camera: Camera, ambientLight: AmbientLight, directionalLight: DirectionalLight, selectedBlock: Pair<Chunk, Vector3>? = null) {
+    fun render(chunks: ArrayList<Chunk>, camera: Camera, ambientLight: AmbientLight, sun: Sun, shadows: List<ShadowData>, selectedBlock: Pair<Chunk, Vector3>? = null) {
         GraphicsContext.enable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
 
         blockSampler.bind(blockTexture)
@@ -45,14 +47,28 @@ class ChunkRenderer {
         }
 
         ambientLight.apply(shaderProgram)
-        directionalLight.apply(shaderProgram)
+        sun.apply(shaderProgram)
+
+        if (shadows.isNotEmpty()) {
+            val shadowData = shadows[0]
+            val shadowSampler = Sampler(1)
+
+            shadowSampler.bind(shadowData.shadowMap)
+
+            shaderProgram.set("shadowDistance", shadowData.shadowDistance)
+            shaderProgram.set("shadowMatrix", shadowData.getShadowMatrix())
+            shaderProgram.set("shadowMap", shadowSampler.index)
+            shaderProgram.set("shadowMapSize", Vector2(
+                    shadowData.shadowMap.getWidth(),
+                    shadowData.shadowMap.getHeight()
+            ))
+        }
 
         for (chunk in chunks) {
             chunk.render(shaderProgram, breakTextures)
         }
 
         shaderProgram.stop()
-        GraphicsContext.disable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
     }
 
     fun renderSubset(camera: Camera, chunks: ArrayList<Chunk>, constraint: (Vector3) -> Boolean): Float {
@@ -81,5 +97,11 @@ class ChunkRenderer {
         colorCodedProgram.stop()
 
         return stepSize
+    }
+
+    fun renderBlack(chunks: ArrayList<Chunk>) {
+        for (chunk in chunks) {
+            chunk.renderUntextured()
+        }
     }
 }

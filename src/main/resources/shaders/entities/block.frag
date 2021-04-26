@@ -4,28 +4,28 @@ struct AmbientLight {
     vec4 color;
 };
 
-struct DirectionalLight {
+struct Sun {
     vec4 color;
     vec3 direction;
 };
 
-struct PointLight {
-    vec4 color;
-    vec3 position;
-};
+const int samples = 3;
+const float samplesPerPixel = (samples * 2.0 + 1.0) * (samples * 2.0 + 1.0);
 
 in vec4 worldPosition;
 in vec3 passTextureCoord;
 in vec3 passNormal;
 in vec3 passInstancePosition;
 in vec2 passBreakTextureCoord;
+in vec4 shadowCoords;
 
 uniform AmbientLight ambient;
-uniform DirectionalLight directional;
-uniform PointLight pointlights[2];
-uniform vec3 cameraPosition;
+uniform Sun sun;
 
+uniform vec3 cameraPosition;
+uniform vec2 shadowMapSize;
 uniform sampler2D textureMap;
+uniform sampler2D shadowMap;
 
 uniform vec3 selectedBlockPosition;
 uniform vec3 breakingPosition;
@@ -41,22 +41,23 @@ vec4 computeAmbientColor(vec4 color) {
 }
 
 vec4 computeDirectionalColor(vec4 color) {
+
     // Diffuse
-    vec3 lightDirection = normalize(directional.direction);
+    vec3 lightDirection = normalize(sun.direction);
     vec3 normal = normalize(passNormal);
 
     float brightness = clamp(dot(lightDirection, normal), 0.0, 1.0);
 
-    vec4 diffuseColor = brightness * color * directional.color;
+    vec4 diffuseColor = brightness * color * sun.color;
 
     // Specular
     vec3 position = worldPosition.xyz;
     vec3 reflectionVector = 2 * (dot(lightDirection, normal)) * normal - lightDirection;
     vec3 toCameraVector = normalize(cameraPosition - position);
 
-    vec4 specularColor = color * directional.color * clamp(pow(dot(reflectionVector, toCameraVector), 0.0), 0.0, 1.0);
+    vec4 specularColor = color * sun.color * clamp(pow(dot(reflectionVector, toCameraVector), 0.0), 0.0, 1.0);
 
-    return diffuseColor;
+    return diffuseColor + specularColor;
 }
 
 vec4 computePointsColor() {
@@ -94,8 +95,25 @@ void main() {
     vec4 ambientColor = computeAmbientColor(color);
     vec4 directionalColor = computeDirectionalColor(color);
 
-    outColor = vec4(0, 0, 0, 1);
-    outColor += ambientColor + directionalColor;
+    float horizontalPixelSize = 1.0 / shadowMapSize.x;
+    float verticalPixelSize = 1.0 / shadowMapSize.y;
+
+    float shadowValue = 0.0;
+
+    for (int x = -samples; x < samples; x++) {
+        for (int y = -samples; y < samples; y++) {
+            float distanceFromLight = texture(shadowMap, shadowCoords.xy + vec2(x * horizontalPixelSize, y * verticalPixelSize)).r;
+            float actualDistance = shadowCoords.z;
+            if (actualDistance - 0.005 > distanceFromLight) {
+                shadowValue += 1.0;
+            }
+        }
+    }
+
+    shadowValue /= samplesPerPixel;
+    float lightFactor = 1.0 - (shadowValue * shadowCoords.w);
+
+    outColor = ambientColor + directionalColor * lightFactor;
     outColor = clamp(outColor, 0.0, 1.0);
 
     if (breaking && equals(passInstancePosition, breakingPosition)) {

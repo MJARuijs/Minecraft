@@ -12,12 +12,12 @@ class ChunkManager(x: Int, z: Int) {
 
     constructor(position: Vector3) : this(position.x.toInt(), position.z.toInt())
 
-    private var maxDistance = 1
-    private var preGenerateDistance = 1
+    private var maxDistance = 0
+    private var preGenerateDistance = 0
 
     private val chunks = ArrayList<Chunk>()
 
-    private var renderDistance = 1
+    private var renderDistance = 0
 
     private var currentX = 0
     private var currentZ = 0
