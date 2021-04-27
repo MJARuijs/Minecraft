@@ -1,6 +1,5 @@
 #version 450
 
-
 struct AmbientLight {
     vec4 color;
 };
@@ -11,50 +10,77 @@ struct DirectionalLight {
 };
 
 struct Material {
-    vec4 ambient;
     vec4 diffuse;
     vec4 specular;
     float shininess;
 };
 
+const int samples = 3;
+const float samplesPerPixel = (samples * 2.0 + 1.0) * (samples * 2.0 + 1.0);
+
 in vec4 worldPosition;
 in vec3 passNormal;
+in vec4 shadowCoords;
 
-//uniform AmbientLight ambient;
-//uniform DirectionalLight sun;
-//uniform Material material;
-//
-//uniform vec3 cameraPosition;
-//
+uniform AmbientLight ambient;
+uniform DirectionalLight sun;
+uniform Material material;
+
+uniform vec3 cameraPosition;
+uniform sampler2D shadowMap;
+uniform vec2 shadowMapSize;
+
 out vec4 outColor;
-//
-//vec4 computeAmbientColor() {
-//    return ambient.color * material.ambient;
-//}
-//
-//vec4 computeDirectionalColor(vec3 lightDirection) {
-//
-//    // Diffuse
-//    vec3 normalDirection = normalize(passNormal);
-//    lightDirection = normalize(lightDirection);
-//
-//    float brightness = clamp(dot(lightDirection, normalDirection), 0.0, 1.0);
-//
-//    vec4 diffuse = material.diffuse * sun.color * brightness;
-//
-//    // Specular
-//    vec3 position = worldPosition.xyz;
-//    vec3 reflectionVector = 2 * (dot(lightDirection, normalDirection)) * normalDirection - lightDirection;
-//    vec3 toCameraVector = normalize(cameraPosition - position);
-//
-//    vec4 specular = material.specular * sun.color * clamp(pow(dot(reflectionVector, toCameraVector), material.shininess), 0.0, 1.0);
-//
-//    return diffuse + specular;
-//}
+
+vec4 computeAmbientColor() {
+    return material.diffuse * ambient.color;
+}
+
+vec4 computeDirectionalColor() {
+
+    // Diffuse
+    vec3 normalDirection = normalize(passNormal);
+    vec3 lightDirection = normalize(sun.direction);
+
+    float brightness = clamp(dot(lightDirection, normalDirection), 0.0, 1.0);
+
+    vec4 diffuse = material.diffuse * sun.color * brightness;
+
+    // Specular
+    vec3 position = worldPosition.xyz;
+    vec3 reflectionVector = 2 * (dot(lightDirection, normalDirection)) * normalDirection - lightDirection;
+    vec3 toCameraVector = normalize(cameraPosition - position);
+
+    vec4 specular = material.specular * sun.color * clamp(pow(dot(reflectionVector, toCameraVector), material.shininess), 0.0, 1.0);
+
+    return diffuse + specular;
+}
 
 void main() {
-//    vec4 ambientColor = computeAmbientColor();
-//    vec4 sunColor = computeDirectionalColor(sun.direction) + computeDirectionalColor(vec3(-1.0));
+    vec4 ambientColor = computeAmbientColor();
+    vec4 sunColor = computeDirectionalColor();
 
-    outColor = vec4(0.5, 0.5, 0.5, 1.0);
+    float horizontalPixelSize = 1.0 / shadowMapSize.x;
+    float verticalPixelSize = 1.0 / shadowMapSize.y;
+
+    float shadowValue = 0.0;
+
+    for (int x = -samples; x < samples; x++) {
+        for (int y = -samples; y < samples; y++) {
+            float distanceFromLight = texture(shadowMap, shadowCoords.xy + vec2(x * horizontalPixelSize, y * verticalPixelSize)).r;
+            float actualDistance = shadowCoords.z;
+            if (actualDistance - 0.005 > distanceFromLight) {
+                shadowValue += 1.0;
+                discard;
+            }
+        }
+    }
+
+    shadowValue /= samplesPerPixel;
+    float lightFactor = 1.0 - (shadowValue * shadowCoords.w);
+
+    outColor = ambientColor + sunColor * lightFactor;
+    outColor = clamp(outColor, 0.0, 1.0);
+
+    //    outColor = ambientColor;
 }

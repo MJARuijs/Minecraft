@@ -31,6 +31,7 @@ class ChunkRenderer {
 
     fun render(chunks: ArrayList<Chunk>, camera: Camera, ambientLight: AmbientLight, sun: Sun, shadows: List<ShadowData>, selectedBlock: Pair<Chunk, Vector3>? = null) {
         GraphicsContext.enable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
+//        GraphicsContext.disable(GraphicsOption.FACE_CULLING)
 
         blockSampler.bind(blockTexture)
 
@@ -38,6 +39,7 @@ class ChunkRenderer {
         shaderProgram.set("projection", camera.projectionMatrix)
         shaderProgram.set("view", camera.viewMatrix)
         shaderProgram.set("textureMap", blockSampler.index)
+        shaderProgram.set("cameraPosition", camera.position)
 
         if (selectedBlock == null) {
             shaderProgram.set("selected", false)
@@ -69,6 +71,9 @@ class ChunkRenderer {
         }
 
         shaderProgram.stop()
+
+//        GraphicsContext.enable(GraphicsOption.FACE_CULLING)
+        GraphicsContext.disable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
     }
 
     fun renderSubset(camera: Camera, chunks: ArrayList<Chunk>, constraint: (Vector3) -> Boolean): Float {
@@ -100,8 +105,10 @@ class ChunkRenderer {
     }
 
     fun renderBlack(chunks: ArrayList<Chunk>) {
+        GraphicsContext.disable(GraphicsOption.FACE_CULLING)
         for (chunk in chunks) {
             chunk.renderUntextured()
         }
+        GraphicsContext.enable(GraphicsOption.FACE_CULLING)
     }
 }

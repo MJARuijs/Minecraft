@@ -1,4 +1,4 @@
-package graphics
+package graphics.entity
 
 import graphics.model.Model
 import graphics.shaders.ShaderProgram

@@ -10,7 +10,7 @@ import kotlin.math.*
 
 class ShadowBox(camera: Camera, val shadowDistance: Float = 50f) {
 
-    private val offset = 0.0f
+    private val offset = 15.0f
 
     private val nearWidth = camera.zNear * tan(Math.toRadians(camera.fieldOfView.toDouble())).toFloat()
     private val farWidth = shadowDistance * tan(Math.toRadians(camera.fieldOfView.toDouble())).toFloat()
@@ -310,12 +310,12 @@ class ShadowBox(camera: Camera, val shadowDistance: Float = 50f) {
         }
 
         viewMatrix = Matrix4()
-//        viewMatrix = viewMatrix.rotateX(xRotation)
-//        viewMatrix = viewMatrix.rotateY(yRotation)
+        viewMatrix = viewMatrix.rotateX(xRotation)
+        viewMatrix = viewMatrix.rotateY(yRotation)
 //        viewMatrix = viewMatrix.rotateY(PI.toFloat() / 2.0f)
-//        viewMatrix = viewMatrix.translate(translation)
+        viewMatrix = viewMatrix.translate(-translation)
 //        viewMatrix = viewMatrix.rotateY(PI.toFloat())
-        viewMatrix = viewMatrix.translate(Vector3(0.0f, 0.0f, 20.0f))
+//        viewMatrix = viewMatrix.translate(Vector3(0.0f, 0.0f, 20.0f))
 //        println(translation)
     }
 }

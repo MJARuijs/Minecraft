@@ -87,6 +87,7 @@ bool equals(vec3 one, vec3 two) {
 
 void main() {
     vec4 color = texture(textureMap, passTextureCoord.xy);
+//    vec4 color = vec4(0.6,0.6,0.6,1.0);
     if (passTextureCoord.z > 0.5) {
         float strength = color.r;
         color.rgb = overlayColor.rgb * strength;
@@ -106,6 +107,7 @@ void main() {
             float actualDistance = shadowCoords.z;
             if (actualDistance - 0.005 > distanceFromLight) {
                 shadowValue += 1.0;
+//                discard;
             }
         }
     }
@@ -114,7 +116,6 @@ void main() {
     float lightFactor = 1.0 - (shadowValue * shadowCoords.w);
 
     outColor = ambientColor + directionalColor * lightFactor;
-    outColor = clamp(outColor, 0.0, 1.0);
 
     if (breaking && equals(passInstancePosition, breakingPosition)) {
         vec4 breakColor = texture(textureMap, passBreakTextureCoord);
@@ -122,4 +123,6 @@ void main() {
             outColor.rgb -= breakColor.rgb * 0.5;
         }
     }
+
+    outColor = clamp(outColor, 0.0, 1.0);
 }

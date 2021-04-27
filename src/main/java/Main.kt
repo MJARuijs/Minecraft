@@ -1,5 +1,4 @@
 import chunks.*
-import chunks.ChunkGenerator.Companion.TERRAIN_HEIGHT
 import chunks.blocks.BlockType
 import chunks.blocks.Selector
 import devices.Button
@@ -8,6 +7,8 @@ import devices.Timer
 import devices.Window
 import environment.sky.SkyBox
 import graphics.*
+import graphics.entity.Entity
+import graphics.entity.EntityRenderer
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
 import graphics.model.LineMesh
@@ -19,12 +20,10 @@ import graphics.shadows.ShadowBox
 import graphics.shadows.ShadowData
 import graphics.shadows.ShadowRenderer
 import math.Color
-import math.matrices.Matrix
 import math.matrices.Matrix4
 import math.vectors.Vector2
 import math.vectors.Vector3
 import org.lwjgl.opengl.GL11
-import org.lwjgl.opengl.GL11.glColor3f
 import org.lwjgl.opengl.GL11.glLineWidth
 import tools.ToolMaterial
 import tools.ToolType
@@ -40,7 +39,6 @@ import userinterface.layout.constraints.constrainttypes.AspectRatioConstraint
 import userinterface.layout.constraints.constrainttypes.CenterConstraint
 import userinterface.layout.constraints.constrainttypes.RelativeConstraint
 import userinterface.text.font.FontLoader
-import java.lang.Math.PI
 
 object Main {
 
@@ -53,31 +51,33 @@ object Main {
     private const val directionalValue = 0.5f
 
     private val ambientLight = AmbientLight(Color(lightValue, lightValue, lightValue))
-    private val sun = Sun(Color(directionalValue, directionalValue, directionalValue), Vector3(0.0f, 0.0f, -1.0f))
+    private val sun = Sun(Color(directionalValue, directionalValue, directionalValue), Vector3(0.0f, 1.0f, 0.0f))
 
     private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, 0, 0))
 //    private val player = Player(Vector3(-80, TERRAIN_HEIGHT, 0))
 
     private val chunkManager = ChunkManager(camera.position)
     private val chunkRenderer = ChunkRenderer()
+    private val entityRenderer = EntityRenderer()
 
     private val selector = Selector()
     private val skyBox = SkyBox("textures/sky/box", camera.zFar)
 
     private var chunks = ArrayList<Chunk>()
+    private val entities = ArrayList<Entity>()
 
     private val ui = UserInterface(window.aspectRatio)
     private val page = UIPage("page")
 
     private var renderDepthMap = false
 
-    val cube = Entity(ModelCache.get("models/block.obj"), Matrix4().translate(0.0f, 52f, 0.0f))
+    val cube = Entity(ModelCache.get("models/block.obj"), Matrix4().translate(0.0f, 5f, 0.0f))
+    val cube2 = Entity(ModelCache.get("models/block.obj"), Matrix4().translate(0.0f, 7f, 0.0f))
     lateinit var shadowBox: ShadowBox
 
     @JvmStatic
     fun main(args: Array<String>) {
         GraphicsContext.init(Color(0.25f, 0.25f, 0.25f))
-        GL11.glClearColor(1.0f, 1.0f, 1.0f, 1.0f)
 
         GraphicsContext.enable(GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING, GraphicsOption.TEXTURE_MAPPING)
 
@@ -87,8 +87,10 @@ object Main {
         shadowBox = ShadowBox(camera)
         ShadowRenderer += shadowBox
 
+        entities += cube
+        entities += cube2
+
         val uiProgram = ShaderProgram.load("shaders/userinterface/user_interface.vert", "shaders/userinterface/user_interface.frag")
-        val entityProgram = ShaderProgram.load("shaders/entities/entity.vert", "shaders/entities/entity.frag")
 //        val shadowRenderTarget = RenderTargetManager.get()
 
         val depthTexture = Texture(Vector2(0.0f, 0.0f), Vector2(0.25f, 0.5f))
@@ -105,7 +107,6 @@ object Main {
         ui += page
         ui.showPage("page")
 
-
         val sampleSize = 40
 
         val fps = FloatArray(sampleSize)
@@ -113,42 +114,23 @@ object Main {
 
         timer.reset()
         mouse.capture()
-        updateChunkManager()
 
         while (!window.isClosed()) {
             window.poll()
 
             processInput()
 
-//            updateChunkManager()
+            updateChunkManager()
 
-//            if (mouse.isCaptured()) {
-//                player.update(keyboard, mouse, timer.getDelta())
-//            }
-//            camera.followPlayer(player)
             val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera, false)
 //            val selectedBlock = null
 
-//            chunkRenderer.render(chunks, camera, ambientLight, directionalLight, selectedBlock)
-
-            val shadows = ShadowRenderer.render(camera, sun, chunks, renderDepthMap, chunkRenderer)
-
+            val shadows = ShadowRenderer.render(camera, sun, entities, entityRenderer, chunks, renderDepthMap, chunkRenderer)
+//            val shadows = ArrayList<ShadowData>()
             doMainRenderPass(selectedBlock, shadows)
 
-            entityProgram.start()
-            entityProgram.set("projection", camera.projectionMatrix)
-            entityProgram.set("view", camera.viewMatrix)
-
-//            println(camera.viewMatrix)
-//            if (keyboard.isPressed(Key.L)) {
-//                camera.rotation.y += PI.toFloat()
-//            }
-            cube.render(entityProgram)
-
-            entityProgram.stop()
-
             glLineWidth(10f)
-//            glColor3f(1.0f, 0.0f, 0.0f)
+
             lineProgram.start()
             lineProgram.set("projection", camera.projectionMatrix)
             lineProgram.set("view", camera.viewMatrix)
@@ -163,7 +145,7 @@ object Main {
             ui.update(mouse, timer.getDelta())
             ui.draw(window.width, window.height)
 
-            ShadowRenderer.render(camera, sun, chunks, renderDepthMap, chunkRenderer)
+            ShadowRenderer.render(camera, sun, entities, entityRenderer, chunks, renderDepthMap, chunkRenderer)
 
             window.synchronize()
             timer.update()
@@ -303,5 +285,6 @@ object Main {
         skyBox.render(camera)
 
         chunkRenderer.render(chunks, camera, ambientLight, sun, shadows, selectedBlock)
+        entityRenderer.render(camera, ambientLight, sun, entities, shadows)
     }
 }
