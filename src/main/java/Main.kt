@@ -59,7 +59,7 @@ object Main {
 //    private val player = Player(Vector3(-80, TERRAIN_HEIGHT, 0))
 
     private val chunkManager = ChunkManager(camera.position)
-    private val cunkRenderer = ChunkRenderer()
+    private val chunkRenderer = ChunkRenderer()
 
     private val selector = Selector()
     private val skyBox = SkyBox("textures/sky/box", camera.zFar)

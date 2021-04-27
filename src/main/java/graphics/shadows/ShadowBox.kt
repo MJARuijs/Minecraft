@@ -6,16 +6,14 @@ import graphics.rendertarget.RenderTargetManager
 import math.matrices.Matrix4
 import math.vectors.Vector3
 import math.vectors.Vector4
-import java.lang.Math.acos
-import java.lang.Math.tan
 import kotlin.math.*
 
 class ShadowBox(camera: Camera, val shadowDistance: Float = 50f) {
 
     private val offset = 0.0f
 
-    private val nearWidth = camera.zNear * tan(Math.toRadians(camera.fieldOfView.toDouble()))
-    private val farWidth = shadowDistance * tan(Math.toRadians(camera.fieldOfView.toDouble()))
+    private val nearWidth = camera.zNear * tan(Math.toRadians(camera.fieldOfView.toDouble())).toFloat()
+    private val farWidth = shadowDistance * tan(Math.toRadians(camera.fieldOfView.toDouble())).toFloat()
 
     private val nearHeight: Float
     private val farHeight: Float
