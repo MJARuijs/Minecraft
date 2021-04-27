@@ -11,7 +11,7 @@ class ChunkGenerator {
     companion object {
         const val CHUNK_SIZE = 16
         const val HALF_CHUNK_SIZE = CHUNK_SIZE / 2
-        const val TERRAIN_HEIGHT = 50
+        const val TERRAIN_HEIGHT = 3
         const val MAX_HEIGHT = 256
     }
 

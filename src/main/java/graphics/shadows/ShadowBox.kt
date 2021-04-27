@@ -6,14 +6,16 @@ import graphics.rendertarget.RenderTargetManager
 import math.matrices.Matrix4
 import math.vectors.Vector3
 import math.vectors.Vector4
+import java.lang.Math.acos
+import java.lang.Math.tan
 import kotlin.math.*
 
 class ShadowBox(camera: Camera, val shadowDistance: Float = 50f) {
 
-    private val offset = 15.0f
+    private val offset = 0.0f
 
-    private val nearWidth = camera.zNear * tan(Math.toRadians(camera.fieldOfView.toDouble()).toFloat()) / 1
-    private val farWidth = shadowDistance * tan(Math.toRadians(camera.fieldOfView.toDouble()).toFloat()) / 1
+    private val nearWidth = camera.zNear * tan(Math.toRadians(camera.fieldOfView.toDouble()))
+    private val farWidth = shadowDistance * tan(Math.toRadians(camera.fieldOfView.toDouble()))
 
     private val nearHeight: Float
     private val farHeight: Float
@@ -24,30 +26,30 @@ class ShadowBox(camera: Camera, val shadowDistance: Float = 50f) {
     var viewMatrix = Matrix4()
         private set
 
-    private var minX = 0.0f
-    private var maxX = 0.0f
-    private var minY = 0.0f
-    private var maxY = 0.0f
-    private var minZ = 0.0f
-    private var maxZ = 0.0f
+    var minX = 0.0f
+    var maxX = 0.0f
+    var minY = 0.0f
+    var maxY = 0.0f
+    var minZ = 0.0f
+    var maxZ = 0.0f
 
     init {
         val renderTarget = RenderTargetManager.getDefault()
         nearHeight = nearWidth / renderTarget.getAspectRatio()
         farHeight = farWidth / renderTarget.getAspectRatio()
     }
-//
-//    fun width() = abs(maxX - minX)
-//
-//    fun height() = abs(maxY - minY)
-//
-//    fun depth() = abs(maxZ - minZ)
 
-    fun height() = if (maxY > minY) maxY - minY else minY - maxY
+    fun width() = abs(maxX - minX)
 
-    fun width() = if (maxX > minX) maxX - minX else minX - maxX
+    fun height() = abs(maxY - minY)
 
-    fun depth() = if (maxZ > minZ) maxZ - minZ else maxZ - minZ
+    fun depth() = abs(maxZ - minZ)
+
+//    fun height() = if (maxY > minY) maxY - minY else minY - maxY
+//
+//    fun width() = if (maxX > minX) maxX - minX else minX - maxX
+//
+//    fun depth() = if (maxZ > minZ) maxZ - minZ else maxZ - minZ
 
     fun update(camera: Camera, sun: Sun) {
         val position = camera.position
@@ -143,15 +145,25 @@ class ShadowBox(camera: Camera, val shadowDistance: Float = 50f) {
         projectionMatrix[3, 3] = 1.0f
     }
 
-    private var nearRightUp = Vector3()
-    private var nearLeftUp = Vector3()
-    private var nearLeftDown = Vector3()
-    private var nearRightDown = Vector3()
-    private var farRightUp = Vector3()
-    private var farLeftUp = Vector3()
-    private var farLeftDown = Vector3()
-    private var farRightDown = Vector3()
-    private var translation = Vector3()
+    var nearRightUp = Vector3()
+    var nearLeftUp = Vector3()
+    var nearLeftDown = Vector3()
+    var nearRightDown = Vector3()
+    var farRightUp = Vector3()
+    var farLeftUp = Vector3()
+    var farLeftDown = Vector3()
+    var farRightDown = Vector3()
+    var translation = Vector3()
+
+    var nearRightUp2 = Vector3()
+    var nearLeftUp2 = Vector3()
+    var nearLeftDown2 = Vector3()
+    var nearRightDown2 = Vector3()
+    var farRightUp2 = Vector3()
+    var farLeftUp2 = Vector3()
+    var farLeftDown2 = Vector3()
+    var farRightDown2 = Vector3()
+    var translation2 = Vector3()
 
     fun updateBox(camera: Camera, sun: Sun) {
         val position = camera.position
@@ -238,23 +250,23 @@ class ShadowBox(camera: Camera, val shadowDistance: Float = 50f) {
         val maxFarZ = max(farLeftDown.z, max(farRightDown.z, max(farLeftUp.z, farRightUp.z)))
         maxZ = max(maxNearZ, maxFarZ)
 
-        nearRightUp = (inverseLightDirection dot Vector4(nearRightUp, 1.0f)).xyz()
-        nearLeftUp = (inverseLightDirection dot Vector4(nearLeftUp, 1.0f)).xyz()
-        nearLeftDown = (inverseLightDirection dot Vector4(nearLeftDown, 1.0f)).xyz()
-        nearRightDown = (inverseLightDirection dot Vector4(nearRightDown, 1.0f)).xyz()
-        farRightUp = (inverseLightDirection dot Vector4(farRightUp, 1.0f)).xyz()
-        farLeftUp = (inverseLightDirection dot Vector4(farLeftUp, 1.0f)).xyz()
-        farLeftDown = (inverseLightDirection dot Vector4(farLeftDown, 1.0f)).xyz()
-        farRightDown = (inverseLightDirection dot Vector4(farRightDown, 1.0f)).xyz()
-
-        nearRightUp += position
-        nearLeftUp += position
-        nearLeftDown += position
-        nearRightDown += position
-        farRightUp += position
-        farLeftUp += position
-        farLeftDown += position
-        farRightDown += position
+//        nearRightUp = (inverseLightDirection dot Vector4(nearRightUp, 1.0f)).xyz()
+//        nearLeftUp = (inverseLightDirection dot Vector4(nearLeftUp, 1.0f)).xyz()
+//        nearLeftDown = (inverseLightDirection dot Vector4(nearLeftDown, 1.0f)).xyz()
+//        nearRightDown = (inverseLightDirection dot Vector4(nearRightDown, 1.0f)).xyz()
+//        farRightUp = (inverseLightDirection dot Vector4(farRightUp, 1.0f)).xyz()
+//        farLeftUp = (inverseLightDirection dot Vector4(farLeftUp, 1.0f)).xyz()
+//        farLeftDown = (inverseLightDirection dot Vector4(farLeftDown, 1.0f)).xyz()
+//        farRightDown = (inverseLightDirection dot Vector4(farRightDown, 1.0f)).xyz()
+//
+//        nearRightUp += position
+//        nearLeftUp += position
+//        nearLeftDown += position
+//        nearRightDown += position
+//        farRightUp += position
+//        farLeftUp += position
+//        farLeftDown += position
+//        farRightDown += position
 
         val x = (maxX + minX) / 2.0f
         val y = (maxY + minY) / 2.0f
@@ -263,9 +275,7 @@ class ShadowBox(camera: Camera, val shadowDistance: Float = 50f) {
         translation = Vector3(x, y, z)
         translation = (inverseLightDirection dot Vector4(translation, 1.0f)).xyz()
         translation += position
-
-
-        println("$position $translation")
+//        println("$position $translation")
         updateViewMatrix(sun)
         updateProjectionMatrix()
     }
@@ -275,6 +285,7 @@ class ShadowBox(camera: Camera, val shadowDistance: Float = 50f) {
 //        projectionMatrix[0, 0] = 2.0f / 10
 //        projectionMatrix[1, 1] = 2.0f / 10
 //        projectionMatrix[2, 2] = -2.0f / 15
+//        println("${width()} ${height()} ${depth()}")
         projectionMatrix[0, 0] = 2.0f / width()
         projectionMatrix[1, 1] = 2.0f / height()
         projectionMatrix[2, 2] = -2.0f / depth()
@@ -301,8 +312,12 @@ class ShadowBox(camera: Camera, val shadowDistance: Float = 50f) {
         }
 
         viewMatrix = Matrix4()
-        viewMatrix = viewMatrix.rotateX(xRotation)
-        viewMatrix = viewMatrix.rotateY(yRotation)
-        viewMatrix = viewMatrix.translate(-translation)
+//        viewMatrix = viewMatrix.rotateX(xRotation)
+//        viewMatrix = viewMatrix.rotateY(yRotation)
+//        viewMatrix = viewMatrix.rotateY(PI.toFloat() / 2.0f)
+//        viewMatrix = viewMatrix.translate(translation)
+//        viewMatrix = viewMatrix.rotateY(PI.toFloat())
+        viewMatrix = viewMatrix.translate(Vector3(0.0f, 0.0f, 20.0f))
+//        println(translation)
     }
 }

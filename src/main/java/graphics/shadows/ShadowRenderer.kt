@@ -11,13 +11,17 @@ import graphics.rendertarget.RenderTarget
 import graphics.rendertarget.RenderTargetManager
 import graphics.samplers.Sampler
 import graphics.shaders.ShaderProgram
+import math.matrices.Matrix4
+import math.vectors.Vector3
+import org.lwjgl.opengl.GL11.glClearColor
+import java.lang.Math.PI
 
 object ShadowRenderer {
 
     private val shadowProgram = ShaderProgram.load("shaders/entities/shadowBlock.vert", "shaders/entities/shadowBlock.frag")
     private val shadowBoxes = ArrayList<ShadowBox>()
 
-    private val renderTarget = RenderTarget(2048, 2048)
+    private val renderTarget = RenderTarget(512, 512)
     private val depthProgram = ShaderProgram.load("shaders/debug/2D.vert", "shaders/debug/depth.frag")
     private val quad = Quad()
     private val sampler = Sampler(0)
@@ -40,8 +44,10 @@ object ShadowRenderer {
             box.updateBox(camera, sun)
 
             shadowProgram.start()
-            shadowProgram.set("projection", box.projectionMatrix)
-            shadowProgram.set("view", box.viewMatrix)
+            shadowProgram.set("projection", camera.projectionMatrix)
+            val mat = Matrix4().rotateY(PI.toFloat()).translate(Vector3(0.0f, 0.0f, -20.0f))
+            shadowProgram.set("view", mat)
+            println(box.viewMatrix)
 
             chunkRenderer.renderBlack(chunks)
 
@@ -59,6 +65,7 @@ object ShadowRenderer {
             val depthTarget = RenderTargetManager.get()
             depthTarget.start()
             depthTarget.clear()
+            glClearColor(0.0f, 1.0f, 1.0f, 1.0f)
 
             sampler.bind(renderTarget.getDepthTexture())
             depthProgram.start()
