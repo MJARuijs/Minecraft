@@ -14,6 +14,7 @@ import math.vectors.Vector2
 class EntityRenderer {
 
     private val entityProgram = ShaderProgram.load("shaders/entities/entity.vert", "shaders/entities/entity.frag")
+    private val shadowProgram = ShaderProgram.load("shaders/entities/shadowEntity.vert", "shaders/entities/shadowEntity.frag")
 
     fun render(camera: Camera, ambient: AmbientLight, sun: Sun, entities: List<Entity>, shadows: List<ShadowData>) {
         GraphicsContext.enable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
@@ -27,7 +28,7 @@ class EntityRenderer {
 
             shadowSampler.bind(shadowData.shadowMap)
 
-            entityProgram.set("shadowPosition", shadowData.shadowDistance)
+            entityProgram.set("shadowDistance", shadowData.shadowDistance)
             entityProgram.set("shadowMatrix", shadowData.getShadowMatrix())
             entityProgram.set("shadowMapSize", Vector2(
                     shadowData.shadowMap.getWidth(),
@@ -52,6 +53,22 @@ class EntityRenderer {
         GraphicsContext.disable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
     }
 
+    fun renderColorLess(projection: Matrix4, view: Matrix4, entities: List<Entity>) {
+        GraphicsContext.enable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
+
+        shadowProgram.start()
+        shadowProgram.set("projection", projection)
+        shadowProgram.set("view", view)
+
+        for (entity in entities) {
+            entity.render(shadowProgram)
+        }
+
+        shadowProgram.stop()
+
+        GraphicsContext.disable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
+    }
+
     fun renderShadowed(projection: Matrix4, view: Matrix4, entities: List<Entity>) {
         GraphicsContext.disable(GraphicsOption.FACE_CULLING)
         entityProgram.start()
@@ -63,7 +80,7 @@ class EntityRenderer {
             entity.render(entityProgram)
         }
 
-        entityProgram.stop()
+        shadowProgram.stop()
         GraphicsContext.enable(GraphicsOption.FACE_CULLING)
 
     }

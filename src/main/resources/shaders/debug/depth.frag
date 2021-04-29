@@ -8,8 +8,9 @@ out vec4 outColor;
 
 float linearizeDepth(float depth) {
     float zNear = 0.01;
-    float zFar = 1000.0;
+    float zFar = 65;
     return 2.0 * zNear * zFar / (zFar + zNear - (2.0 * depth - 1.0) * (zFar - zNear));
+//    return depth;
 }
 
 void main() {

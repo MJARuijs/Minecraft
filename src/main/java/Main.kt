@@ -51,7 +51,7 @@ object Main {
     private const val directionalValue = 0.5f
 
     private val ambientLight = AmbientLight(Color(lightValue, lightValue, lightValue))
-    private val sun = Sun(Color(directionalValue, directionalValue, directionalValue), Vector3(0.0f, 1.0f, 0.0f))
+    private val sun = Sun(Color(directionalValue, directionalValue, directionalValue), Vector3(0.0f, 1.0f, -1.0f))
 
     private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, 0, 0))
 //    private val player = Player(Vector3(-80, TERRAIN_HEIGHT, 0))
@@ -71,13 +71,13 @@ object Main {
 
     private var renderDepthMap = false
 
-    val cube = Entity(ModelCache.get("models/block.obj"), Matrix4().translate(0.0f, 5f, 0.0f))
-    val cube2 = Entity(ModelCache.get("models/block.obj"), Matrix4().translate(0.0f, 7f, 0.0f))
+    val cube = Entity(ModelCache.get("models/block.obj"), Matrix4().translate(0.0f, 0f, 2.0f))
+    val cube2 = Entity(ModelCache.get("models/block.obj"), Matrix4().translate(0.0f, 0f, 0.0f))
     lateinit var shadowBox: ShadowBox
 
     @JvmStatic
     fun main(args: Array<String>) {
-        GraphicsContext.init(Color(0.25f, 0.25f, 0.25f))
+        GraphicsContext.init(Color(0f,0f,0f))
 
         GraphicsContext.enable(GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING, GraphicsOption.TEXTURE_MAPPING)
 
@@ -92,9 +92,9 @@ object Main {
 
         val uiProgram = ShaderProgram.load("shaders/userinterface/user_interface.vert", "shaders/userinterface/user_interface.frag")
 //        val shadowRenderTarget = RenderTargetManager.get()
+        val depthProgram = ShaderProgram.load("shaders/debug/2D.vert", "shaders/debug/depth.frag")
 
         val depthTexture = Texture(Vector2(0.0f, 0.0f), Vector2(0.25f, 0.5f))
-
         val crossHair = Item("crossHair", ConstraintSet(
                 CenterConstraint(ConstraintDirection.HORIZONTAL),
                 CenterConstraint(ConstraintDirection.VERTICAL),
@@ -125,27 +125,34 @@ object Main {
             val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera, false)
 //            val selectedBlock = null
 
-            val shadows = ShadowRenderer.render(camera, sun, entities, entityRenderer, chunks, renderDepthMap, chunkRenderer)
+            val shadows = ShadowRenderer.render(camera, sun, entities, entityRenderer, chunks, false, chunkRenderer)
 //            val shadows = ArrayList<ShadowData>()
             doMainRenderPass(selectedBlock, shadows)
 
-            glLineWidth(10f)
+//            glLineWidth(10f)
+//
+//            lineProgram.start()
+//            lineProgram.set("projection", camera.projectionMatrix)
+//            lineProgram.set("view", camera.viewMatrix)
+//            lineProgram.set("model", Matrix4())
+//            lineProgram.set("color", Vector3(1.0f, 0.0f, 0.0f))
+//            lineMesh.draw()
+//            lineProgram.set("color", Vector3(1.0f, 1.0f, 0.0f))
+//
+//            lineMesh2.draw()
+//            lineProgram.stop()
 
-            lineProgram.start()
-            lineProgram.set("projection", camera.projectionMatrix)
-            lineProgram.set("view", camera.viewMatrix)
-            lineProgram.set("model", Matrix4())
-            lineProgram.set("color", Vector3(1.0f, 0.0f, 0.0f))
-            lineMesh.draw()
-            lineProgram.set("color", Vector3(1.0f, 1.0f, 0.0f))
-
-            lineMesh2.draw()
-            lineProgram.stop()
-
-            ui.update(mouse, timer.getDelta())
-            ui.draw(window.width, window.height)
+//            ui.update(mouse, timer.getDelta())
+//            ui.draw(window.width, window.height)
 
             ShadowRenderer.render(camera, sun, entities, entityRenderer, chunks, renderDepthMap, chunkRenderer)
+
+//            depthProgram.start()
+//            depthProgram.set("scale", depthTexture.scale)
+//            depthProgram.set("translation", depthTexture.translation)
+//            depthProgram.set("aspectRatio", window.aspectRatio)
+//            depthTexture.render(depthProgram, shadows[0].shadowMap.handle)
+//            depthProgram.stop()
 
             window.synchronize()
             timer.update()
@@ -173,6 +180,15 @@ object Main {
     private fun updateChunkManager() {
         chunkManager.updatePosition(camera.position)
         chunks = chunkManager.determineVisibleChunks()
+    }
+
+    private fun doMainRenderPass(selectedBlock: Pair<Chunk, Vector3>?, shadows: List<ShadowData>) {
+        RenderTargetManager.getDefault().start()
+        RenderTargetManager.getDefault().clear()
+        skyBox.render(camera)
+
+        chunkRenderer.render(chunks, camera, ambientLight, sun, shadows, selectedBlock)
+        entityRenderer.render(camera, ambientLight, sun, entities, shadows)
     }
 
     private fun processInput() {
@@ -238,53 +254,44 @@ object Main {
                 camera.rotation = Vector3()
             }
 
-            if (keyboard.isPressed(Key.K)) {
-                cube.transformation = Matrix4().translate(shadowBox.translation)
-
-                val segments = ArrayList<Segment>()
-                segments += Segment(shadowBox.farLeftDown, shadowBox.farLeftUp)
-                segments += Segment(shadowBox.farLeftDown, shadowBox.farRightDown)
-                segments += Segment(shadowBox.farLeftDown, shadowBox.nearLeftDown)
-
-                segments += Segment(shadowBox.nearRightUp, shadowBox.nearRightDown)
-                segments += Segment(shadowBox.nearRightUp, shadowBox.farRightUp)
-                segments += Segment(shadowBox.nearRightUp, shadowBox.nearLeftUp)
-
-                segments += Segment(shadowBox.nearLeftUp, shadowBox.farLeftUp)
-                segments += Segment(shadowBox.nearLeftUp, shadowBox.nearLeftDown)
-
-                segments += Segment(shadowBox.nearLeftDown, shadowBox.nearRightDown)
-                segments += Segment(shadowBox.nearRightDown, shadowBox.farRightDown)
-
-                segments += Segment(shadowBox.farRightUp, shadowBox.farRightDown)
-                segments += Segment(shadowBox.farRightUp, shadowBox.farLeftUp)
-
-                lineMesh = LineMesh(segments)
-
-                val segments2 = ArrayList<Segment>()
-
-                var offset = Vector3(shadowBox.width() / 2.0f, shadowBox.height() / 2.0f, shadowBox.depth() / 2.0f)
-                offset = camera.position
-
-                segments2 += Segment(offset + Vector3(shadowBox.minX, shadowBox.minY, shadowBox.minZ), offset + Vector3(shadowBox.minX, shadowBox.minY, shadowBox.maxZ))
-                segments2 += Segment(offset + Vector3(shadowBox.minX, shadowBox.minY, shadowBox.minZ), offset + Vector3(shadowBox.minX, shadowBox.minY, shadowBox.minZ))
-                segments2 += Segment(offset + Vector3(shadowBox.minX, shadowBox.minY, shadowBox.minZ), offset + Vector3(shadowBox.maxX, shadowBox.minY, shadowBox.minZ))
-                segments2 += Segment(offset + Vector3(shadowBox.maxX, shadowBox.maxY, shadowBox.maxZ), offset + Vector3(shadowBox.minX, shadowBox.maxY, shadowBox.maxZ))
-                segments2 += Segment(offset + Vector3(shadowBox.maxX, shadowBox.maxY, shadowBox.maxZ), offset + Vector3(shadowBox.maxX, shadowBox.minY, shadowBox.maxZ))
-                segments2 += Segment(offset + Vector3(shadowBox.maxX, shadowBox.maxY, shadowBox.maxZ), offset + Vector3(shadowBox.maxX, shadowBox.maxY, shadowBox.minZ))
-
-                lineMesh2 = LineMesh(segments2)
-                println(shadowBox.translation)
-            }
+//            if (keyboard.isPressed(Key.K)) {
+//                cube.transformation = Matrix4().translate(shadowBox.translation)
+//
+//                val segments = ArrayList<Segment>()
+//                segments += Segment(shadowBox.farLeftDown, shadowBox.farLeftUp)
+//                segments += Segment(shadowBox.farLeftDown, shadowBox.farRightDown)
+//                segments += Segment(shadowBox.farLeftDown, shadowBox.nearLeftDown)
+//
+//                segments += Segment(shadowBox.nearRightUp, shadowBox.nearRightDown)
+//                segments += Segment(shadowBox.nearRightUp, shadowBox.farRightUp)
+//                segments += Segment(shadowBox.nearRightUp, shadowBox.nearLeftUp)
+//
+//                segments += Segment(shadowBox.nearLeftUp, shadowBox.farLeftUp)
+//                segments += Segment(shadowBox.nearLeftUp, shadowBox.nearLeftDown)
+//
+//                segments += Segment(shadowBox.nearLeftDown, shadowBox.nearRightDown)
+//                segments += Segment(shadowBox.nearRightDown, shadowBox.farRightDown)
+//
+//                segments += Segment(shadowBox.farRightUp, shadowBox.farRightDown)
+//                segments += Segment(shadowBox.farRightUp, shadowBox.farLeftUp)
+//
+//                lineMesh = LineMesh(segments)
+//
+//                val segments2 = ArrayList<Segment>()
+//
+//                var offset = Vector3(shadowBox.width() / 2.0f, shadowBox.height() / 2.0f, shadowBox.depth() / 2.0f)
+//                offset = camera.position
+//
+//                segments2 += Segment(offset + Vector3(shadowBox.minX, shadowBox.minY, shadowBox.minZ), offset + Vector3(shadowBox.minX, shadowBox.minY, shadowBox.maxZ))
+//                segments2 += Segment(offset + Vector3(shadowBox.minX, shadowBox.minY, shadowBox.minZ), offset + Vector3(shadowBox.minX, shadowBox.minY, shadowBox.minZ))
+//                segments2 += Segment(offset + Vector3(shadowBox.minX, shadowBox.minY, shadowBox.minZ), offset + Vector3(shadowBox.maxX, shadowBox.minY, shadowBox.minZ))
+//                segments2 += Segment(offset + Vector3(shadowBox.maxX, shadowBox.maxY, shadowBox.maxZ), offset + Vector3(shadowBox.minX, shadowBox.maxY, shadowBox.maxZ))
+//                segments2 += Segment(offset + Vector3(shadowBox.maxX, shadowBox.maxY, shadowBox.maxZ), offset + Vector3(shadowBox.maxX, shadowBox.minY, shadowBox.maxZ))
+//                segments2 += Segment(offset + Vector3(shadowBox.maxX, shadowBox.maxY, shadowBox.maxZ), offset + Vector3(shadowBox.maxX, shadowBox.maxY, shadowBox.minZ))
+//
+//                lineMesh2 = LineMesh(segments2)
+//                println(shadowBox.translation)
+//            }
         }
-    }
-
-    private fun doMainRenderPass(selectedBlock: Pair<Chunk, Vector3>?, shadows: List<ShadowData>) {
-        RenderTargetManager.getDefault().start()
-        RenderTargetManager.getDefault().clear()
-        skyBox.render(camera)
-
-        chunkRenderer.render(chunks, camera, ambientLight, sun, shadows, selectedBlock)
-        entityRenderer.render(camera, ambientLight, sun, entities, shadows)
     }
 }

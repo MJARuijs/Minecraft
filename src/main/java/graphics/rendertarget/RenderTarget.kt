@@ -2,6 +2,7 @@ package graphics.rendertarget
 
 import graphics.textures.ColorMap
 import graphics.textures.DepthMap
+import org.lwjgl.BufferUtils.createIntBuffer
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL20.glDrawBuffers
 import org.lwjgl.opengl.GL30.*
@@ -14,8 +15,9 @@ class RenderTarget(private var width: Int, private var height: Int, val handle: 
 
     init {
         glBindFramebuffer(GL_FRAMEBUFFER, handle)
-        glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, colorTexture.handle, 0)
-        glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture.handle, 0)
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, colorTexture.handle, 0)
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture.handle, 0)
+
         glBindFramebuffer(GL_FRAMEBUFFER, 0)
     }
 
@@ -31,9 +33,11 @@ class RenderTarget(private var width: Int, private var height: Int, val handle: 
 
     fun start() {
         glBindFramebuffer(GL_FRAMEBUFFER, handle)
+        glViewport(0, 0, width, height)
     }
 
     fun clear() {
+        glViewport(0, 0, width, height)
         glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
     }
 
@@ -48,9 +52,9 @@ class RenderTarget(private var width: Int, private var height: Int, val handle: 
             return
         }
 
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, handle)
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, targetId)
-
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, handle)
+        glReadBuffer(GL_COLOR_ATTACHMENT0)
         glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT, GL_NEAREST)
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0)

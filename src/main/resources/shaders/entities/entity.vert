@@ -28,7 +28,7 @@ void main() {
     float toCameraDistance = length(toCameraVector);
     float distance = toCameraDistance - (shadowDistance - transitionDistance);
     distance /= transitionDistance;
-    shadowCoords.w = clamp(distance, 0.0, 1.0);
+    shadowCoords.w = clamp(1.0 - distance, 0.0, 1.0);
 
     gl_Position = projection * view * worldPosition;
 }
