@@ -27,6 +27,7 @@ open class Item(id: String, constraints: ConstraintSet, background: Background =
     open fun draw(shaderProgram: ShaderProgram, iconProgram: ShaderProgram, textProgram: ShaderProgram, aspectRatio: Float, parent: MovableUIContainer?) {
         shaderProgram.set("translation", getTranslation())
         shaderProgram.set("scale", getScale())
+        println("$id ${getTranslation()}")
         
         shaderProgram.set("allowedToOverdraw", parent?.isChildBoundless(id) ?: true)
         shaderProgram.set("parentTranslation", parent?.getTranslation() ?: Vector2())

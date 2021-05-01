@@ -20,7 +20,7 @@ class Selector {
     private val reach = 8.0f
     private var lastSelected: Pair<Chunk, Vector3>? = null
 
-    fun findSelectedItem(window: Window, chunkRenderer: ChunkRenderer, chunks: ArrayList<Chunk>, camera: Camera, render: Boolean): Pair<Chunk, Vector3>? {
+    fun findSelectedItem(window: Window, chunkRenderer: ChunkRenderer, chunks: ArrayList<Chunk>, camera: Camera): Pair<Chunk, Vector3>? {
         GraphicsContext.enable(GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING)
 
         val renderTarget = RenderTargetManager.get()
@@ -45,11 +45,7 @@ class Selector {
         val pixelData = BufferUtils.createFloatBuffer(3)
         glReadPixels(x, y, 1, 1, GL_RGB, GL_FLOAT, pixelData)
 
-        if (render) {
-//            renderTarget.renderToScreen()
-        } else {
-            renderTarget.stop()
-        }
+        renderTarget.stop()
 
         GraphicsContext.disable(GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING)
 

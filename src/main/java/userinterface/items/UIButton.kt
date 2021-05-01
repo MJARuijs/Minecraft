@@ -27,14 +27,12 @@ open class UIButton(id: String, constraints: ConstraintSet, private var onClick:
     }
     
     private fun setText(text: String, background: Background, color: Color, font: Font = UniversalParameters.defaultFont): UIButton {
-        add(
-            TextBox("${id}_text", ConstraintSet(
-            CenterConstraint(ConstraintDirection.HORIZONTAL),
-            CenterConstraint(ConstraintDirection.VERTICAL),
-            RelativeConstraint(ConstraintDirection.HORIZONTAL, 1.0f),
-            RelativeConstraint(ConstraintDirection.VERTICAL, 1.0f)
-        ), text, 1.77f, 3f, background, color, font)
-        )
+        add(TextBox("${id}_text", ConstraintSet(
+                CenterConstraint(ConstraintDirection.HORIZONTAL),
+                CenterConstraint(ConstraintDirection.VERTICAL),
+                RelativeConstraint(ConstraintDirection.HORIZONTAL, 1.0f),
+                RelativeConstraint(ConstraintDirection.VERTICAL, 1.0f)
+        ), text, 1.77f, 3f, background, color, font))
         return this
     }
     

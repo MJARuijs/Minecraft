@@ -24,7 +24,7 @@ object UniversalParameters {
     const val ANIMATION_DURATION = 0.1f
     
     fun TEXT_COLOR() = UIColor.WHITE
-    
+
     fun ITEM_BACKGROUND() = ColoredBackground(UIColor.BLUE)
     
     fun SWITCH_THUMB_OFF_BACKGROUND() = ColoredBackground(Color(185, 185, 185), 90f)
@@ -33,7 +33,7 @@ object UniversalParameters {
     fun SWITCH_TRACK_OFF_BACKGROUND() = ColoredBackground(UIColor.TRANSPARENT, 90f, 0.09f, Color(74, 74, 74))
     fun SWITCH_TRACK_ON_BACKGROUND() = ColoredBackground(UIColor.TRANSPARENT, 90f, 0.09f, Color(33, 73, 107))
     
-    fun BUTTON_BACKGROUND() = ColoredBackground(PRIMARY_COLOR, 10.0f, 0.09f, UIColor.WHITE)
+    fun BUTTON_BACKGROUND() = ColoredBackground(PRIMARY_COLOR)
     fun BUTTON_ON_HOVER_BACKGROUND() = ColoredBackground(PRIMARY_COLOR, 0.0f, 0.09f, UIColor.WHITE)
     
     fun PROGRESS_BAR_BACKGROUND() = ColoredBackground(UIColor.GREY)

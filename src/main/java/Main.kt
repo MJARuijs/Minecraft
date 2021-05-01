@@ -15,13 +15,11 @@ import graphics.entity.Entity
 import graphics.entity.EntityRenderer
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
-import graphics.model.ModelCache
 import graphics.rendertarget.RenderTargetManager
 import graphics.shadows.ShadowBox
 import graphics.shadows.ShadowData
 import graphics.shadows.ShadowRenderer
 import math.Color
-import math.matrices.Matrix4
 import math.vectors.Vector3
 import tools.ToolMaterial
 import tools.ToolType
@@ -66,23 +64,20 @@ object Main {
 
     private val ui = UserInterface(window.aspectRatio)
     private val page = UIPage("page")
-    private val scale = 1.0f
-    private val cube = Entity(ModelCache.get("models/block.obj"), Matrix4().translate(0.0f, 0f, 2.0f).scale(scale, scale, scale))
-    private val cube2 = Entity(ModelCache.get("models/block.obj"), Matrix4().translate(0.0f, 2f, 0.0f).scale(scale, scale, scale))
-    lateinit var shadowBox: ShadowBox
+
+    private const val sampleSize = 40
+    private var printPerformance = false
+    private val fps = FloatArray(sampleSize)
 
     @JvmStatic
     fun main(args: Array<String>) {
         GraphicsContext.init(Color(0f, 0f, 0f))
         GraphicsContext.enable(GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING, GraphicsOption.TEXTURE_MAPPING)
+
         UniversalParameters.init(window.aspectRatio, FontLoader(window.aspectRatio).load("fonts/candara.png"))
-
         RenderTargetManager.init(window)
-        shadowBox = ShadowBox(camera)
-        ShadowRenderer += shadowBox
 
-        entities += cube
-        entities += cube2
+        ShadowRenderer += ShadowBox(camera)
 
         val crossHair = Item("crossHair", ConstraintSet(
                 CenterConstraint(ConstraintDirection.HORIZONTAL),
@@ -96,9 +91,6 @@ object Main {
         ui += page
         ui.showPage("page")
 
-        val sampleSize = 40
-
-        val fps = FloatArray(sampleSize)
         var i = 0
 
         timer.reset()
@@ -110,8 +102,8 @@ object Main {
             processInput()
             updateChunkManager()
 
-            val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera, false)
-            val shadows = ShadowRenderer.render(camera, sun, entities, entityRenderer, chunks, false, chunkRenderer)
+            val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera)
+            val shadows = ShadowRenderer.render(camera, sun, entities, entityRenderer, chunks, chunkRenderer)
             doMainRenderPass(selectedBlock, shadows)
 
             ui.update(mouse, timer.getDelta())
@@ -120,15 +112,8 @@ object Main {
             window.synchronize()
             timer.update()
 
-            fps[i] = 1f / timer.getDelta()
-            i++
-            if (i == sampleSize) {
-                i = 0
-                var totalFps = 0f
-                for (j in 0 until sampleSize) {
-                    totalFps += fps[j]
-                }
-//                println("Average fps: ${totalFps / sampleSize}")
+            if (printPerformance) {
+                i = updatePerformance(i)
             }
         }
 
@@ -172,7 +157,7 @@ object Main {
 
         if (mouse.isCaptured()) {
             if (mouse.isPressed(Button.LEFT)) {
-                val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera, false)
+                val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera)
                 if (selectedBlock != null) {
                     for (chunk in chunks) {
                         if (chunk.containsBlock(selectedBlock.second)) {
@@ -183,7 +168,7 @@ object Main {
             }
 
             if (mouse.isPressed(Button.RIGHT) || keyboard.isPressed(Key.V)) {
-                val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera, false)
+                val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera)
                 if (selectedBlock != null) {
                     val face = selector.determineSelectedFace(camera, selectedBlock.second) ?: return
                     val newPosition = chunkManager.newBlockPosition(selectedBlock.second, face)
@@ -199,5 +184,18 @@ object Main {
                 chunkManager.stopBreaking()
             }
         }
+    }
+
+    private fun updatePerformance(i: Int): Int {
+        fps[i] = 1f / timer.getDelta()
+        if (i + 1 == sampleSize) {
+            var totalFps = 0f
+            for (j in 0 until sampleSize) {
+                totalFps += fps[j]
+            }
+            println("Average fps: ${totalFps / sampleSize}")
+            return 0
+        }
+        return i + 1
     }
 }
