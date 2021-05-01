@@ -64,20 +64,28 @@ void main() {
     float verticalPixelSize = 1.0 / shadowMapSize.y;
 
     float shadowValue = 0.0;
-//    + vec2(x * horizontalPixelSize, y * verticalPixelSize)
-//    for (int x = -samples; x < samples; x++) {
-//        for (int y = -samples; y < samples; y++) {
-            float distanceFromLight = texture(shadowMap, shadowCoords.xy).r;
+
+    for (int x = -samples; x < samples; x++) {
+        for (int y = -samples; y < samples; y++) {
+            float distanceFromLight = texture(shadowMap, shadowCoords.xy + vec2(x * horizontalPixelSize, y * verticalPixelSize)).r;
             float actualDistance = shadowCoords.z;
-            if (actualDistance - 0.005 > distanceFromLight) {
+            if (actualDistance - 0.0002 > distanceFromLight) {
                 shadowValue += 1.0;
             }
-//        }
-//    }
+        }
+    }
 
-//    shadowValue /= samplesPerPixel;
+    shadowValue /= samplesPerPixel;
     float lightFactor = 1.0 - (shadowValue * shadowCoords.w);
 
-    outColor = ambientColor + sunColor * lightFactor;
+    outColor = ( sunColor);
+//    if (lightFactor < 0.0f) {
+//        outColor = vec4(1.0, 0.0, 0.0, 1.0);
+//    }
+//    outColor = vec4(0.0, 0.0, 0.0, 1.0);
+//    outColor.rgb +=vec3(0.6, 0.6, 0.6) * lightFactor;
+    //    if (lightFactor < 0.6) {
+//        outColor = vec4(0.0, 1.0, 0.0, 1.0);
+//    }
     outColor = clamp(outColor, 0.0, 1.0);
 }

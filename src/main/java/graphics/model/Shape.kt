@@ -1,6 +1,5 @@
 package graphics.model
 
-import graphics.material.ColoredMaterial
 import graphics.material.Material
 import graphics.model.mesh.Mesh
 import graphics.shaders.ShaderProgram

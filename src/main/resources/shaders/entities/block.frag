@@ -48,7 +48,8 @@ vec4 computeDirectionalColor(vec4 color) {
 
     float brightness = clamp(dot(lightDirection, normal), 0.0, 1.0);
 
-    vec4 diffuseColor = brightness * color * sun.color;
+    vec4 diffuseColor = color * sun.color * brightness;
+    diffuseColor.rgb *= brightness;
 
     // Specular
     vec3 position = worldPosition.xyz;
@@ -56,6 +57,7 @@ vec4 computeDirectionalColor(vec4 color) {
     vec3 toCameraVector = normalize(cameraPosition - position);
 
     vec4 specularColor = color * sun.color * clamp(pow(dot(reflectionVector, toCameraVector), 0.0), 0.0, 1.0);
+    specularColor.rgb *= brightness;
 
     return diffuseColor + specularColor;
 }
@@ -87,7 +89,8 @@ bool equals(vec3 one, vec3 two) {
 
 void main() {
     vec4 color = texture(textureMap, passTextureCoord.xy);
-//    vec4 color = vec4(0.6,0.6,0.6,1.0);
+    color.rgb *= 0.85;
+
     if (passTextureCoord.z > 0.5) {
         float strength = color.r;
         color.rgb = overlayColor.rgb * strength;
@@ -98,24 +101,23 @@ void main() {
 
     float horizontalPixelSize = 1.0 / shadowMapSize.x;
     float verticalPixelSize = 1.0 / shadowMapSize.y;
-//    + vec2(x * horizontalPixelSize, y * verticalPixelSize)
     float shadowValue = 0.0;
-//    + vec2(x * horizontalPixelSize, y * verticalPixelSize)
-//    for (int x = -samples; x < samples; x++) {
-//        for (int y = -samples; y < samples; y++) {
-            float distanceFromLight = texture(shadowMap, shadowCoords.xy).r;
+
+    for (int x = -samples; x < samples; x++) {
+        for (int y = -samples; y < samples; y++) {
+            float distanceFromLight = texture(shadowMap, shadowCoords.xy + vec2(x * horizontalPixelSize, y * verticalPixelSize)).r;
             float actualDistance = shadowCoords.z;
-            if (actualDistance - 0.005 > distanceFromLight) {
-                shadowValue += 0.6;
-//                discard;
+            if (actualDistance - 0.0005 > distanceFromLight) {
+                shadowValue += 1.5;
             }
-//        }
-//    }
+        }
+    }
 
-//    shadowValue /= samplesPerPixel;
-    float lightFactor = 1.0 - (shadowValue);
+    shadowValue /= samplesPerPixel;
+    float lightFactor = 1.0 - (shadowValue * shadowCoords.w);
 
-    outColor = ambientColor + directionalColor * lightFactor;
+    outColor = ambientColor;
+    outColor.rgb += directionalColor.rgb * lightFactor;
 
     if (breaking && equals(passInstancePosition, breakingPosition)) {
         vec4 breakColor = texture(textureMap, passBreakTextureCoord);

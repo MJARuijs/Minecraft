@@ -4,7 +4,7 @@ layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec2 inTextureCoord;
 layout(location = 2) in vec3 inNormal;
 
-const float transitionDistance = 10.0;
+const float transitionDistance = 0.0;
 
 uniform mat4 projection;
 uniform mat4 view;

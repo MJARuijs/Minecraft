@@ -151,16 +151,13 @@
             <artifactId>joml</artifactId>
             <version>1.9.25</version>
         </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-test</artifactId>
-            <version>${kotlin.version}</version>
-            <scope>test</scope>
-        </dependency>
 
     </dependencies>
 
     <build>
+
+        <sourceDirectory>src/main/java</sourceDirectory>
+        <testSourceDirectory>src/test/java</testSourceDirectory>
 
         <plugins>
             <plugin>

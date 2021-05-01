@@ -1,4 +1,6 @@
-import chunks.*
+import chunks.Chunk
+import chunks.ChunkManager
+import chunks.ChunkRenderer
 import chunks.blocks.BlockType
 import chunks.blocks.Selector
 import devices.Button
@@ -6,25 +8,21 @@ import devices.Key
 import devices.Timer
 import devices.Window
 import environment.sky.SkyBox
-import graphics.*
+import graphics.Camera
+import graphics.GraphicsContext
+import graphics.GraphicsOption
 import graphics.entity.Entity
 import graphics.entity.EntityRenderer
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
-import graphics.model.LineMesh
 import graphics.model.ModelCache
-import graphics.model.Segment
 import graphics.rendertarget.RenderTargetManager
-import graphics.shaders.ShaderProgram
 import graphics.shadows.ShadowBox
 import graphics.shadows.ShadowData
 import graphics.shadows.ShadowRenderer
 import math.Color
 import math.matrices.Matrix4
-import math.vectors.Vector2
 import math.vectors.Vector3
-import org.lwjgl.opengl.GL11
-import org.lwjgl.opengl.GL11.glLineWidth
 import tools.ToolMaterial
 import tools.ToolType
 import userinterface.UIColor
@@ -51,7 +49,7 @@ object Main {
     private const val directionalValue = 0.5f
 
     private val ambientLight = AmbientLight(Color(lightValue, lightValue, lightValue))
-    private val sun = Sun(Color(directionalValue, directionalValue, directionalValue), Vector3(0.0f, 1.0f, -1.0f))
+    private val sun = Sun(Color(directionalValue, directionalValue, directionalValue), Vector3(1.0f, 1.0f, -1.0f))
 
     private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, 0, 0))
 //    private val player = Player(Vector3(-80, TERRAIN_HEIGHT, 0))
@@ -68,19 +66,15 @@ object Main {
 
     private val ui = UserInterface(window.aspectRatio)
     private val page = UIPage("page")
-
-    private var renderDepthMap = false
-
-    val cube = Entity(ModelCache.get("models/block.obj"), Matrix4().translate(0.0f, 0f, 2.0f))
-    val cube2 = Entity(ModelCache.get("models/block.obj"), Matrix4().translate(0.0f, 0f, 0.0f))
+    private val scale = 1.0f
+    private val cube = Entity(ModelCache.get("models/block.obj"), Matrix4().translate(0.0f, 0f, 2.0f).scale(scale, scale, scale))
+    private val cube2 = Entity(ModelCache.get("models/block.obj"), Matrix4().translate(0.0f, 2f, 0.0f).scale(scale, scale, scale))
     lateinit var shadowBox: ShadowBox
 
     @JvmStatic
     fun main(args: Array<String>) {
-        GraphicsContext.init(Color(0f,0f,0f))
-
+        GraphicsContext.init(Color(0f, 0f, 0f))
         GraphicsContext.enable(GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING, GraphicsOption.TEXTURE_MAPPING)
-
         UniversalParameters.init(window.aspectRatio, FontLoader(window.aspectRatio).load("fonts/candara.png"))
 
         RenderTargetManager.init(window)
@@ -90,11 +84,6 @@ object Main {
         entities += cube
         entities += cube2
 
-        val uiProgram = ShaderProgram.load("shaders/userinterface/user_interface.vert", "shaders/userinterface/user_interface.frag")
-//        val shadowRenderTarget = RenderTargetManager.get()
-        val depthProgram = ShaderProgram.load("shaders/debug/2D.vert", "shaders/debug/depth.frag")
-
-        val depthTexture = Texture(Vector2(0.0f, 0.0f), Vector2(0.25f, 0.5f))
         val crossHair = Item("crossHair", ConstraintSet(
                 CenterConstraint(ConstraintDirection.HORIZONTAL),
                 CenterConstraint(ConstraintDirection.VERTICAL),
@@ -119,40 +108,14 @@ object Main {
             window.poll()
 
             processInput()
-
             updateChunkManager()
 
             val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera, false)
-//            val selectedBlock = null
-
             val shadows = ShadowRenderer.render(camera, sun, entities, entityRenderer, chunks, false, chunkRenderer)
-//            val shadows = ArrayList<ShadowData>()
             doMainRenderPass(selectedBlock, shadows)
 
-//            glLineWidth(10f)
-//
-//            lineProgram.start()
-//            lineProgram.set("projection", camera.projectionMatrix)
-//            lineProgram.set("view", camera.viewMatrix)
-//            lineProgram.set("model", Matrix4())
-//            lineProgram.set("color", Vector3(1.0f, 0.0f, 0.0f))
-//            lineMesh.draw()
-//            lineProgram.set("color", Vector3(1.0f, 1.0f, 0.0f))
-//
-//            lineMesh2.draw()
-//            lineProgram.stop()
-
-//            ui.update(mouse, timer.getDelta())
-//            ui.draw(window.width, window.height)
-
-            ShadowRenderer.render(camera, sun, entities, entityRenderer, chunks, renderDepthMap, chunkRenderer)
-
-//            depthProgram.start()
-//            depthProgram.set("scale", depthTexture.scale)
-//            depthProgram.set("translation", depthTexture.translation)
-//            depthProgram.set("aspectRatio", window.aspectRatio)
-//            depthTexture.render(depthProgram, shadows[0].shadowMap.handle)
-//            depthProgram.stop()
+            ui.update(mouse, timer.getDelta())
+            ui.draw(window.width, window.height)
 
             window.synchronize()
             timer.update()
@@ -171,11 +134,6 @@ object Main {
 
         window.destroy()
     }
-
-    val lineProgram = ShaderProgram.load("shaders/line.vert", "shaders/line.frag")
-    var lineMesh = LineMesh()
-
-    var lineMesh2 = LineMesh()
 
     private fun updateChunkManager() {
         chunkManager.updatePosition(camera.position)
@@ -204,16 +162,8 @@ object Main {
             camera.update(keyboard, mouse, timer.getDelta())
         }
 
-        if (keyboard.isPressed(Key.F)) {
-            println(camera.position)
-        }
-
         if (keyboard.isPressed(Key.UP)) {
             chunkManager.setRenderDistance(chunkManager.getRenderDistance() + 1)
-        }
-
-        if (keyboard.isPressed(Key.T)) {
-            renderDepthMap = !renderDepthMap
         }
 
         if (keyboard.isPressed(Key.DOWN)) {
@@ -248,50 +198,6 @@ object Main {
             if (mouse.isReleased(Button.LEFT)) {
                 chunkManager.stopBreaking()
             }
-
-            if (keyboard.isPressed(Key.R)) {
-                camera.position = Vector3()
-                camera.rotation = Vector3()
-            }
-
-//            if (keyboard.isPressed(Key.K)) {
-//                cube.transformation = Matrix4().translate(shadowBox.translation)
-//
-//                val segments = ArrayList<Segment>()
-//                segments += Segment(shadowBox.farLeftDown, shadowBox.farLeftUp)
-//                segments += Segment(shadowBox.farLeftDown, shadowBox.farRightDown)
-//                segments += Segment(shadowBox.farLeftDown, shadowBox.nearLeftDown)
-//
-//                segments += Segment(shadowBox.nearRightUp, shadowBox.nearRightDown)
-//                segments += Segment(shadowBox.nearRightUp, shadowBox.farRightUp)
-//                segments += Segment(shadowBox.nearRightUp, shadowBox.nearLeftUp)
-//
-//                segments += Segment(shadowBox.nearLeftUp, shadowBox.farLeftUp)
-//                segments += Segment(shadowBox.nearLeftUp, shadowBox.nearLeftDown)
-//
-//                segments += Segment(shadowBox.nearLeftDown, shadowBox.nearRightDown)
-//                segments += Segment(shadowBox.nearRightDown, shadowBox.farRightDown)
-//
-//                segments += Segment(shadowBox.farRightUp, shadowBox.farRightDown)
-//                segments += Segment(shadowBox.farRightUp, shadowBox.farLeftUp)
-//
-//                lineMesh = LineMesh(segments)
-//
-//                val segments2 = ArrayList<Segment>()
-//
-//                var offset = Vector3(shadowBox.width() / 2.0f, shadowBox.height() / 2.0f, shadowBox.depth() / 2.0f)
-//                offset = camera.position
-//
-//                segments2 += Segment(offset + Vector3(shadowBox.minX, shadowBox.minY, shadowBox.minZ), offset + Vector3(shadowBox.minX, shadowBox.minY, shadowBox.maxZ))
-//                segments2 += Segment(offset + Vector3(shadowBox.minX, shadowBox.minY, shadowBox.minZ), offset + Vector3(shadowBox.minX, shadowBox.minY, shadowBox.minZ))
-//                segments2 += Segment(offset + Vector3(shadowBox.minX, shadowBox.minY, shadowBox.minZ), offset + Vector3(shadowBox.maxX, shadowBox.minY, shadowBox.minZ))
-//                segments2 += Segment(offset + Vector3(shadowBox.maxX, shadowBox.maxY, shadowBox.maxZ), offset + Vector3(shadowBox.minX, shadowBox.maxY, shadowBox.maxZ))
-//                segments2 += Segment(offset + Vector3(shadowBox.maxX, shadowBox.maxY, shadowBox.maxZ), offset + Vector3(shadowBox.maxX, shadowBox.minY, shadowBox.maxZ))
-//                segments2 += Segment(offset + Vector3(shadowBox.maxX, shadowBox.maxY, shadowBox.maxZ), offset + Vector3(shadowBox.maxX, shadowBox.maxY, shadowBox.minZ))
-//
-//                lineMesh2 = LineMesh(segments2)
-//                println(shadowBox.translation)
-//            }
         }
     }
 }

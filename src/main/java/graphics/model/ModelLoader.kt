@@ -16,6 +16,7 @@ class ModelLoader: Loader<Model> {
     override fun load(path: String): Model {
         val scene = loadScene(path)
         val root = scene.mRootNode() ?: throw Exception("Scene does not contain root node")
+        println(path)
         val shapes = parseNode(scene, root)
 
         return Model(shapes)

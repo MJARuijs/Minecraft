@@ -14,7 +14,7 @@ class MeshLoader: Loader<Mesh> {
     override fun load(path: String): Mesh {
         val scene = loadScene(path)
         val aiMeshes = scene.mMeshes()
-
+        println("Mesh path: $path")
         return parseData(AIMesh.create(aiMeshes!!.get(0)), Matrix4())
     }
 
@@ -45,6 +45,8 @@ class MeshLoader: Loader<Mesh> {
             vertices += position.y
             vertices += position.z
 
+//            println("${position.x} ${position.y} ${position.z}")
+
             if (aiTexture != null) {
                 val texCoord = Vector2(aiTexture.x(), aiTexture.y())
                 vertices += texCoord.x
@@ -52,6 +54,7 @@ class MeshLoader: Loader<Mesh> {
 
                 containsTexCoords = true
             }
+
 
             if (aiNormal != null) {
                 val normal = Matrix3(transformation).dot(Vector3(aiNormal.x(), aiNormal.y(), aiNormal.z()))
@@ -75,7 +78,7 @@ class MeshLoader: Loader<Mesh> {
         }
 
         val attributes = arrayListOf(Attribute(0, 3))
-
+        println("$containsTexCoords $containsNormals")
         if (containsTexCoords) {
             attributes += Attribute(1, 2)
         }
@@ -84,7 +87,11 @@ class MeshLoader: Loader<Mesh> {
         }
 
         val layout = Layout(Primitive.TRIANGLE, attributes)
-
+//        for (value in vertices) {
+//            print(" $value")
+//        }
+//        println("DONE")
+//        println()
         return Mesh(layout, vertices, indices)
     }
 

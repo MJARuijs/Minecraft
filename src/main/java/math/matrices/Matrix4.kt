@@ -39,7 +39,7 @@ class Matrix4(elements: FloatArray = generateIdentityElements(4)): Matrix<Matrix
             0.0f, 1.0f, 0.0f, y,
             0.0f, 0.0f, 1.0f, z,
             0.0f, 0.0f, 0.0f, 1.0f
-    ))
+        ))
     )
 
     fun translate(vector: Vector2) = translate(vector.x, vector.y)
@@ -52,7 +52,7 @@ class Matrix4(elements: FloatArray = generateIdentityElements(4)): Matrix<Matrix
             0.0f, y, 0.0f, 0.0f,
             0.0f, 0.0f, z, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f
-    ))
+        ))
     )
 
     fun scale(vector: Vector2) = scale(vector.x, vector.y)

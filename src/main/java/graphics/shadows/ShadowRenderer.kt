@@ -13,7 +13,7 @@ import graphics.shaders.ShaderProgram
 
 object ShadowRenderer {
 
-    private const val SHADOW_MAP_SIZE = 4096
+    private const val SHADOW_MAP_SIZE = 4096 * 5
 
     private val shadowProgram = ShaderProgram.load("shaders/entities/shadowBlock.vert", "shaders/entities/shadowBlock.frag")
     private val shadowBoxes = ArrayList<ShadowBox>()
@@ -75,7 +75,6 @@ object ShadowRenderer {
             depthProgram.stop()
             depthTarget.renderToScreen()
             depthTarget.stop()
-//            renderTarget.renderToScreen()
         } else {
             renderTarget.stop()
         }

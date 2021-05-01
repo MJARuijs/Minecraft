@@ -65,8 +65,8 @@ class UserInterface(private val aspectRatio: Float) {
     }
 
     fun draw(windowWidth: Int, windowHeight: Int) {
-//        GraphicsContext.disable(GraphicsOption.DEPTH_TESTING)
-//        GraphicsContext.enable(GraphicsOption.ALPHA_BLENDING)
+        GraphicsContext.disable(GraphicsOption.DEPTH_TESTING)
+        GraphicsContext.enable(GraphicsOption.ALPHA_BLENDING)
         shaderProgram.start()
         shaderProgram.set("aspectRatio", aspectRatio)
         shaderProgram.set("viewPort", Vector2(windowWidth, windowHeight))
@@ -81,8 +81,8 @@ class UserInterface(private val aspectRatio: Float) {
             }
         }
         shaderProgram.stop()
-//        GraphicsContext.enable(GraphicsOption.DEPTH_TESTING)
-//        GraphicsContext.disable(GraphicsOption.ALPHA_BLENDING)
+        GraphicsContext.enable(GraphicsOption.DEPTH_TESTING)
+        GraphicsContext.disable(GraphicsOption.ALPHA_BLENDING)
     }
 
     fun update(mouse: Mouse, deltaTime: Float) {
