@@ -20,22 +20,17 @@ class File(location: String, createIfAbsent: Boolean = false, private val charse
     private var path: Path
 
     init {
-        try {
+        path = try {
             val loader = ClassLoader.getSystemClassLoader()
             val url = loader.getResource(location) ?: throw Exception("Could not find file: $location")
             val uri = url.toURI()
-            path = Paths.get(uri)
+            Paths.get(uri)
         } catch (exception: Exception) {
             if (createIfAbsent) {
-                println(location)
-//                File("resources/$location").createNewFile()
-                val uriTest = Thread.currentThread().contextClassLoader.getDefinedPackage("fonts/arial.fnt")
-                println(uriTest.name)
-//                File(uriTest).createNewFile()
                 val loader = ClassLoader.getSystemClassLoader()
                 val url = loader.getResource(location) ?: throw Exception("Could not find file: $location")
                 val uri = url.toURI()
-                path = Paths.get(uri)
+                Paths.get(uri)
             } else {
                 throw Exception("Could not retrieve file: $location", exception)
             }
