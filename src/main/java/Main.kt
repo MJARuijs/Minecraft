@@ -1,6 +1,6 @@
-import chunks.Chunk
+import chunks2.Chunk
 import chunks.ChunkManager
-import chunks.ChunkRenderer
+import chunks2.ChunkRenderer
 import chunks.blocks.BlockType
 import chunks.blocks.Selector
 import devices.Button
@@ -56,7 +56,7 @@ object Main {
     private val chunkRenderer = ChunkRenderer()
     private val entityRenderer = EntityRenderer()
 
-    private val selector = Selector()
+//    private val selector = Selector()
     private val skyBox = SkyBox("textures/sky/box", camera.zFar)
 
     private var chunks = ArrayList<Chunk>()
@@ -77,8 +77,7 @@ object Main {
         UniversalParameters.init(window.aspectRatio, FontLoader(window.aspectRatio).load("fonts/candara.png"))
         RenderTargetManager.init(window)
 
-        ShadowRenderer += ShadowBox(camera)
-
+//        ShadowRenderer += ShadowBox(camera)
         val crossHair = Item("crossHair", ConstraintSet(
                 CenterConstraint(ConstraintDirection.HORIZONTAL),
                 CenterConstraint(ConstraintDirection.VERTICAL),
@@ -102,9 +101,9 @@ object Main {
             processInput()
             updateChunkManager()
 
-            val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera)
-            val shadows = ShadowRenderer.render(camera, sun, entities, entityRenderer, chunks, chunkRenderer)
-            doMainRenderPass(selectedBlock, shadows)
+//            val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera)
+//            val shadows = ShadowRenderer.render(camera, sun, entities, entityRenderer, chunks, chunkRenderer)
+            doMainRenderPass()
 
             ui.update(mouse, timer.getDelta())
             ui.draw(window.width, window.height)
@@ -125,13 +124,22 @@ object Main {
         chunks = chunkManager.determineVisibleChunks()
     }
 
-    private fun doMainRenderPass(selectedBlock: Pair<Chunk, Vector3>?, shadows: List<ShadowData>) {
+//    private fun doMainRenderPass(selectedBlock: Pair<Chunk, Vector3>?, shadows: List<ShadowData>) {
+//        RenderTargetManager.getDefault().start()
+//        RenderTargetManager.getDefault().clear()
+//        skyBox.render(camera)
+//
+//        chunkRenderer.render(chunks, camera, ambientLight, sun, shadows, selectedBlock)
+//        entityRenderer.render(camera, ambientLight, sun, entities, shadows)
+//    }
+
+    private fun doMainRenderPass() {
         RenderTargetManager.getDefault().start()
         RenderTargetManager.getDefault().clear()
         skyBox.render(camera)
 
-        chunkRenderer.render(chunks, camera, ambientLight, sun, shadows, selectedBlock)
-        entityRenderer.render(camera, ambientLight, sun, entities, shadows)
+        chunkRenderer.render(chunks, camera, ambientLight, sun)
+//        entityRenderer.render(camera, ambientLight, sun, entities, shadows)
     }
 
     private fun processInput() {
@@ -147,43 +155,43 @@ object Main {
             camera.update(keyboard, mouse, timer.getDelta())
         }
 
-        if (keyboard.isPressed(Key.UP)) {
-            chunkManager.setRenderDistance(chunkManager.getRenderDistance() + 1)
-        }
-
-        if (keyboard.isPressed(Key.DOWN)) {
-            chunkManager.setRenderDistance(chunkManager.getRenderDistance() - 1)
-        }
-
-        if (mouse.isCaptured()) {
-            if (mouse.isPressed(Button.LEFT)) {
-                val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera)
-                if (selectedBlock != null) {
-                    for (chunk in chunks) {
-                        if (chunk.containsBlock(selectedBlock.second)) {
-                            chunk.startBreakingBlock(selectedBlock.second, ToolType.SHOVEL, ToolMaterial.GOLD)
-                        }
-                    }
-                }
-            }
-
-            if (mouse.isPressed(Button.RIGHT) || keyboard.isPressed(Key.V)) {
-                val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera)
-                if (selectedBlock != null) {
-                    val face = selector.determineSelectedFace(camera, selectedBlock.second) ?: return
-                    val newPosition = chunkManager.newBlockPosition(selectedBlock.second, face)
-                    for (chunk in chunks) {
-                        if (chunk.containsBlock(newPosition)) {
-                            chunk.addBlock(BlockType.GRASS, newPosition)
-                        }
-                    }
-                }
-            }
-
-            if (mouse.isReleased(Button.LEFT)) {
-                chunkManager.stopBreaking()
-            }
-        }
+//        if (keyboard.isPressed(Key.UP)) {
+//            chunkManager.setRenderDistance(chunkManager.getRenderDistance() + 1)
+//        }
+//
+//        if (keyboard.isPressed(Key.DOWN)) {
+//            chunkManager.setRenderDistance(chunkManager.getRenderDistance() - 1)
+//        }
+////
+//        if (mouse.isCaptured()) {
+//            if (mouse.isPressed(Button.LEFT)) {
+//                val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera)
+//                if (selectedBlock != null) {
+//                    for (chunk in chunks) {
+//                        if (chunk.containsBlock(selectedBlock.second)) {
+//                            chunk.startBreakingBlock(selectedBlock.second, ToolType.SHOVEL, ToolMaterial.GOLD)
+//                        }
+//                    }
+//                }
+//            }
+//
+//            if (mouse.isPressed(Button.RIGHT) || keyboard.isPressed(Key.V)) {
+//                val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera)
+//                if (selectedBlock != null) {
+//                    val face = selector.determineSelectedFace(camera, selectedBlock.second) ?: return
+//                    val newPosition = chunkManager.newBlockPosition(selectedBlock.second, face)
+//                    for (chunk in chunks) {
+//                        if (chunk.containsBlock(newPosition)) {
+//                            chunk.addBlock(BlockType.GRASS, newPosition)
+//                        }
+//                    }
+//                }
+//            }
+//
+//            if (mouse.isReleased(Button.LEFT)) {
+//                chunkManager.stopBreaking()
+//            }
+//        }
     }
 
     private fun updatePerformance(i: Int): Int {

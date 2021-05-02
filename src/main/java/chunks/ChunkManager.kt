@@ -7,6 +7,8 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.abs
 import kotlin.math.floor
+import chunks2.Chunk
+import chunks2.ChunkGenerator
 
 class ChunkManager(x: Int, z: Int) {
 
@@ -119,9 +121,9 @@ class ChunkManager(x: Int, z: Int) {
         val distance = preGenerateDistance * CHUNK_SIZE
         for (x in -distance .. distance step CHUNK_SIZE) {
             for (z in -distance .. distance step CHUNK_SIZE) {
-                Thread {
+//                Thread {
                     generate(currentX * CHUNK_SIZE + x, currentZ * CHUNK_SIZE + z)
-                }.start()
+//                }.start()
             }
         }
     }

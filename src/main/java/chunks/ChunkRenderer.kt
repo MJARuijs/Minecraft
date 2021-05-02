@@ -15,8 +15,8 @@ import resources.images.ImageCache
 
 class ChunkRenderer {
 
-    private val shaderProgram = ShaderProgram.load("shaders/entities/block.vert", "shaders/entities/block.frag")
-    private val colorCodedProgram = ShaderProgram.load("shaders/entities/colorCodedBlock.vert", "shaders/entities/colorCodedBlock.frag")
+    private val shaderProgram = ShaderProgram.load("shaders/environment/terrain/block.vert", "shaders/environment/terrain/block.frag")
+    private val colorCodedProgram = ShaderProgram.load("shaders/environment/terrain/colorCodedBlock.vert", "shaders/environment/terrain/colorCodedBlock.frag")
 
     private val blockTexture = ImageMap(ImageCache.get("textures/blocks/blocks.png"))
     private val breakTextures = ArrayList<Vector2>()

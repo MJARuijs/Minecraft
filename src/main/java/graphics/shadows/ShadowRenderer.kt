@@ -13,7 +13,7 @@ object ShadowRenderer {
 
     private const val SHADOW_MAP_SIZE = 4096 * 4
 
-    private val shadowProgram = ShaderProgram.load("shaders/entities/shadowBlock.vert", "shaders/entities/shadowBlock.frag")
+    private val shadowProgram = ShaderProgram.load("shaders/environment/terrain/shadowBlock.vert", "shaders/environment/terrain/shadowBlock.frag")
     private val shadowBoxes = ArrayList<ShadowBox>()
 
     private val renderTarget = RenderTarget(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE)
