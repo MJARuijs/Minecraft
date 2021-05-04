@@ -28,6 +28,7 @@ void main() {
     float u = int(textureIndex) % 16;
     float v = floor(textureIndex / 16);
     textureCoordinates = TEXTURE_COORDINATES[gl_VertexID % 6] * 0.0625 + vec2(u, v) * 0.0625;
+//    textureCoordinates = TEXTURE_COORDINATES[gl_VertexID % 6] * 0.0625;
 
     useOverlayColor = 0;
     for (int i = 0; i < OVERLAYED_TEXTURE_INDICES.length(); i++) {

@@ -4,45 +4,35 @@ import chunks.blocks.BlockData
 import chunks.blocks.Direction
 import chunks.blocks.FaceData
 import graphics.model.mesh.Attribute
-import graphics.model.mesh.DataType
 import graphics.model.mesh.Layout
 import graphics.model.mesh.Primitive
 import org.lwjgl.opengl.GL11.*
-import org.lwjgl.opengl.GL15.*
-import org.lwjgl.opengl.GL20.*
-import org.lwjgl.opengl.GL30.*
+import org.lwjgl.opengl.GL15.GL_STATIC_DRAW
+import org.lwjgl.opengl.GL15.glDeleteBuffers
+import org.lwjgl.opengl.GL30.glBindVertexArray
+import org.lwjgl.opengl.GL30.glDeleteVertexArrays
+import org.lwjgl.opengl.GL45.*
+import java.nio.ByteBuffer
 
 class ChunkMesh(layout: Layout, vertices: FloatArray, textureIndices: FloatArray) {
 
-    private val vao = glGenVertexArrays()
-    private val vbo = glGenBuffers()
-    private val tbo = glGenBuffers()
+    private val vao = glCreateVertexArrays()
+    private val vbo = glCreateBuffers()
+    private val tbo = glCreateBuffers()
 
-    private val count = vertices.size / 3
+    private val count = vertices.size
 
     init {
-        glBindVertexArray(vao)
-        var offset = 0L
+        glNamedBufferData(vbo, vertices, GL_STATIC_DRAW)
+        glNamedBufferData(tbo, textureIndices, GL_STATIC_DRAW)
 
-//        for (attribute in layout.attributes) {
-//            glVertexAttribPointer(attribute.location, attribute.size, attribute.dataType.code, false, 4 * layout.stride, offset)
-//            glEnableVertexAttribArray(attribute.location)
-//            offset += attribute.dataType.size * attribute.size
-//        }
+        glVertexArrayVertexBuffer(vao, 0, vbo, 0, 12)
+        glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, false, 0)
+        glEnableVertexArrayAttrib(vao, 0)
 
-        glBindBuffer(GL_ARRAY_BUFFER, vbo)
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0)
-        glEnableVertexAttribArray(0)
-        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW)
-        glBindBuffer(GL_ARRAY_BUFFER, 0)
-
-        glBindBuffer(GL_ARRAY_BUFFER, tbo)
-        glBufferData(GL_ARRAY_BUFFER, textureIndices, GL_STATIC_DRAW)
-        glVertexAttribPointer(1, 1, GL_FLOAT, false, 0, 0)
-        glEnableVertexAttribArray(1)
-        glBindBuffer(GL_ARRAY_BUFFER, 0)
-
-        glBindVertexArray(0)
+        glVertexArrayVertexBuffer(vao, 1, tbo, 0, 4)
+        glVertexArrayAttribFormat(vao, 1, 1, GL_FLOAT, false, 0)
+        glEnableVertexArrayAttrib(vao, 1)
     }
 
     fun draw() {
@@ -113,6 +103,7 @@ class ChunkMesh(layout: Layout, vertices: FloatArray, textureIndices: FloatArray
             var vertices = FloatArray(0)
             var textureIndices = FloatArray(0)
 
+
             val visibleFaces = ArrayList<FaceData>()
             for (blockData in data) {
                 val position = blockData.position
@@ -133,10 +124,37 @@ class ChunkMesh(layout: Layout, vertices: FloatArray, textureIndices: FloatArray
                     vertices += faceVertices[i + 2] + visibleFace.position.z
                     textureIndices += visibleFace.textureIndex.toFloat()
                 }
-
             }
 
-            val layout = Layout(Primitive.TRIANGLE, Attribute(0, 3), Attribute(1, 1))
+            val bytes = ByteBuffer.allocate(36)
+
+            bytes.putFloat(0.0f)
+            bytes.putFloat(0.0f)
+            bytes.putFloat(0.0f)
+
+            bytes.putFloat(1.0f)
+            bytes.putFloat(0.0f)
+            bytes.putFloat(0.0f)
+
+            bytes.putFloat(1.0f)
+            bytes.putFloat(1.0f)
+            bytes.putFloat(0.0f)
+
+            val ints = intArrayOf(
+                    0, 0, 0,
+                    1, 0, 0,
+                    1, 1, 0
+            )
+//            println(bytes.size)
+//            bytes += 1.toByte()
+//            bytes += 0.toByte()
+//            bytes += 0.toByte()
+//            bytes += 1.toByte()
+//            bytes += 1.toByte()
+//            bytes += 0.toByte()
+
+
+            val layout = Layout(Primitive.TRIANGLE, Attribute(0, 3))
 
             return ChunkMesh(layout, vertices, textureIndices)
         }
