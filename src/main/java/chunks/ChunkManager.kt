@@ -59,9 +59,9 @@ class ChunkManager(x: Int, z: Int) {
         if (chunkX != currentX || chunkZ != currentZ) {
             currentX = chunkX
             currentZ = chunkZ
-            Thread {
+//            Thread {
                 update()
-            }.start()
+//            }.start()
         }
     }
 

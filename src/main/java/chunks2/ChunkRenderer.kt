@@ -18,8 +18,7 @@ class ChunkRenderer {
     private val blockSampler = Sampler(0)
 
     fun render(chunks: List<Chunk>, camera: Camera, ambientLight: AmbientLight, sun: Sun) {
-        GraphicsContext.enable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
-        GraphicsContext.disable(GraphicsOption.FACE_CULLING)
+        GraphicsContext.enable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING)
         blockSampler.bind(blockTexture)
         shaderProgram.start()
         shaderProgram.set("projection", camera.projectionMatrix)
@@ -34,7 +33,6 @@ class ChunkRenderer {
         }
 
         shaderProgram.stop()
-        GraphicsContext.enable(GraphicsOption.FACE_CULLING)
-        GraphicsContext.disable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
+        GraphicsContext.disable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING)
     }
 }

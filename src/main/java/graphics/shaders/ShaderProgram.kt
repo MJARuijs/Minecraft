@@ -22,7 +22,7 @@ class ShaderProgram(shaders: List<Shader>): Resource {
 
     constructor(vararg shaders: Shader): this(shaders.toList())
 
-    private val handle = glCreateProgram()
+    val handle = glCreateProgram()
     private val uniforms = HashMap<String, Int>()
 
     init {

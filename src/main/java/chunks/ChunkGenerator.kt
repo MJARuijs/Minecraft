@@ -35,8 +35,6 @@ class ChunkGenerator {
             }
         }
 
-        var highestBlock = 0
-
         var i = 0
 
         for (x in 0 until CHUNK_SIZE) {
@@ -45,10 +43,6 @@ class ChunkGenerator {
                 val worldZ = chunkZ + z - HALF_CHUNK_SIZE
 
                 val height = get(x, z)
-
-                if (height > highestBlock) {
-                    highestBlock = height
-                }
 
                 if (x == 0 || x == CHUNK_SIZE - 1 || z == 0 || z == CHUNK_SIZE - 1) {
                     for (y in 0..height) {
@@ -66,7 +60,7 @@ class ChunkGenerator {
             }
         }
 
-        val chunk = Chunk(chunkX, chunkZ, biome, data.sliceArray(0 until i), highestBlock)
+        val chunk = Chunk(chunkX, chunkZ, biome, data.sliceArray(0 until i))
 
         Thread {
             val newData = FloatArray(CHUNK_SIZE * CHUNK_SIZE * MAX_HEIGHT * 21 - i)
@@ -141,14 +135,14 @@ class ChunkGenerator {
 
     private fun determineBlockType(y: Int, height: Int, biome: Biome): BlockType {
         var blockType = BlockType.STONE
-        var typeHeight = 0
-        for (type in biome.blocks) {
-            if (y > height - type.second - typeHeight) {
-                blockType = type.first
-                break
-            }
-            typeHeight += type.second
-        }
+//        var typeHeight = 0
+//        for (type in biome.blocks) {
+//            if (y > height - type.second - typeHeight) {
+//                blockType = type.first
+//                break
+//            }
+//            typeHeight += type.second
+//        }
         return blockType
     }
 

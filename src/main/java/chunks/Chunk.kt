@@ -14,7 +14,7 @@ import tools.ToolType
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
-class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private var visibleInstanceData: FloatArray, private var highestBlock: Int = 0) {
+class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private var visibleInstanceData: FloatArray) {
 
     private val instanceSize = 21
 
@@ -75,10 +75,6 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private 
     fun addBlock(type: BlockType, position: Vector3) {
         if (containsBlock(position) && position.y >= 0 && position.y < MAX_HEIGHT) {
             val newBlock = Pair(type, position)
-
-            if (position.y.toInt() >= highestBlock) {
-                highestBlock = position.y.toInt()
-            }
 
             addBlockData(newBlock)
             removeSurroundingBlocks(position)

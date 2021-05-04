@@ -11,6 +11,7 @@ import environment.sky.SkyBox
 import graphics.Camera
 import graphics.GraphicsContext
 import graphics.GraphicsOption
+import graphics.Quad
 import graphics.entity.Entity
 import graphics.entity.EntityRenderer
 import graphics.lights.AmbientLight
@@ -49,7 +50,7 @@ object Main {
     private val ambientLight = AmbientLight(Color(lightValue, lightValue, lightValue))
     private val sun = Sun(Color(directionalValue, directionalValue, directionalValue), Vector3(1.0f, 1.0f, -1.0f))
 
-    private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, 0, 0))
+    private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, 0, 1))
 //    private val player = Player(Vector3(-80, TERRAIN_HEIGHT, 0))
 
     private val chunkManager = ChunkManager(camera.position)
@@ -95,11 +96,12 @@ object Main {
         timer.reset()
         mouse.capture()
 
+        val quad = Quad()
         while (!window.isClosed()) {
             window.poll()
+            updateChunkManager()
 
             processInput()
-            updateChunkManager()
 
 //            val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera)
 //            val shadows = ShadowRenderer.render(camera, sun, entities, entityRenderer, chunks, chunkRenderer)
@@ -107,7 +109,6 @@ object Main {
 
             ui.update(mouse, timer.getDelta())
             ui.draw(window.width, window.height)
-
             window.synchronize()
             timer.update()
 
@@ -155,13 +156,13 @@ object Main {
             camera.update(keyboard, mouse, timer.getDelta())
         }
 
-//        if (keyboard.isPressed(Key.UP)) {
-//            chunkManager.setRenderDistance(chunkManager.getRenderDistance() + 1)
-//        }
-//
-//        if (keyboard.isPressed(Key.DOWN)) {
-//            chunkManager.setRenderDistance(chunkManager.getRenderDistance() - 1)
-//        }
+        if (keyboard.isPressed(Key.UP)) {
+            chunkManager.setRenderDistance(chunkManager.getRenderDistance() + 1)
+        }
+
+        if (keyboard.isPressed(Key.DOWN)) {
+            chunkManager.setRenderDistance(chunkManager.getRenderDistance() - 1)
+        }
 ////
 //        if (mouse.isCaptured()) {
 //            if (mouse.isPressed(Button.LEFT)) {
