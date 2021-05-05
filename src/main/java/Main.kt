@@ -161,6 +161,10 @@ object Main {
             printPerformance = !printPerformance
         }
 
+        if (keyboard.isPressed(Key.F)) {
+            println(camera.position)
+        }
+
         if (mouse.isCaptured()) {
             if (mouse.isPressed(Button.LEFT)) {
                 val selectedBlock = selector.getSelected(chunks, camera, camera.position)

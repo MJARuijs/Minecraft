@@ -11,7 +11,7 @@ class ChunkGenerator {
     companion object {
         const val CHUNK_SIZE = 16
         const val HALF_CHUNK_SIZE = CHUNK_SIZE / 2
-        const val TERRAIN_HEIGHT = 1
+        const val TERRAIN_HEIGHT = 15
         const val MAX_HEIGHT = 256
     }
 
@@ -55,6 +55,9 @@ class ChunkGenerator {
                 val frontHeight = get(x, z + 1)
 
                 addFaceData(worldX, height, worldZ, FaceDirection.TOP, blockType)
+                if (height == 0) {
+                    addFaceData(worldX, height, worldZ, FaceDirection.BOTTOM, blockType)
+                }
 
                 if (leftHeight < height) addFaceData(worldX, height, worldZ, FaceDirection.LEFT, blockType)
                 if (rightHeight < height) addFaceData(worldX, height, worldZ, FaceDirection.RIGHT, blockType)
@@ -78,15 +81,15 @@ class ChunkGenerator {
             }
         }
 
-        val buffer = ByteBuffer.allocateDirect(vertexCount * 4 * 4).order(ByteOrder.nativeOrder())
-        for (i in 0 until vertexCount * 3 step 3) {
-            buffer.putFloat(floats[i])
-            buffer.putFloat(floats[i + 1])
-            buffer.putFloat(floats[i + 2])
-            buffer.putInt(ints[i / 3])
-        }
+//        val buffer = ByteBuffer.allocateDirect(vertexCount * 4 * 4).order(ByteOrder.nativeOrder())
+//        for (i in 0 until vertexCount * 3 step 3) {
+//            buffer.putFloat(floats[i])
+//            buffer.putFloat(floats[i + 1])
+//            buffer.putFloat(floats[i + 2])
+//            buffer.putInt(ints[i / 3])
+//        }
 
-        val chunk = Chunk(chunkX, chunkZ, biome, blockData, buffer, vertexCount)
+        val chunk = Chunk(chunkX, chunkZ, biome, blockData, floats, ints, vertexCount)
 
         Thread {
             val newBlocks = ArrayList<BlockData>()
