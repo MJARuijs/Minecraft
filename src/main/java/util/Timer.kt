@@ -6,14 +6,14 @@ object Timer {
 
     fun start(): Int {
         val id = timers.size
-        val currentTime = System.currentTimeMillis()
+        val currentTime = System.nanoTime()
         timers += Pair(id, currentTime)
         return id
     }
 
-    fun getDelay(id: Int): Long {
-        val timer = timers.find { timer -> timer.first == id } ?: return -1
-        return (System.currentTimeMillis() - timer.second)
+    fun getDelay(id: Int): Float {
+        val timer = timers.find { timer -> timer.first == id } ?: return -1f
+        return (System.nanoTime() - timer.second).toFloat() / 1000000.0f
     }
 
 }

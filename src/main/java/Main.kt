@@ -1,9 +1,7 @@
+import chunks2.ChunkManager
 import chunks2.Chunk
-import chunks.ChunkManager
+import chunks2.ChunkGenerator
 import chunks2.ChunkRenderer
-import chunks.blocks.BlockType
-import chunks.blocks.Selector
-import devices.Button
 import devices.Key
 import devices.Timer
 import devices.Window
@@ -11,7 +9,6 @@ import environment.sky.SkyBox
 import graphics.Camera
 import graphics.GraphicsContext
 import graphics.GraphicsOption
-import graphics.Quad
 import graphics.entity.Entity
 import graphics.entity.EntityRenderer
 import graphics.lights.AmbientLight
@@ -22,8 +19,6 @@ import graphics.shadows.ShadowData
 import graphics.shadows.ShadowRenderer
 import math.Color
 import math.vectors.Vector3
-import tools.ToolMaterial
-import tools.ToolType
 import userinterface.UIColor
 import userinterface.UIPage
 import userinterface.UniversalParameters
@@ -50,7 +45,7 @@ object Main {
     private val ambientLight = AmbientLight(Color(lightValue, lightValue, lightValue))
     private val sun = Sun(Color(directionalValue, directionalValue, directionalValue), Vector3(1.0f, 1.0f, -1.0f))
 
-    private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, 0, 1))
+    private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, ChunkGenerator.TERRAIN_HEIGHT, 0))
 //    private val player = Player(Vector3(-80, TERRAIN_HEIGHT, 0))
 
     private val chunkManager = ChunkManager(camera.position)
@@ -78,7 +73,7 @@ object Main {
         UniversalParameters.init(window.aspectRatio, FontLoader(window.aspectRatio).load("fonts/candara.png"))
         RenderTargetManager.init(window)
 
-//        ShadowRenderer += ShadowBox(camera)
+        ShadowRenderer += ShadowBox(camera)
         val crossHair = Item("crossHair", ConstraintSet(
                 CenterConstraint(ConstraintDirection.HORIZONTAL),
                 CenterConstraint(ConstraintDirection.VERTICAL),
@@ -96,16 +91,15 @@ object Main {
         timer.reset()
         mouse.capture()
 
-        val quad = Quad()
         while (!window.isClosed()) {
             window.poll()
-            updateChunkManager()
 
             processInput()
+            updateChunkManager()
 
 //            val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera)
 //            val shadows = ShadowRenderer.render(camera, sun, entities, entityRenderer, chunks, chunkRenderer)
-            doMainRenderPass()
+            doMainRenderPass(arrayListOf())
 
             ui.update(mouse, timer.getDelta())
             ui.draw(window.width, window.height)
@@ -134,12 +128,12 @@ object Main {
 //        entityRenderer.render(camera, ambientLight, sun, entities, shadows)
 //    }
 
-    private fun doMainRenderPass() {
+    private fun doMainRenderPass(shadows: List<ShadowData>) {
         RenderTargetManager.getDefault().start()
         RenderTargetManager.getDefault().clear()
         skyBox.render(camera)
 
-        chunkRenderer.render(chunks, camera, ambientLight, sun)
+        chunkRenderer.render(chunks, camera, ambientLight, sun, arrayListOf())
 //        entityRenderer.render(camera, ambientLight, sun, entities, shadows)
     }
 
@@ -162,6 +156,10 @@ object Main {
 
         if (keyboard.isPressed(Key.DOWN)) {
             chunkManager.setRenderDistance(chunkManager.getRenderDistance() - 1)
+        }
+
+        if (keyboard.isPressed(Key.P)) {
+            printPerformance = !printPerformance
         }
 ////
 //        if (mouse.isCaptured()) {

@@ -1,8 +1,7 @@
-package chunks
+package chunks2
 
 import chunks.ChunkGenerator.Companion.CHUNK_SIZE
 import chunks.blocks.Face
-import math.vectors.Vector2
 import math.vectors.Vector3
 import java.util.*
 import kotlin.collections.ArrayList
@@ -119,32 +118,13 @@ class ChunkManager(x: Int, z: Int) {
 
         chunks.removeAll(removableChunks)
 
-        val requiredChunks = ArrayList<Vector2>()
-
         val distance = preGenerateDistance * CHUNK_SIZE
         for (x in -distance .. distance step CHUNK_SIZE) {
             for (z in -distance .. distance step CHUNK_SIZE) {
-                val chunkX = currentX * CHUNK_SIZE + x
-                val chunkZ = currentZ * CHUNK_SIZE + z
-                if (chunks.none { chunk -> chunk.chunkX == chunkX && chunk.chunkZ == chunkZ }) {
-                    requiredChunks += Vector2(chunkX, chunkZ)
-
-                }
-//                Thread {
-//                    generate(currentX * CHUNK_SIZE + x, currentZ * CHUNK_SIZE + z)
-//                }.start()
+                Thread {
+                    generate(currentX * CHUNK_SIZE + x, currentZ * CHUNK_SIZE + z)
+                }.start()
             }
-        }
-
-        if (requiredChunks.isEmpty()) {
-            println("No chunks required")
-        }
-
-        for (position in requiredChunks) {
-            println("generating $position")
-            Thread {
-                generate(position.x.toInt(), position.y.toInt())
-            }.start()
         }
     }
 

@@ -14,22 +14,18 @@ const int OVERLAYED_TEXTURE_INDICES[] = {
 };
 
 layout (location = 0) in vec3 inPosition;
-layout (location = 1) in float textureIndex;
-
-uniform mat4 projection;
-uniform mat4 view;
-uniform vec4 overlayColor;
+layout (location = 1) in int textureIndex;
 
 out flat int useOverlayColor;
 out vec2 textureCoordinates;
-out float passNormal;
+
+out vec3 position;
 
 void main() {
     float u = int(textureIndex) % 16;
     float v = floor(textureIndex / 16);
     textureCoordinates = TEXTURE_COORDINATES[gl_VertexID % 6] * 0.0625 + vec2(u, v) * 0.0625;
 //    textureCoordinates = TEXTURE_COORDINATES[gl_VertexID % 6] * 0.0625;
-
     useOverlayColor = 0;
     for (int i = 0; i < OVERLAYED_TEXTURE_INDICES.length(); i++) {
         if (OVERLAYED_TEXTURE_INDICES[i] == textureIndex) {
@@ -38,5 +34,5 @@ void main() {
         }
     }
 
-    gl_Position = projection * view * vec4(inPosition, 1.0);
+    position = inPosition;
 }

@@ -1,22 +1,35 @@
 package chunks2
 
-import chunks.Biome
-import chunks.blocks.BlockData
-import graphics.model.mesh.Attribute
-import graphics.model.mesh.Layout
-import graphics.model.mesh.Primitive
 import graphics.shaders.ShaderProgram
-import org.lwjgl.opengl.GL11.*
-import org.lwjgl.opengl.GL20.glBindAttribLocation
+import java.nio.ByteBuffer
 
-class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, val blocks: List<BlockData>) {
+class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, val blocks: List<BlockData>, private val positionData: ByteBuffer, private val vertexCount: Int) {
 
-    private val mesh = ChunkMesh.create(blocks)
+    private lateinit var mesh: ChunkMesh
+    private var initialized = false
+
+    private val hiddenBlocks = ArrayList<BlockData>()
+
+    private fun init() {
+        mesh = ChunkMesh(positionData, vertexCount)
+        initialized = true
+    }
 
     fun render(shaderProgram: ShaderProgram) {
         shaderProgram.set("overlayColor", biome.overlayColor)
 
-        mesh.draw()
+        if (initialized) {
+            mesh.draw()
+        } else {
+            init()
+            mesh.draw()
+        }
+    }
+
+    fun add(blockData: List<BlockData>, hiddenPositions: FloatArray, hiddenTextures: IntArray) {
+        hiddenBlocks += blockData
+//        mesh = ChunkMesh.create(blocks + hiddenBlocks)
+//        initialized = false
     }
 
     fun update() {
@@ -26,5 +39,6 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, val bloc
     fun stopBreaking() {
 
     }
+
 
 }

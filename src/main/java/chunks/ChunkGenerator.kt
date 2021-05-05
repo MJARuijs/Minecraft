@@ -11,12 +11,11 @@ class ChunkGenerator {
     companion object {
         const val CHUNK_SIZE = 16
         const val HALF_CHUNK_SIZE = CHUNK_SIZE / 2
-        const val TERRAIN_HEIGHT = 3
+        const val TERRAIN_HEIGHT = 50
         const val MAX_HEIGHT = 256
     }
 
     private val heights = Array(CHUNK_SIZE) { Array(CHUNK_SIZE) { 0 } }
-    private val data = FloatArray(CHUNK_SIZE * CHUNK_SIZE * MAX_HEIGHT * 21)
     private val positions = ArrayList<Vector3>()
 
     private var chunkX = 0
@@ -36,6 +35,7 @@ class ChunkGenerator {
         }
 
         var i = 0
+        val data = FloatArray(CHUNK_SIZE * CHUNK_SIZE * MAX_HEIGHT * 21)
 
         for (x in 0 until CHUNK_SIZE) {
             for (z in 0 until CHUNK_SIZE) {
@@ -55,7 +55,7 @@ class ChunkGenerator {
                     positions += position
 
                     i = addData(data, i, worldX, height, worldZ, height, biome)
-                    i = addBlocksBelow(x, z, i, biome)
+                    i = addBlocksBelow(data, x, z, i, biome)
                 }
             }
         }
@@ -88,7 +88,7 @@ class ChunkGenerator {
         return chunk
     }
 
-    private fun addBlocksBelow(x: Int, z: Int, i: Int, biome: Biome): Int {
+    private fun addBlocksBelow(data: FloatArray, x: Int, z: Int, i: Int, biome: Biome): Int {
         val height = get(x, z)
         val leftHeight = get(x - 1, z)
         val rightHeight = get(x + 1, z)
@@ -135,14 +135,14 @@ class ChunkGenerator {
 
     private fun determineBlockType(y: Int, height: Int, biome: Biome): BlockType {
         var blockType = BlockType.STONE
-//        var typeHeight = 0
-//        for (type in biome.blocks) {
-//            if (y > height - type.second - typeHeight) {
-//                blockType = type.first
-//                break
-//            }
-//            typeHeight += type.second
-//        }
+        var typeHeight = 0
+        for (type in biome.blocks) {
+            if (y > height - type.second - typeHeight) {
+                blockType = type.first
+                break
+            }
+            typeHeight += type.second
+        }
         return blockType
     }
 
