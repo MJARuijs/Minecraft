@@ -88,24 +88,24 @@ class ChunkGenerator {
 
         val chunk = Chunk(chunkX, chunkZ, biome, blockData, buffer, vertexCount)
 
-//        Thread {
-//            val newBlocks = ArrayList<BlockData>()
-//            for (x in 0 until CHUNK_SIZE) {
-//                for (z in 0 until CHUNK_SIZE) {
-//                    val worldX = chunkX + x - HALF_CHUNK_SIZE
-//                    val worldZ = chunkZ + z - HALF_CHUNK_SIZE
-//
-//                    val height = get(x, z)
-//
-//                    for (y in 0 until height) {
-//                        val blockType = determineBlockType(y, height, biome)
-//                        val position = Vector3(worldX, y, worldZ)
-//                        newBlocks += BlockData(blockType, position)
-//                    }
-//                }
-//            }
-////            chunk.add(newBlocks)
-//        }.start()
+        Thread {
+            val newBlocks = ArrayList<BlockData>()
+            for (x in 0 until CHUNK_SIZE) {
+                for (z in 0 until CHUNK_SIZE) {
+                    val worldX = chunkX + x - HALF_CHUNK_SIZE
+                    val worldZ = chunkZ + z - HALF_CHUNK_SIZE
+
+                    val height = get(x, z)
+
+                    for (y in 0 until height) {
+                        val blockType = determineBlockType(y, height, biome)
+                        val position = Vector3(worldX, y, worldZ)
+                        newBlocks += BlockData(blockType, position)
+                    }
+                }
+            }
+            chunk.add(newBlocks)
+        }.start()
 
         return chunk
     }

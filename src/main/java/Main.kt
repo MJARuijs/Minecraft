@@ -1,7 +1,6 @@
-import chunks2.ChunkManager
-import chunks2.Chunk
-import chunks2.ChunkGenerator
-import chunks2.ChunkRenderer
+import chunks.blocks.BlockType
+import chunks2.*
+import devices.Button
 import devices.Key
 import devices.Timer
 import devices.Window
@@ -52,7 +51,7 @@ object Main {
     private val chunkRenderer = ChunkRenderer()
     private val entityRenderer = EntityRenderer()
 
-//    private val selector = Selector()
+    private val selector = Selector()
     private val skyBox = SkyBox("textures/sky/box", camera.zFar)
 
     private var chunks = ArrayList<Chunk>()
@@ -161,9 +160,18 @@ object Main {
         if (keyboard.isPressed(Key.P)) {
             printPerformance = !printPerformance
         }
-////
-//        if (mouse.isCaptured()) {
-//            if (mouse.isPressed(Button.LEFT)) {
+
+        if (mouse.isCaptured()) {
+            if (mouse.isPressed(Button.LEFT)) {
+                val selectedBlock = selector.getSelected(chunks, camera, camera.position)
+                if (selectedBlock != null) {
+                    for (chunk in chunks) {
+                        if (chunk.containsBlock(selectedBlock)) {
+                            chunk.removeBlock(selectedBlock)
+                        }
+                    }
+                }
+
 //                val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera)
 //                if (selectedBlock != null) {
 //                    for (chunk in chunks) {
@@ -172,9 +180,11 @@ object Main {
 //                        }
 //                    }
 //                }
-//            }
-//
-//            if (mouse.isPressed(Button.RIGHT) || keyboard.isPressed(Key.V)) {
+            }
+
+            if (mouse.isPressed(Button.RIGHT) || keyboard.isPressed(Key.V)) {
+
+            }
 //                val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera)
 //                if (selectedBlock != null) {
 //                    val face = selector.determineSelectedFace(camera, selectedBlock.second) ?: return
@@ -185,7 +195,7 @@ object Main {
 //                        }
 //                    }
 //                }
-//            }
+            }
 //
 //            if (mouse.isReleased(Button.LEFT)) {
 //                chunkManager.stopBreaking()

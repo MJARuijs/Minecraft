@@ -1,8 +1,7 @@
 package chunks2
 
 import org.lwjgl.opengl.GL11.*
-import org.lwjgl.opengl.GL15.GL_STATIC_DRAW
-import org.lwjgl.opengl.GL15.glDeleteBuffers
+import org.lwjgl.opengl.GL15.*
 import org.lwjgl.opengl.GL30.glBindVertexArray
 import org.lwjgl.opengl.GL30.glDeleteVertexArrays
 import org.lwjgl.opengl.GL45.*
@@ -18,7 +17,19 @@ class ChunkMesh(vertices: ByteBuffer, vertexCount: Int) {
         vao = glCreateVertexArrays()
         vbo = glCreateBuffers()
 
-        glNamedBufferData(vbo, vertices.rewind(), GL_STATIC_DRAW)
+        glNamedBufferData(vbo, vertices.rewind(), GL_DYNAMIC_DRAW)
+
+        glVertexArrayVertexBuffer(vao, 0, vbo, 0, 16)
+        glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, false, 0)
+        glEnableVertexArrayAttrib(vao, 0)
+
+        glVertexArrayVertexBuffer(vao, 1, vbo, 12, 16)
+        glVertexArrayAttribIFormat(vao, 1, 1, GL_INT, 0)
+        glEnableVertexArrayAttrib(vao, 1)
+    }
+
+    fun updateInstanceData(data: ByteBuffer) {
+        glNamedBufferData(vbo, data.rewind(), GL_DYNAMIC_DRAW)
 
         glVertexArrayVertexBuffer(vao, 0, vbo, 0, 16)
         glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, false, 0)
