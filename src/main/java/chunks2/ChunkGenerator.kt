@@ -80,13 +80,12 @@ class ChunkGenerator {
             }
         }
 
-//        val buffer = ByteBuffer.allocateDirect(vertexCount * 4 * 4).order(ByteOrder.nativeOrder())
-//        for (i in 0 until vertexCount * 3 step 3) {
-//            buffer.putFloat(floats[i])
-//            buffer.putFloat(floats[i + 1])
-//            buffer.putFloat(floats[i + 2])
-//            buffer.putInt(ints[i / 3])
-//        }
+//        addFaceData(0, 16, 0, FaceDirection.TOP, BlockType2.GRASS)
+//        addFaceData(0, 16, 0, FaceDirection.LEFT, BlockType2.GRASS)
+//        addFaceData(0, 16, 0, FaceDirection.RIGHT, BlockType2.GRASS)
+//        addFaceData(0, 16, 0, FaceDirection.FRONT, BlockType2.GRASS)
+//        addFaceData(0, 16, 0, FaceDirection.BACK, BlockType2.GRASS)
+//        blockData += BlockData(BlockType2.GRASS, Vector3(0, 16, 0))
 
         val chunk = Chunk(chunkX, chunkZ, biome, blockData, floats, ints, vertexCount)
 
@@ -113,14 +112,14 @@ class ChunkGenerator {
     }
 
     private fun get(x: Int, z: Int): Int {
-//        if (x < 0 || z < 0 || x >= CHUNK_SIZE || z >= CHUNK_SIZE) {
-//            return noise[x + chunkX, z + chunkZ].toInt() + TERRAIN_HEIGHT
-//        }
-//        if (heights[x][z] == 0) {
-//            heights[x][z] = noise[x + chunkX, z + chunkZ].toInt() + TERRAIN_HEIGHT
-//        }
-//        return heights[x][z]
-        return TERRAIN_HEIGHT
+        if (x < 0 || z < 0 || x >= CHUNK_SIZE || z >= CHUNK_SIZE) {
+            return noise[x + chunkX, z + chunkZ].toInt() + TERRAIN_HEIGHT
+        }
+        if (heights[x][z] == 0) {
+            heights[x][z] = noise[x + chunkX, z + chunkZ].toInt() + TERRAIN_HEIGHT
+        }
+        return heights[x][z]
+//        return TERRAIN_HEIGHT
     }
 
     private fun determineBlockType(y: Int, maxY: Int, biome: Biome): BlockType2 {

@@ -41,6 +41,7 @@ class ChunkMesh(vertices: ByteBuffer, vertexCount: Int) {
     }
 
     fun draw() {
+//        glDisable(GL_CULL_FACE)
         glBindVertexArray(vao)
         glDrawArrays(GL_TRIANGLES, 0, count)
         glBindVertexArray(0)

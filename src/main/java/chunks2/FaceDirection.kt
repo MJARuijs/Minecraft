@@ -51,6 +51,16 @@ enum class FaceDirection(val normal: Vector3, val vertices: FloatArray) {
             0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 1.0f,
             0.0f, 1.0f, 1.0f
-    ))
+    ));
 
+    fun getOpposite(): FaceDirection {
+        return when (this) {
+            FRONT -> BACK
+            BACK -> FRONT
+            LEFT -> RIGHT
+            RIGHT -> LEFT
+            TOP -> BOTTOM
+            BOTTOM -> TOP
+        }
+    }
 }

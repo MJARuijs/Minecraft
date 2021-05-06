@@ -4,6 +4,7 @@ import graphics.Camera
 import math.vectors.Vector3
 import math.vectors.Vector4
 import org.joml.Math.abs
+import util.FloatUtils
 import java.lang.Float.max
 import java.lang.Float.min
 
@@ -78,7 +79,7 @@ class Selector {
 
     private fun determineFace(blockPosition: Vector3, hitPoint: Vector3): FaceDirection {
         val epsilon = 0.00005f
-        if (abs(hitPoint.x - blockPosition.x) < epsilon) {
+        if (abs(blockPosition.x - hitPoint.x) < epsilon) {
             return FaceDirection.LEFT
         }
         if (abs(hitPoint.x - (blockPosition.x + 1.0f)) < epsilon) {

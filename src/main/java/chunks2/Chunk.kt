@@ -35,40 +35,32 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, val bloc
         }
     }
 
-    fun addBlock(position: Vector3, type: BlockType2) {
-        for (direction in FaceDirection.values()) {
-            if (!containsBlock(position + direction.normal)) {
-                for (i in direction.vertices.indices step 3) {
-                    positionData += direction.vertices[i] + position.x
-                    positionData += direction.vertices[i + 1] + position.y
-                    positionData += direction.vertices[i + 2] + position.z
-                    textureData += type.textureIndices[FaceDirection.values().indexOf(direction)]
-                    vertexCount += 1
-                }
-            }
-        }
-
-        init()
-    }
-
-    fun removeBlock(position: Vector3) {
-//        blocks.removeIf { block -> block.position == position }
-        for (direction in FaceDirection.values()) {
-            if (!containsBlock(position + direction.normal)) {
-                removeFaceData(position, direction)
-            } else {
-                println("Contains neighbour ${position + direction.normal}")
-            }
-        }
-        init()
-    }
-
     fun containsBlock(position: Vector3): Boolean {
-        return blocks.any { block -> block.position == position } or containsHiddenBlock(position)
+        return containsVisibleBlock(position) or containsHiddenBlock(position)
+    }
+
+    fun containsVisibleBlock(position: Vector3): Boolean {
+        return blocks.any { block -> block.position == position }
     }
 
     fun containsHiddenBlock(position: Vector3): Boolean {
         return hiddenBlocks.any { block -> block.position == position }
+    }
+
+    fun getVisibleBlock(position: Vector3, remove: Boolean): BlockData? {
+        val blockData = blocks.find { block -> block.position == position }
+        if (remove) {
+            blocks.removeIf { block -> block.position == position }
+        }
+        return blockData
+    }
+
+    fun getHiddenBlock(position: Vector3, remove: Boolean): BlockData? {
+        val blockData = hiddenBlocks.find { block -> block.position == position }
+        if (remove) {
+            hiddenBlocks.removeIf { block -> block.position == position }
+        }
+        return blockData
     }
 
     fun getBlocksNearPosition(position: Vector3, maxDistance: Float): List<Vector3> {
@@ -93,36 +85,100 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, val bloc
 
     }
 
+    fun addBlock(position: Vector3, type: BlockType2) {
+        blocks += BlockData(type, position)
+
+        for (direction in FaceDirection.values()) {
+            if (containsBlock(position + direction.normal)) {
+                removeFaceData(position + direction.normal, direction.getOpposite())
+            }
+
+            if (!containsBlock(position + direction.normal)) {
+                for (i in direction.vertices.indices step 3) {
+                    positionData += direction.vertices[i] + position.x
+                    positionData += direction.vertices[i + 1] + position.y
+                    positionData += direction.vertices[i + 2] + position.z
+                    textureData += type[direction]
+                    vertexCount += 1
+                }
+            }
+        }
+
+        init()
+    }
+
+    fun removeBlock(position: Vector3) {
+        blocks.removeIf { block -> block.position == position }
+
+        for (direction in FaceDirection.values()) {
+            if (!containsBlock(position + direction.normal)) {
+                removeFaceData(position, direction)
+            } else {
+                val block = if (containsVisibleBlock(position + direction.normal)) {
+                    getVisibleBlock(position + direction.normal, false)!!
+                } else if (containsHiddenBlock(position + direction.normal)) {
+                    val hiddenBlock = getHiddenBlock(position + direction.normal, true)!!
+                    blocks += hiddenBlock
+                    hiddenBlock
+                } else {
+                    continue
+                }
+
+                for (i in direction.vertices.indices step 3) {
+                    positionData += block.position.x + direction.getOpposite().vertices[i]
+                    positionData += block.position.y + direction.getOpposite().vertices[i + 1]
+                    positionData += block.position.z + direction.getOpposite().vertices[i + 2]
+                    textureData += block.type[direction]
+                    vertexCount += 1
+                }
+            }
+        }
+        init()
+    }
+
     private fun removeFaceData(position: Vector3, direction: FaceDirection) {
-        var found = false
-        var index = -1
-        for (i in positionData.indices step POSITION_INSTANCE_SIZE) {
+        val indices = getIndices(position, direction)
+
+        for (index in indices) {
+            removeFaceData(index)
+        }
+    }
+
+    private fun removeFaceData(index: Int) {
+        val lastPositionIndex = positionData.size - POSITION_INSTANCE_SIZE
+        for (k in index until index + POSITION_INSTANCE_SIZE) {
+            positionData[k] = positionData[lastPositionIndex + k - index]
+        }
+
+        positionData = positionData.sliceArray(0 until positionData.size - POSITION_INSTANCE_SIZE)
+
+        val startIndex = (index / POSITION_INSTANCE_SIZE) * TEXTURE_INSTANCE_SIZE
+        val lastTextureIndex = textureData.size - TEXTURE_INSTANCE_SIZE
+        for (k in startIndex until startIndex + TEXTURE_INSTANCE_SIZE) {
+            textureData[k] = textureData[lastTextureIndex + k - startIndex]
+        }
+
+        textureData = textureData.sliceArray(0 until textureData.size - TEXTURE_INSTANCE_SIZE)
+        vertexCount -= 6
+    }
+
+    private fun getIndices(position: Vector3, direction: FaceDirection): IntArray {
+        var indices = IntArray(0)
+
+        loop@for (i in positionData.indices step POSITION_INSTANCE_SIZE) {
             for (j in direction.vertices.indices step 3) {
                 val x = direction.vertices[j] + position.x
                 val y = direction.vertices[j + 1] + position.y
                 val z = direction.vertices[j + 2] + position.z
 
-                if (positionData[i + j] != x) break
-                if (positionData[i + j + 1] != y) break
-                if (positionData[i + j + 2] != z) break
+                if (positionData[i + j] != x) continue@loop
+                if (positionData[i + j + 1] != y) continue@loop
+                if (positionData[i + j + 2] != z) continue@loop
 
-                found = true
-                index = i
             }
-            if (found) {
-                val lastPositionIndex = positionData.size - POSITION_INSTANCE_SIZE
-                for (k in index until index + POSITION_INSTANCE_SIZE) {
-                    positionData[k] = positionData[lastPositionIndex + k - index]
-                }
-
-                val startIndex = (index / POSITION_INSTANCE_SIZE) * TEXTURE_INSTANCE_SIZE
-                val lastTextureIndex = textureData.size - TEXTURE_INSTANCE_SIZE
-                for (k in startIndex until startIndex + TEXTURE_INSTANCE_SIZE) {
-                    textureData[k] = textureData[lastTextureIndex + k - startIndex]
-                }
-            }
-            found = false
+            indices += i
         }
+        return indices
     }
 
     companion object {

@@ -52,9 +52,9 @@ class ChunkManager(x: Int, z: Int) {
         val chunkX = floor((position.x + (CHUNK_SIZE / 2)) / CHUNK_SIZE).toInt()
         val chunkZ = floor((position.z + (CHUNK_SIZE / 2)) / CHUNK_SIZE).toInt()
 
-        for (chunk in chunks) {
-            chunk.update()
-        }
+//        for (chunk in chunks) {
+//            chunk.update()
+//        }
 
         if (chunkX != currentX || chunkZ != currentZ) {
             currentX = chunkX
