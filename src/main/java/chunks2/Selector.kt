@@ -3,13 +3,15 @@ package chunks2
 import graphics.Camera
 import math.vectors.Vector3
 import math.vectors.Vector4
-import kotlin.math.roundToInt
+import org.joml.Math.abs
+import java.lang.Float.max
+import java.lang.Float.min
 
 class Selector {
 
     private val maxDistance = 8.0f
 
-    fun getSelected(chunks: List<Chunk>, camera: Camera, position: Vector3): Vector3? {
+    fun getSelected(chunks: List<Chunk>, camera: Camera, position: Vector3): Pair<Vector3, FaceDirection>? {
         val clipCoords = Vector4(0f, 0f, -1f, 1f)
         val eyeSpace = camera.projectionMatrix.inverse().dot(clipCoords)
         eyeSpace.z = -1f
@@ -22,56 +24,79 @@ class Selector {
             nearbyBlocks += chunk.getBlocksNearPosition(position, maxDistance)
         }
 
+        var smallestDistance = Float.MAX_VALUE
+        var selectedPoint = Vector3()
+        var selectedBlock = Vector3()
+
         for (min in nearbyBlocks) {
-            val max = min + Vector3(1, 1, 1)
+            val hitPoint = determineBlockHit(min, position, rayDirection) ?: continue
 
-            var xMin = (min.x - position.x) / rayDirection.x
-            var xMax = (max.x - position.x) / rayDirection.x
-
-            if (xMin > xMax) {
-                val temp = xMin
-                xMin = xMax
-                xMax = temp
+            val distance = (hitPoint - position).length()
+            if (distance < smallestDistance) {
+                smallestDistance = distance
+                selectedBlock = min
+                selectedPoint = hitPoint
             }
-
-            var yMin = (min.y - position.y) / rayDirection.y
-            var yMax = (max.y - position.y) / rayDirection.y
-
-            if (yMin > yMax) {
-                val temp = yMin
-                yMin = yMax
-                yMax = temp
-            }
-
-            if (xMin > yMax || yMin > xMax) {
-                continue
-            }
-
-            if (yMin > xMin) {
-                xMin = yMin
-            }
-
-            if (yMax < xMax) {
-                xMax = yMax
-            }
-
-            var zMin = (min.z - position.z) / rayDirection.z
-            var zMax = (max.z - position.z) / rayDirection.z
-
-            if (zMin > zMax) {
-                val temp = zMin
-                zMin = zMax
-                zMax = temp
-            }
-
-            if (xMin > zMax || zMin > xMax) {
-                continue
-            }
-
-            println("YUP $min")
-            return min
         }
-        return null
+
+        if (smallestDistance == Float.MAX_VALUE) {
+            return null
+        }
+
+        val selectedFace = determineFace(selectedBlock, selectedPoint)
+
+        return Pair(selectedBlock, selectedFace)
+    }
+
+    private fun determineBlockHit(min: Vector3, position: Vector3, rayDirection: Vector3): Vector3? {
+        val max = min + Vector3(1, 1, 1)
+        var tMin = Float.MIN_VALUE
+        var tMax = Float.MAX_VALUE
+
+        for (i in 0 until 3) {
+
+            val ood = 1.0f / rayDirection[i]
+            var t1 = (min[i] - position[i]) * ood
+            var t2 = (max[i] - position[i]) * ood
+
+            if (t1 > t2) {
+                val temp = t1
+                t1 = t2
+                t2 = temp
+            }
+
+            tMin = max(tMin, t1)
+            tMax = min(tMax, t2)
+
+            if (tMin > tMax) {
+                return null
+            }
+        }
+
+        return position + rayDirection * tMin
+    }
+
+    private fun determineFace(blockPosition: Vector3, hitPoint: Vector3): FaceDirection {
+        val epsilon = 0.00005f
+        if (abs(hitPoint.x - blockPosition.x) < epsilon) {
+            return FaceDirection.LEFT
+        }
+        if (abs(hitPoint.x - (blockPosition.x + 1.0f)) < epsilon) {
+            return FaceDirection.RIGHT
+        }
+        if (abs(hitPoint.y - blockPosition.y) < epsilon) {
+            return FaceDirection.BOTTOM
+        }
+        if (abs(hitPoint.y - (blockPosition.y + 1.0f)) < epsilon) {
+            return FaceDirection.TOP
+        }
+        if (abs(hitPoint.z - blockPosition.z) < epsilon) {
+            return FaceDirection.BACK
+        }
+        if (abs(hitPoint.z - (blockPosition.z + 1.0f)) < epsilon) {
+            return FaceDirection.FRONT
+        }
+        throw IllegalArgumentException("Point $hitPoint does not belong on block: $blockPosition")
     }
 
 }

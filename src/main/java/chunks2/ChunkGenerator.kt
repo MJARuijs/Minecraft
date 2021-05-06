@@ -2,8 +2,6 @@ package chunks2
 
 import math.Noise
 import math.vectors.Vector3
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import kotlin.math.max
 
 class ChunkGenerator {
@@ -43,6 +41,7 @@ class ChunkGenerator {
 
         for (x in 0 until CHUNK_SIZE) {
             for (z in 0 until CHUNK_SIZE) {
+//        val z = 0
                 val worldX = chunkX + x - HALF_CHUNK_SIZE
                 val worldZ = chunkZ + z - HALF_CHUNK_SIZE
                 val height = get(x, z)
@@ -114,13 +113,14 @@ class ChunkGenerator {
     }
 
     private fun get(x: Int, z: Int): Int {
-        if (x < 0 || z < 0 || x >= CHUNK_SIZE || z >= CHUNK_SIZE) {
-            return noise[x + chunkX, z + chunkZ].toInt() + TERRAIN_HEIGHT
-        }
-        if (heights[x][z] == 0) {
-            heights[x][z] = noise[x + chunkX, z + chunkZ].toInt() + TERRAIN_HEIGHT
-        }
-        return heights[x][z]
+//        if (x < 0 || z < 0 || x >= CHUNK_SIZE || z >= CHUNK_SIZE) {
+//            return noise[x + chunkX, z + chunkZ].toInt() + TERRAIN_HEIGHT
+//        }
+//        if (heights[x][z] == 0) {
+//            heights[x][z] = noise[x + chunkX, z + chunkZ].toInt() + TERRAIN_HEIGHT
+//        }
+//        return heights[x][z]
+        return TERRAIN_HEIGHT
     }
 
     private fun determineBlockType(y: Int, maxY: Int, biome: Biome): BlockType2 {

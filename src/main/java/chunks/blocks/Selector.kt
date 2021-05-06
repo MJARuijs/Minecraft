@@ -106,17 +106,6 @@ class Selector {
         return closestFace
     }
 
-//    fun render(camera: Camera) {
-//        shaderProgram.start()
-//        glLineWidth(2.0f)
-//        shaderProgram.set("projection", camera.projectionMatrix)
-//        shaderProgram.set("view", camera.viewMatrix)
-//        for (mesh in meshes) {
-//            mesh.draw()
-//        }
-//        shaderProgram.stop()
-//    }
-
     private fun decodeId(r: Float, g: Float, b: Float, stepSize: Float): Int {
         if (g == 0.0f && b == 0.0f) {
             return (r / stepSize / 4.0f).roundToInt()

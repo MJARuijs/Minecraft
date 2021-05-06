@@ -162,7 +162,7 @@ object Main {
         }
 
         if (keyboard.isPressed(Key.F)) {
-            println(camera.position)
+            println(chunks.size)
         }
 
         if (mouse.isCaptured()) {
@@ -170,8 +170,8 @@ object Main {
                 val selectedBlock = selector.getSelected(chunks, camera, camera.position)
                 if (selectedBlock != null) {
                     for (chunk in chunks) {
-                        if (chunk.containsBlock(selectedBlock)) {
-                            chunk.removeBlock(selectedBlock)
+                        if (chunk.containsBlock(selectedBlock.first)) {
+                            chunk.removeBlock(selectedBlock.first)
                         }
                     }
                 }
@@ -187,19 +187,16 @@ object Main {
             }
 
             if (mouse.isPressed(Button.RIGHT) || keyboard.isPressed(Key.V)) {
-
+                val selectedBlock = selector.getSelected(chunks, camera, camera.position)
+                if (selectedBlock != null) {
+                    for (chunk in chunks) {
+                        if (chunk.containsBlock(selectedBlock.first)) {
+                            chunk.addBlock(selectedBlock.first + selectedBlock.second.normal, BlockType2.GRASS)
+                        }
+                    }
+                }
             }
-//                val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera)
-//                if (selectedBlock != null) {
-//                    val face = selector.determineSelectedFace(camera, selectedBlock.second) ?: return
-//                    val newPosition = chunkManager.newBlockPosition(selectedBlock.second, face)
-//                    for (chunk in chunks) {
-//                        if (chunk.containsBlock(newPosition)) {
-//                            chunk.addBlock(BlockType.GRASS, newPosition)
-//                        }
-//                    }
-//                }
-            }
+        }
 //
 //            if (mouse.isReleased(Button.LEFT)) {
 //                chunkManager.stopBreaking()
