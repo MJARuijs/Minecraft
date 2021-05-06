@@ -44,6 +44,7 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private 
     private fun initBlock() {
         block = Block()
         block.initAttributes()
+//        block.update(visibleInstanceData)
         initialized = true
     }
 
@@ -86,6 +87,8 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private 
         untexturedFloatData = removeData(position, untexturedFloatData, 3)
 
         addSurroundingBlocks(position)
+
+//        block.update(visibleInstanceData)
     }
 
     private fun removeData(position: Vector3, data: FloatArray, stepSize: Int): FloatArray {

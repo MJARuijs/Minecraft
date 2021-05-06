@@ -191,7 +191,7 @@ object Main {
                 if (selectedBlock != null) {
                     for (chunk in chunks) {
                         if (chunk.containsBlock(selectedBlock.first)) {
-                            chunk.addBlock(selectedBlock.first + selectedBlock.second.normal, BlockType2.GRASS)
+                            chunk.addBlock(selectedBlock.first + selectedBlock.second.normal, BlockType2.TNT)
                         }
                     }
                 }

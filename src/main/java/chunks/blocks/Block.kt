@@ -30,8 +30,12 @@ class Block {
         )
     }
 
-    fun render(instances: Int, instancePositions: FloatArray) {
+    fun update(instancePositions: FloatArray) {
         mesh.updateInstanceData(instancePositions)
+    }
+    
+    fun render(instances: Int, instancePositions: FloatArray) {
+        update(instancePositions)
         mesh.draw(instances)
     }
 

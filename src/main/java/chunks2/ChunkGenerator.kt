@@ -80,13 +80,6 @@ class ChunkGenerator {
             }
         }
 
-//        addFaceData(0, 16, 0, FaceDirection.TOP, BlockType2.GRASS)
-//        addFaceData(0, 16, 0, FaceDirection.LEFT, BlockType2.GRASS)
-//        addFaceData(0, 16, 0, FaceDirection.RIGHT, BlockType2.GRASS)
-//        addFaceData(0, 16, 0, FaceDirection.FRONT, BlockType2.GRASS)
-//        addFaceData(0, 16, 0, FaceDirection.BACK, BlockType2.GRASS)
-//        blockData += BlockData(BlockType2.GRASS, Vector3(0, 16, 0))
-
         val chunk = Chunk(chunkX, chunkZ, biome, blockData, floats, ints, vertexCount)
 
         Thread {
@@ -99,8 +92,12 @@ class ChunkGenerator {
                     val height = get(x, z)
 
                     for (y in 0 until height) {
-                        val blockType = determineBlockType(y, height, biome)
                         val position = Vector3(worldX, y, worldZ)
+                        if (positions.contains(position)) {
+                            continue
+                        }
+
+                        val blockType = determineBlockType(y, height, biome)
                         newBlocks += BlockData(blockType, position)
                     }
                 }
@@ -119,7 +116,6 @@ class ChunkGenerator {
             heights[x][z] = noise[x + chunkX, z + chunkZ].toInt() + TERRAIN_HEIGHT
         }
         return heights[x][z]
-//        return TERRAIN_HEIGHT
     }
 
     private fun determineBlockType(y: Int, maxY: Int, biome: Biome): BlockType2 {
