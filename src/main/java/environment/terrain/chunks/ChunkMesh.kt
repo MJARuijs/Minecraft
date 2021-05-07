@@ -1,4 +1,4 @@
-package chunks2
+package environment.terrain.chunks
 
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL15.*
@@ -41,7 +41,6 @@ class ChunkMesh(vertices: ByteBuffer, vertexCount: Int) {
     }
 
     fun draw() {
-//        glDisable(GL_CULL_FACE)
         glBindVertexArray(vao)
         glDrawArrays(GL_TRIANGLES, 0, count)
         glBindVertexArray(0)

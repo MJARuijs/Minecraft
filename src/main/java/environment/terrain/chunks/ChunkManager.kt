@@ -1,8 +1,7 @@
-package chunks
+package environment.terrain.chunks
 
-import chunks.ChunkGenerator.Companion.CHUNK_SIZE
-import chunks.blocks.Face
-import math.vectors.Vector2
+import environment.terrain.Biome
+import environment.terrain.chunks.ChunkGenerator.Companion.CHUNK_SIZE
 import math.vectors.Vector3
 import java.util.*
 import kotlin.collections.ArrayList
@@ -53,9 +52,9 @@ class ChunkManager(x: Int, z: Int) {
         val chunkX = floor((position.x + (CHUNK_SIZE / 2)) / CHUNK_SIZE).toInt()
         val chunkZ = floor((position.z + (CHUNK_SIZE / 2)) / CHUNK_SIZE).toInt()
 
-        for (chunk in chunks) {
-            chunk.update()
-        }
+//        for (chunk in environment.terrain.chunks) {
+//            chunk.update()
+//        }
 
         if (chunkX != currentX || chunkZ != currentZ) {
             currentX = chunkX
@@ -63,18 +62,6 @@ class ChunkManager(x: Int, z: Int) {
             Thread {
                 update()
             }.start()
-        }
-    }
-
-    fun newBlockPosition(position: Vector3, face: Face): Vector3 {
-        return when (face) {
-            Face.FRONT  -> position + Vector3(0, 0, 1)
-            Face.BACK   -> position + Vector3(0, 0, -1)
-            Face.LEFT   -> position + Vector3(-1, 0, 0)
-            Face.RIGHT  -> position + Vector3(1, 0, 0)
-            Face.TOP    -> position + Vector3(0, 1, 0)
-            Face.BOTTOM -> position + Vector3(0, -1, 0)
-            Face.ALL -> position
         }
     }
 
@@ -119,32 +106,13 @@ class ChunkManager(x: Int, z: Int) {
 
         chunks.removeAll(removableChunks)
 
-        val requiredChunks = ArrayList<Vector2>()
-
         val distance = preGenerateDistance * CHUNK_SIZE
         for (x in -distance .. distance step CHUNK_SIZE) {
             for (z in -distance .. distance step CHUNK_SIZE) {
-                val chunkX = currentX * CHUNK_SIZE + x
-                val chunkZ = currentZ * CHUNK_SIZE + z
-                if (chunks.none { chunk -> chunk.chunkX == chunkX && chunk.chunkZ == chunkZ }) {
-                    requiredChunks += Vector2(chunkX, chunkZ)
-
-                }
-//                Thread {
-//                    generate(currentX * CHUNK_SIZE + x, currentZ * CHUNK_SIZE + z)
-//                }.start()
+                Thread {
+                    generate(currentX * CHUNK_SIZE + x, currentZ * CHUNK_SIZE + z)
+                }.start()
             }
-        }
-
-        if (requiredChunks.isEmpty()) {
-            println("No chunks required")
-        }
-
-        for (position in requiredChunks) {
-            println("generating $position")
-            Thread {
-                generate(position.x.toInt(), position.y.toInt())
-            }.start()
         }
     }
 

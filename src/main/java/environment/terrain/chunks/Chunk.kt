@@ -1,5 +1,8 @@
-package chunks2
+package environment.terrain.chunks
 
+import environment.terrain.Biome
+import environment.terrain.blocks.BlockData
+import environment.terrain.blocks.BlockType
 import graphics.shaders.ShaderProgram
 import math.vectors.Vector3
 import java.nio.ByteBuffer
@@ -39,15 +42,15 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, val bloc
         return containsVisibleBlock(position) or containsHiddenBlock(position)
     }
 
-    fun containsVisibleBlock(position: Vector3): Boolean {
+    private fun containsVisibleBlock(position: Vector3): Boolean {
         return blocks.any { block -> block.position == position }
     }
 
-    fun containsHiddenBlock(position: Vector3): Boolean {
+    private fun containsHiddenBlock(position: Vector3): Boolean {
         return hiddenBlocks.any { block -> block.position == position }
     }
 
-    fun getVisibleBlock(position: Vector3, remove: Boolean): BlockData? {
+    private fun getVisibleBlock(position: Vector3, remove: Boolean): BlockData? {
         val blockData = blocks.find { block -> block.position == position }
         if (remove) {
             blocks.removeIf { block -> block.position == position }
@@ -55,7 +58,7 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, val bloc
         return blockData
     }
 
-    fun getHiddenBlock(position: Vector3, remove: Boolean): BlockData? {
+    private fun getHiddenBlock(position: Vector3, remove: Boolean): BlockData? {
         val blockData = hiddenBlocks.find { block -> block.position == position }
         if (remove) {
             hiddenBlocks.removeIf { block -> block.position == position }
@@ -85,7 +88,7 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, val bloc
 
     }
 
-    fun addBlock(position: Vector3, type: BlockType2) {
+    fun addBlock(position: Vector3, type: BlockType) {
         blocks += BlockData(type, position)
 
         for (direction in FaceDirection.values()) {
@@ -117,47 +120,24 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, val bloc
                 if (containsHiddenBlock(position + direction.normal)) {
                     val block = getHiddenBlock(position + direction.normal, true)!!
                     blocks += block
-                    println(block.type)
-
-                    for (i in direction.vertices.indices step 3) {
-                        positionData += block.position.x + direction.getOpposite().vertices[i]
-                        positionData += block.position.y + direction.getOpposite().vertices[i + 1]
-                        positionData += block.position.z + direction.getOpposite().vertices[i + 2]
-                        textureData += block.type[direction.getOpposite()]
-                        vertexCount += 1
-                    }
+                    addFaceData(block, direction)
                 } else if (containsVisibleBlock(position + direction.normal)) {
                     val block = getVisibleBlock(position + direction.normal, false)!!
-                    println(block.type)
-
-                    for (i in direction.vertices.indices step 3) {
-                        positionData += block.position.x + direction.getOpposite().vertices[i]
-                        positionData += block.position.y + direction.getOpposite().vertices[i + 1]
-                        positionData += block.position.z + direction.getOpposite().vertices[i + 2]
-                        textureData += block.type[direction.getOpposite()]
-                        vertexCount += 1
-                    }
+                    addFaceData(block, direction)
                 }
-//                val block = if (containsVisibleBlock(position + direction.normal)) {
-//                    getVisibleBlock(position + direction.normal, false)!!
-//                } else if (containsHiddenBlock(position + direction.normal)) {
-//                    val hiddenBlock = getHiddenBlock(position + direction.normal, true)!!
-//                    blocks += hiddenBlock
-//                    hiddenBlock
-//                } else {
-//                    continue
-//                }
-//
-//                for (i in direction.vertices.indices step 3) {
-//                    positionData += block.position.x + direction.getOpposite().vertices[i]
-//                    positionData += block.position.y + direction.getOpposite().vertices[i + 1]
-//                    positionData += block.position.z + direction.getOpposite().vertices[i + 2]
-//                    textureData += block.type[direction]
-//                    vertexCount += 1
-//                }
             }
         }
         init()
+    }
+
+    private fun addFaceData(block: BlockData, direction: FaceDirection) {
+        for (i in direction.vertices.indices step 3) {
+            positionData += block.position.x + direction.getOpposite().vertices[i]
+            positionData += block.position.y + direction.getOpposite().vertices[i + 1]
+            positionData += block.position.z + direction.getOpposite().vertices[i + 2]
+            textureData += block.type[direction.getOpposite()]
+            vertexCount += 1
+        }
     }
 
     private fun removeFaceData(position: Vector3, direction: FaceDirection) {

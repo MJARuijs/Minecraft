@@ -1,4 +1,4 @@
-package chunks2
+package environment.terrain.chunks
 
 import graphics.Camera
 import graphics.GraphicsContext
@@ -58,7 +58,7 @@ class ChunkRenderer {
 
     fun renderBlack(chunks: List<Chunk>, projection: Matrix4, view: Matrix4) {
         GraphicsContext.enable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
-        GraphicsContext.disable(GraphicsOption.FACE_CULLING)
+//        GraphicsContext.disable(GraphicsOption.FACE_CULLING)
 
         shadowProgram.start()
         shadowProgram.set("projection", projection)
@@ -69,7 +69,7 @@ class ChunkRenderer {
         }
 
         shadowProgram.stop()
-        GraphicsContext.enable(GraphicsOption.FACE_CULLING)
+//        GraphicsContext.enable(GraphicsOption.FACE_CULLING)
 
         GraphicsContext.disable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING)
     }

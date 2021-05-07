@@ -1,14 +1,14 @@
 package userinterface
 
 import devices.Mouse
-import graphics.Quad
+import graphics.model.Quad
 import userinterface.items.Item
 import userinterface.layout.UILayout
 import java.util.concurrent.ConcurrentHashMap
 
 abstract class UIContainer(val id: String, private val layouts: ArrayList<UILayout> = ArrayList()) {
 
-    private val postPonedItems = ConcurrentHashMap<Item, ArrayList<String>>()
+    private val postponedItems = ConcurrentHashMap<Item, ArrayList<String>>()
     private val boundlessChildren = ArrayList<String>()
     
     protected val quad = Quad()
@@ -49,10 +49,10 @@ abstract class UIContainer(val id: String, private val layouts: ArrayList<UILayo
             }
         }
         if (requiredIds.isEmpty()) {
-            postPonedItems.remove(item)
+            postponedItems.remove(item)
             add(item)
         } else {
-            postPonedItems[item] = requiredIds
+            postponedItems[item] = requiredIds
         }
     }
 
@@ -63,7 +63,7 @@ abstract class UIContainer(val id: String, private val layouts: ArrayList<UILayo
 
         positionChild(item)
 
-        for (postPonedItem in postPonedItems) {
+        for (postPonedItem in postponedItems) {
             addItemWithDependencies(postPonedItem.key, postPonedItem.value)
         }
     }

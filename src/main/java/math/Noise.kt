@@ -1,6 +1,6 @@
 package math
 
-import chunks.ChunkGenerator.Companion.CHUNK_SIZE
+import environment.terrain.chunks.ChunkGenerator.Companion.CHUNK_SIZE
 import org.joml.SimplexNoise
 import java.util.*
 

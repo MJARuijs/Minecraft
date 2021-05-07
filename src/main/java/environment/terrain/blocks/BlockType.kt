@@ -1,8 +1,9 @@
-package chunks2
+package environment.terrain.blocks
 
+import environment.terrain.chunks.FaceDirection
 import tools.ToolType
 
-enum class BlockType2(val bestTool: ToolType, val hardness: Float, val textureIndices: IntArray) {
+enum class BlockType(val bestTool: ToolType, val hardness: Float, val textureIndices: IntArray) {
 
     GRASS(ToolType.SHOVEL, 0.5f, intArrayOf(3, 3, 0, 2, 3, 3)),
     DIRT(ToolType.SHOVEL, 0.5f, intArrayOf(2, 2, 2, 2, 2, 2)),

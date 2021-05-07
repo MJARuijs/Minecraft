@@ -1,5 +1,8 @@
-package chunks2
+package environment.terrain.chunks
 
+import environment.terrain.Biome
+import environment.terrain.blocks.BlockData
+import environment.terrain.blocks.BlockType
 import math.Noise
 import math.vectors.Vector3
 import kotlin.math.max
@@ -41,7 +44,6 @@ class ChunkGenerator {
 
         for (x in 0 until CHUNK_SIZE) {
             for (z in 0 until CHUNK_SIZE) {
-//        val z = 0
                 val worldX = chunkX + x - HALF_CHUNK_SIZE
                 val worldZ = chunkZ + z - HALF_CHUNK_SIZE
                 val height = get(x, z)
@@ -118,8 +120,8 @@ class ChunkGenerator {
         return heights[x][z]
     }
 
-    private fun determineBlockType(y: Int, maxY: Int, biome: Biome): BlockType2 {
-        var blockType = BlockType2.STONE
+    private fun determineBlockType(y: Int, maxY: Int, biome: Biome): BlockType {
+        var blockType = BlockType.STONE
         var typeHeight = 0
         for (type in biome.blocks) {
             if (y > maxY - type.second - typeHeight) {
@@ -131,7 +133,7 @@ class ChunkGenerator {
         return blockType
     }
 
-    private fun addFaceData(x: Int, height: Int, z: Int, face: FaceDirection, blockType: BlockType2) {
+    private fun addFaceData(x: Int, height: Int, z: Int, face: FaceDirection, blockType: BlockType) {
         val faceVertices = face.vertices
         for (i in faceVertices.indices step 3) {
             floats += faceVertices[i] + x

@@ -1,10 +1,11 @@
-package chunks2
+package environment.terrain
 
+import environment.terrain.chunks.Chunk
+import environment.terrain.chunks.FaceDirection
 import graphics.Camera
 import math.vectors.Vector3
 import math.vectors.Vector4
 import org.joml.Math.abs
-import util.FloatUtils
 import java.lang.Float.max
 import java.lang.Float.min
 

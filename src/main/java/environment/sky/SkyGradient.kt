@@ -2,7 +2,7 @@ package environment.sky
 
 import graphics.GraphicsContext
 import graphics.GraphicsOption
-import graphics.Quad
+import graphics.model.Quad
 import graphics.samplers.Sampler
 import graphics.shaders.ShaderProgram
 import graphics.textures.ImageMap

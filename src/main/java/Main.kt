@@ -1,10 +1,11 @@
-import chunks.blocks.BlockType
-import chunks2.*
+import environment.terrain.chunks.*
 import devices.Button
 import devices.Key
 import devices.Timer
 import devices.Window
 import environment.sky.SkyBox
+import environment.terrain.Selector
+import environment.terrain.blocks.BlockType
 import graphics.Camera
 import graphics.GraphicsContext
 import graphics.GraphicsOption
@@ -45,7 +46,6 @@ object Main {
     private val sun = Sun(Color(directionalValue, directionalValue, directionalValue), Vector3(1.0f, 1.0f, -1.0f))
 
     private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, ChunkGenerator.TERRAIN_HEIGHT, 0))
-//    private val player = Player(Vector3(-80, TERRAIN_HEIGHT, 0))
 
     private val chunkManager = ChunkManager(camera.position)
     private val chunkRenderer = ChunkRenderer()
@@ -96,9 +96,9 @@ object Main {
             processInput()
             updateChunkManager()
 
-//            val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera)
-//            val shadows = ShadowRenderer.render(camera, sun, entities, entityRenderer, chunks, chunkRenderer)
-            doMainRenderPass(arrayListOf())
+//            val selectedBlock = selector.findSelectedItem(window, chunkRenderer, environment.terrain.chunks, camera)
+            val shadows = ShadowRenderer.render(camera, sun, entities, entityRenderer, chunks, chunkRenderer)
+            doMainRenderPass(shadows)
 
             ui.update(mouse, timer.getDelta())
             ui.draw(window.width, window.height)
@@ -123,7 +123,7 @@ object Main {
 //        RenderTargetManager.getDefault().clear()
 //        skyBox.render(camera)
 //
-//        chunkRenderer.render(chunks, camera, ambientLight, sun, shadows, selectedBlock)
+//        chunkRenderer.render(environment.terrain.chunks, camera, ambientLight, sun, shadows, selectedBlock)
 //        entityRenderer.render(camera, ambientLight, sun, entities, shadows)
 //    }
 
@@ -132,8 +132,8 @@ object Main {
         RenderTargetManager.getDefault().clear()
         skyBox.render(camera)
 
-        chunkRenderer.render(chunks, camera, ambientLight, sun, arrayListOf())
-//        entityRenderer.render(camera, ambientLight, sun, entities, shadows)
+        chunkRenderer.render(chunks, camera, ambientLight, sun, shadows)
+        entityRenderer.render(camera, ambientLight, sun, entities, shadows)
     }
 
     private fun processInput() {
@@ -161,10 +161,6 @@ object Main {
             printPerformance = !printPerformance
         }
 
-        if (keyboard.isPressed(Key.F)) {
-            println(chunks.size)
-        }
-
         if (mouse.isCaptured()) {
             if (mouse.isPressed(Button.LEFT)) {
                 val selectedBlock = selector.getSelected(chunks, camera, camera.position)
@@ -175,15 +171,6 @@ object Main {
                         }
                     }
                 }
-
-//                val selectedBlock = selector.findSelectedItem(window, chunkRenderer, chunks, camera)
-//                if (selectedBlock != null) {
-//                    for (chunk in chunks) {
-//                        if (chunk.containsBlock(selectedBlock.second)) {
-//                            chunk.startBreakingBlock(selectedBlock.second, ToolType.SHOVEL, ToolMaterial.GOLD)
-//                        }
-//                    }
-//                }
             }
 
             if (mouse.isPressed(Button.RIGHT) || keyboard.isPressed(Key.V)) {
@@ -191,7 +178,7 @@ object Main {
                 if (selectedBlock != null) {
                     for (chunk in chunks) {
                         if (chunk.containsBlock(selectedBlock.first)) {
-                            chunk.addBlock(selectedBlock.first + selectedBlock.second.normal, BlockType2.TNT)
+                            chunk.addBlock(selectedBlock.first + selectedBlock.second.normal, BlockType.TNT)
                         }
                     }
                 }

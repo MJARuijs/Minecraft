@@ -1,4 +1,4 @@
-package chunks2
+package environment.terrain.chunks
 
 import math.vectors.Vector3
 

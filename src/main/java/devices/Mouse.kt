@@ -24,10 +24,10 @@ class Mouse(private val window: Window) {
             this.yScroll = yScroll.toFloat()
         }
         
-        glfwSetCursorPosCallback(window.handle) { _, newX: Double, newY: Double ->
+        glfwSetCursorPosCallback(window.handle) { _, xPixel: Double, yPixel: Double ->
 
-            val scaledX = (newX - window.width / 2) / window.width
-            val scaledY = -(newY - window.height / 2) / window.height
+            val scaledX = (xPixel - window.width / 2) / window.width
+            val scaledY = -(yPixel - window.height / 2) / window.height
 
             moved = (x != scaledX) || (y != scaledY)
 
@@ -107,6 +107,9 @@ class Mouse(private val window: Window) {
         
         xScroll = 0.0f
         yScroll = 0.0f
+
+        dx = 0.0
+        dy = 0.0
 
         while (events.isNotEmpty()) {
             val event = events.pop()
