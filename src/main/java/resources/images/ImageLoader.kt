@@ -8,6 +8,7 @@ import util.File
 class ImageLoader: Loader<ImageData> {
 
     override fun load(path: String): ImageData {
+//        val scaler = ImageScaler()
 
         val file = File(path)
         val absolutePath = file.getPath()
@@ -18,8 +19,11 @@ class ImageLoader: Loader<ImageData> {
 
         val pixels = STBImage.stbi_load(absolutePath, widthBuffer, heightBuffer, channelBuffer, 4)
                 ?: throw IllegalArgumentException("Could not find texture file: $path")
-        
-        return ImageData(widthBuffer.get(), heightBuffer.get(), pixels)
+
+        val width = widthBuffer.get()
+        val height = heightBuffer.get()
+//        return scaler.scale(ImageData(width, height, pixels), width * 2, height * 2)
+        return ImageData(width, height, pixels)
     }
 
 }

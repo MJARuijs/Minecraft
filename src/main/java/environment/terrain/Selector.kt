@@ -6,6 +6,7 @@ import graphics.Camera
 import math.vectors.Vector3
 import math.vectors.Vector4
 import org.joml.Math.abs
+import util.FloatUtils
 import java.lang.Float.max
 import java.lang.Float.min
 
@@ -79,23 +80,22 @@ class Selector {
     }
 
     private fun determineFace(blockPosition: Vector3, hitPoint: Vector3): FaceDirection {
-        val epsilon = 0.00005f
-        if (abs(blockPosition.x - hitPoint.x) < epsilon) {
+        if (FloatUtils.compare(blockPosition.x, hitPoint.x)) {
             return FaceDirection.LEFT
         }
-        if (abs(hitPoint.x - (blockPosition.x + 1.0f)) < epsilon) {
+        if (FloatUtils.compare(hitPoint.x, blockPosition.x + 1.0f)) {
             return FaceDirection.RIGHT
         }
-        if (abs(hitPoint.y - blockPosition.y) < epsilon) {
+        if (FloatUtils.compare(hitPoint.y, blockPosition.y)) {
             return FaceDirection.BOTTOM
         }
-        if (abs(hitPoint.y - (blockPosition.y + 1.0f)) < epsilon) {
+        if (FloatUtils.compare(hitPoint.y, blockPosition.y + 1.0f)) {
             return FaceDirection.TOP
         }
-        if (abs(hitPoint.z - blockPosition.z) < epsilon) {
+        if (FloatUtils.compare(hitPoint.z, blockPosition.z)) {
             return FaceDirection.BACK
         }
-        if (abs(hitPoint.z - (blockPosition.z + 1.0f)) < epsilon) {
+        if (FloatUtils.compare(hitPoint.z, blockPosition.z + 1.0f)) {
             return FaceDirection.FRONT
         }
         throw IllegalArgumentException("Point $hitPoint does not belong on block: $blockPosition")

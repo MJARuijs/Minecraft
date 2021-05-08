@@ -13,7 +13,6 @@ class ChunkGenerator {
         const val CHUNK_SIZE = 16
         const val HALF_CHUNK_SIZE = CHUNK_SIZE / 2
         const val TERRAIN_HEIGHT = 15
-        const val MAX_HEIGHT = 256
     }
 
     private val heights = Array(CHUNK_SIZE) { Array(CHUNK_SIZE) { 0 } }

@@ -8,7 +8,7 @@ import math.vectors.Vector3
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, val blocks: ArrayList<BlockData>, private var positionData: FloatArray, private var textureData: IntArray, private var vertexCount: Int) {
+class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private val blocks: ArrayList<BlockData>, private var positionData: FloatArray, private var textureData: IntArray, private var vertexCount: Int) {
 
     private val hiddenBlocks = ArrayList<BlockData>()
     private var initialized = false
@@ -16,15 +16,12 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, val bloc
     private lateinit var mesh: ChunkMesh
 
     private fun init() {
-        val buffer = ByteBuffer.allocateDirect(vertexCount * 4 * 4).order(ByteOrder.nativeOrder())
-        for (i in 0 until vertexCount * 3 step 3) {
-            buffer.putFloat(positionData[i])
-            buffer.putFloat(positionData[i + 1])
-            buffer.putFloat(positionData[i + 2])
-            buffer.putInt(textureData[i / 3])
-        }
-        mesh = ChunkMesh(buffer.rewind(), vertexCount)
+        mesh = ChunkMesh(bufferData(), vertexCount)
         initialized = true
+    }
+
+    private fun updateMesh() {
+        mesh.updateInstanceData(bufferData(), vertexCount)
     }
 
     fun render(shaderProgram: ShaderProgram) {
@@ -88,6 +85,17 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, val bloc
 
     }
 
+    private fun bufferData(): ByteBuffer {
+        val buffer = ByteBuffer.allocateDirect(vertexCount * 4 * 4).order(ByteOrder.nativeOrder())
+        for (i in 0 until vertexCount * 3 step 3) {
+            buffer.putFloat(positionData[i])
+            buffer.putFloat(positionData[i + 1])
+            buffer.putFloat(positionData[i + 2])
+            buffer.putInt(textureData[i / 3])
+        }
+        return buffer
+    }
+
     fun addBlock(position: Vector3, type: BlockType) {
         blocks += BlockData(type, position)
 
@@ -107,7 +115,7 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, val bloc
             }
         }
 
-        init()
+    updateMesh()
     }
 
     fun removeBlock(position: Vector3) {
@@ -127,7 +135,7 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, val bloc
                 }
             }
         }
-        init()
+        updateMesh()
     }
 
     private fun addFaceData(block: BlockData, direction: FaceDirection) {

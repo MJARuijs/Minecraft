@@ -19,6 +19,8 @@ import graphics.shadows.ShadowData
 import graphics.shadows.ShadowRenderer
 import math.Color
 import math.vectors.Vector3
+import org.lwjgl.opengl.GL11.GL_MAX_TEXTURE_SIZE
+import org.lwjgl.opengl.GL11.glGetInteger
 import userinterface.UIColor
 import userinterface.UIPage
 import userinterface.UniversalParameters
@@ -90,6 +92,8 @@ object Main {
         timer.reset()
         mouse.capture()
 
+        println(glGetInteger(GL_MAX_TEXTURE_SIZE))
+
         while (!window.isClosed()) {
             window.poll()
 
@@ -117,15 +121,6 @@ object Main {
         chunkManager.updatePosition(camera.position)
         chunks = chunkManager.determineVisibleChunks()
     }
-
-//    private fun doMainRenderPass(selectedBlock: Pair<Chunk, Vector3>?, shadows: List<ShadowData>) {
-//        RenderTargetManager.getDefault().start()
-//        RenderTargetManager.getDefault().clear()
-//        skyBox.render(camera)
-//
-//        chunkRenderer.render(environment.terrain.chunks, camera, ambientLight, sun, shadows, selectedBlock)
-//        entityRenderer.render(camera, ambientLight, sun, entities, shadows)
-//    }
 
     private fun doMainRenderPass(shadows: List<ShadowData>) {
         RenderTargetManager.getDefault().start()
