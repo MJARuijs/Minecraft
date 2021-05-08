@@ -19,8 +19,6 @@ import graphics.shadows.ShadowData
 import graphics.shadows.ShadowRenderer
 import math.Color
 import math.vectors.Vector3
-import org.lwjgl.opengl.GL11.GL_MAX_TEXTURE_SIZE
-import org.lwjgl.opengl.GL11.glGetInteger
 import userinterface.UIColor
 import userinterface.UIPage
 import userinterface.UniversalParameters
@@ -91,8 +89,6 @@ object Main {
 
         timer.reset()
         mouse.capture()
-
-        println(glGetInteger(GL_MAX_TEXTURE_SIZE))
 
         while (!window.isClosed()) {
             window.poll()
