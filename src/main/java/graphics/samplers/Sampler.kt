@@ -1,11 +1,13 @@
 package graphics.samplers
 
+import graphics.test.TextureArray
 import graphics.textures.TextureMap
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL12.GL_TEXTURE_WRAP_R
 import org.lwjgl.opengl.GL13.GL_TEXTURE0
 import org.lwjgl.opengl.GL13.glActiveTexture
 import org.lwjgl.opengl.GL20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS
+import org.lwjgl.opengl.GL30.GL_TEXTURE_2D_ARRAY
 import org.lwjgl.opengl.GL33.glSamplerParameterf
 import org.lwjgl.opengl.GL33.glSamplerParameteri
 import org.lwjgl.opengl.GL46.GL_MAX_TEXTURE_MAX_ANISOTROPY
@@ -41,6 +43,12 @@ data class Sampler(
     fun bind(map: TextureMap) {
         glActiveTexture(GL_TEXTURE0 + index)
         glBindTexture(GL_TEXTURE_2D, map.handle)
+        glActiveTexture(GL_TEXTURE0)
+    }
+
+    fun bind(array: TextureArray) {
+        glActiveTexture(GL_TEXTURE0 + index)
+        glBindTexture(GL_TEXTURE_2D_ARRAY, array.handle)
         glActiveTexture(GL_TEXTURE0)
     }
 

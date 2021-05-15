@@ -143,19 +143,19 @@ object Main {
 //            glActiveTexture(GL_TEXTURE0)
 //            glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, textureArray.handle)
 //            glActiveTexture(GL_TEXTURE0)
-
+//
 //            testProgram.start()
 //            testProgram.set("projection", camera.projectionMatrix)
 //            testProgram.set("view", camera.viewMatrix)
 //            testProgram.set("model", Matrix4())
 //            testProgram.set("sampler", sampler.index)
-
+//
 //            entity.render(testProgram)
-
+//
 //            testProgram.stop()
 //
-//            ui.update(mouse, timer.getDelta())
-//            ui.draw(window.width, window.height)
+            ui.update(mouse, timer.getDelta())
+            ui.draw(window.width, window.height)
 
             window.synchronize()
             timer.update()

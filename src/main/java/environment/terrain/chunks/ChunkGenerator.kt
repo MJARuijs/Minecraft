@@ -138,7 +138,7 @@ class ChunkGenerator {
             floats += faceVertices[i] + x
             floats += faceVertices[i + 1] + height.toFloat()
             floats += faceVertices[i + 2] + z
-            ints += blockType.textureIndices[FaceDirection.values().indexOf(face)]
+            ints += blockType[face]
 
             vertexCount += 1
         }

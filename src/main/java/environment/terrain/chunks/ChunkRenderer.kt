@@ -38,15 +38,13 @@ class ChunkRenderer : Renderer() {
 
     override fun render(camera: Camera, ambient: AmbientLight, sun: Sun, chunks: List<Renderable>, shadows: List<ShadowData>) {
         GraphicsContext.enable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING)
+
         shaderProgram.start()
         shaderProgram.set("projection", camera.projectionMatrix)
         shaderProgram.set("view", camera.viewMatrix)
         shaderProgram.set("textureMap", blockSampler.index)
-        glActiveTexture(GL_TEXTURE0)
-        GL11.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, FaceTextures.t!!.handle)
-        glActiveTexture(GL_TEXTURE0)
 
-//        blockSampler.bind()
+        blockSampler.bind(FaceTextures.t!!)
 
         ambient.apply(shaderProgram)
         sun.apply(shaderProgram)

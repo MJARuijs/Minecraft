@@ -64,34 +64,34 @@ vec4 computeSunColor(vec4 color) {
 void main() {
 //    vec4 color = texture(textureMap, passTextureCoordinates);
     vec4 color = texture(textureMap, vec3(passTextureCoordinates, 0));
-    color.rgb *= 0.85;
+//    color.rgb *= 0.85;
 
-    if (passOverlayColor == 1) {
-        float strength = color.r;
-        color.rgb = overlayColor.rgb * strength;
-    }
+//    if (passOverlayColor == 1) {
+//        float strength = color.r;
+//        color.rgb = overlayColor.rgb * strength;
+//    }
+//
+//    vec4 ambientColor = computeAmbientColor(color);
+//    vec4 sunColor = computeSunColor(color);
+//
+//    float horizontalPixelSize = 1.0 / shadowMapSize.x;
+//    float verticalPixelSize = 1.0 / shadowMapSize.y;
+//    float shadowValue = 0.0;
+//
+//    for (int x = -samples; x < samples; x++) {
+//        for (int y = -samples; y < samples; y++) {
+//            float distanceFromLight = texture(shadowMap, passShadowCoords.xy + vec2(x * horizontalPixelSize, y * verticalPixelSize)).r;
+//            float actualDistance = passShadowCoords.z;
+//            if (actualDistance - 0.0002 > distanceFromLight) {
+//                shadowValue += 1.5;
+//            }
+//        }
+//    }
+//
+//    shadowValue /= samplesPerPixel;
+//    float lightFactor = 1.0 - (shadowValue * passShadowCoords.w);
 
-    vec4 ambientColor = computeAmbientColor(color);
-    vec4 sunColor = computeSunColor(color);
-
-    float horizontalPixelSize = 1.0 / shadowMapSize.x;
-    float verticalPixelSize = 1.0 / shadowMapSize.y;
-    float shadowValue = 0.0;
-
-    for (int x = -samples; x < samples; x++) {
-        for (int y = -samples; y < samples; y++) {
-            float distanceFromLight = texture(shadowMap, passShadowCoords.xy + vec2(x * horizontalPixelSize, y * verticalPixelSize)).r;
-            float actualDistance = passShadowCoords.z;
-            if (actualDistance - 0.0002 > distanceFromLight) {
-                shadowValue += 1.5;
-            }
-        }
-    }
-
-    shadowValue /= samplesPerPixel;
-    float lightFactor = 1.0 - (shadowValue * passShadowCoords.w);
-
-    outColor = ambientColor;
-    outColor.rgb += sunColor.rgb * lightFactor;
+    outColor = color;
+//    outColor.rgb += sunColor.rgb * lightFactor;
     outColor = clamp(outColor, 0.0, 1.0);
 }

@@ -35,7 +35,6 @@ class ForwardRenderEngine {
             }
         }
 
-
         GraphicsContext.disable(GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING, GraphicsOption.ALPHA_BLENDING)
         return forwardTarget
     }
