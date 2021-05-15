@@ -66,13 +66,13 @@ class RenderTarget(private var width: Int, private var height: Int, vararg attac
     }
 
     fun start() {
-        glBindFramebuffer(GL_FRAMEBUFFER, handle)
         glViewport(0, 0, width, height)
+        glBindFramebuffer(GL_FRAMEBUFFER, handle)
         available = false
     }
 
     fun clear() {
-        glViewport(0, 0, width, height)
+//        glViewport(0, 0, width, height)
         glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
     }
 
@@ -81,33 +81,23 @@ class RenderTarget(private var width: Int, private var height: Int, vararg attac
         available = true
     }
 
-    fun renderTo(target: RenderTarget) = renderTo(target.handle)
+    fun renderTo(renderTarget: RenderTarget, buffers: Int) {
+        renderTo(renderTarget.handle, buffers)
+    }
 
-    private fun renderTo(targetId: Int) {
+    private fun renderTo(targetId: Int, buffers: Int) {
         if (handle == targetId) {
             return
         }
 
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, handle)
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, targetId)
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, handle)
-        glReadBuffer(GL_COLOR_ATTACHMENT0)
-        glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT, GL_NEAREST)
+        glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, buffers, GL_NEAREST)
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0)
     }
 
-    private fun renderTo(targetID: Int, colorBuffer: Int = 0) {
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, targetID)
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, handle)
-
-        glReadBuffer(GL_COLOR_ATTACHMENT0 + colorBuffer)
-
-        glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT, GL_NEAREST)
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0)
-    }
-
-    fun renderToScreen() = renderTo(0)
+    fun renderToScreen() = renderTo(0, GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
 
     fun matches(width: Int, height: Int, vararg requiredTypes: AttachmentType): Boolean {
 

@@ -73,7 +73,7 @@ class ChunkManager(x: Int, z: Int) {
                 var chunk: Chunk? = null
 
                 for (i in 0 until chunks.size) {
-                    if (chunks[i].chunkX == x && chunks[i].chunkZ == z) {
+                    if (chunks[i].x == x && chunks[i].z == z) {
                         chunk = chunks[i]
                         break
                     }
@@ -97,8 +97,8 @@ class ChunkManager(x: Int, z: Int) {
     private fun update() {
         val removableChunks = ArrayList<Chunk>()
         for (chunk in chunks) {
-            val xDistance = abs(chunk.chunkX - currentX * CHUNK_SIZE)
-            val zDistance = abs(chunk.chunkZ - currentZ * CHUNK_SIZE)
+            val xDistance = abs(chunk.x - currentX * CHUNK_SIZE)
+            val zDistance = abs(chunk.z - currentZ * CHUNK_SIZE)
             if (xDistance > maxDistance * CHUNK_SIZE || zDistance > maxDistance * CHUNK_SIZE) {
                 removableChunks += chunk
             }
@@ -118,7 +118,7 @@ class ChunkManager(x: Int, z: Int) {
 
     private fun generate(x: Int, z: Int) {
         try {
-            if (chunks.none { chunk -> chunk.chunkX == x && chunk.chunkZ == z }) {
+            if (chunks.none { chunk -> chunk.x == x && chunk.z == z }) {
                 chunks += ChunkGenerator().generate(x, z, Biome.HILLS, 0)
             }
         } catch (e: ConcurrentModificationException) {

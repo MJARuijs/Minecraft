@@ -6,14 +6,15 @@ layout(location = 0) in vec2 inTexCoords;
 //uniform vec2 translation;
 //uniform float aspectRatio;
 
-out vec2 passTexCoords;
+out vec2 passTextureCoordinates;
 
 void main() {
-    passTexCoords = (inTexCoords + 1.0) / 2.0;
+//    passTextureCoordinates = inTexCoords;
+    passTextureCoordinates = (inTexCoords + 1.0) / 2.0;
 //vec2 position = passTexCoords;
 //    vec2 position = translation + scale * inTexCoords.xy;
 //    vec2 position = passTexCoords;
 //    position.x /= aspectRatio;
 
-    gl_Position = vec4(passTexCoords, 0, 1);
+    gl_Position = vec4(inTexCoords, 0, 1);
 }

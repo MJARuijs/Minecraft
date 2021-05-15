@@ -5,18 +5,23 @@ import graphics.GraphicsContext
 import graphics.GraphicsOption
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
+import graphics.renderer.Renderable
+import graphics.renderer.Renderer
 import graphics.samplers.Sampler
 import graphics.shaders.ShaderProgram
 import graphics.shadows.ShadowData
-import math.matrices.Matrix4
 import math.vectors.Vector2
 
-class EntityRenderer {
+@Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
+class EntityRenderer : Renderer() {
 
-    private val entityProgram = ShaderProgram.load("shaders/entities/entity.vert", "shaders/entities/entity.frag")
-    private val shadowProgram = ShaderProgram.load("shaders/entities/shadowEntity.vert", "shaders/entities/shadowEntity.frag")
+    private val entityProgram = ShaderProgram.load("shaders/entities/entity.vert", "shaders/entities/entityForwardRendering.frag")
+    private val deferredGeometryProgram = ShaderProgram.load("shaders/entities/entity.vert", "shaders/entities/entityGeometryPass.frag")
 
-    fun render(camera: Camera, ambient: AmbientLight, sun: Sun, entities: List<Entity>, shadows: List<ShadowData>) {
+    override val shadowProgram = ShaderProgram.load("shaders/entities/shadowEntity.vert", "shaders/entities/shadowEntity.frag")
+    override val deferredLightingProgram = ShaderProgram.load("shaders/debug/2D.vert", "shaders/entities/entityLightingPass.frag")
+
+    override fun render(camera: Camera, ambient: AmbientLight, sun: Sun, entities: List<Renderable>, shadows: List<ShadowData>) {
         GraphicsContext.enable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
 
         entityProgram.start()
@@ -53,36 +58,17 @@ class EntityRenderer {
         GraphicsContext.disable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
     }
 
-    fun renderColorLess(projection: Matrix4, view: Matrix4, entities: List<Entity>) {
-        GraphicsContext.enable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
+    override fun renderDeferredGeometry(camera: Camera, ambient: AmbientLight, entities: List<Renderable>) {
+        deferredGeometryProgram.start()
+        deferredGeometryProgram.set("projection", camera.projectionMatrix)
+        deferredGeometryProgram.set("view", camera.viewMatrix)
 
-        shadowProgram.start()
-        shadowProgram.set("projection", projection)
-        shadowProgram.set("view", view)
-
-        for (entity in entities) {
-            entity.render(shadowProgram)
-        }
-
-        shadowProgram.stop()
-
-        GraphicsContext.disable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
-    }
-
-    fun renderShadowed(projection: Matrix4, view: Matrix4, entities: List<Entity>) {
-        GraphicsContext.disable(GraphicsOption.FACE_CULLING)
-        entityProgram.start()
-
-        entityProgram.set("projection", projection)
-        entityProgram.set("view", view)
+        ambient.apply(deferredGeometryProgram)
 
         for (entity in entities) {
-            entity.render(entityProgram)
+            entity.render(deferredGeometryProgram)
         }
 
-        shadowProgram.stop()
-        GraphicsContext.enable(GraphicsOption.FACE_CULLING)
-
+        deferredGeometryProgram.stop()
     }
-
 }

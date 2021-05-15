@@ -4,6 +4,7 @@ import devices.Key
 import devices.Timer
 import devices.Window
 import environment.sky.SkyBox
+import environment.terrain.FaceTextures
 import environment.terrain.Selector
 import environment.terrain.blocks.BlockType
 import graphics.Camera
@@ -13,12 +14,24 @@ import graphics.entity.Entity
 import graphics.entity.EntityRenderer
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
+import graphics.model.ModelCache
+import graphics.renderer.RenderData
+import graphics.renderer.RenderEngine
+import graphics.renderer.RenderType
 import graphics.rendertarget.RenderTargetManager
+import graphics.samplers.Sampler
+import graphics.shaders.ShaderProgram
 import graphics.shadows.ShadowBox
-import graphics.shadows.ShadowData
-import graphics.shadows.ShadowRenderer
+import graphics.test.TextureArray
+import graphics.textures.ImageMap
 import math.Color
+import math.matrices.Matrix4
 import math.vectors.Vector3
+import org.lwjgl.opengl.GL11.*
+import org.lwjgl.opengl.GL13.GL_TEXTURE0
+import org.lwjgl.opengl.GL13.glActiveTexture
+import org.lwjgl.opengl.GL30
+import resources.images.ImageCache
 import userinterface.UIColor
 import userinterface.UIPage
 import userinterface.UniversalParameters
@@ -45,11 +58,13 @@ object Main {
     private val ambientLight = AmbientLight(Color(lightValue, lightValue, lightValue))
     private val sun = Sun(Color(directionalValue, directionalValue, directionalValue), Vector3(1.0f, 1.0f, -1.0f))
 
-    private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, ChunkGenerator.TERRAIN_HEIGHT, 0))
+    private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, 0, 0))
 
     private val chunkManager = ChunkManager(camera.position)
     private val chunkRenderer = ChunkRenderer()
     private val entityRenderer = EntityRenderer()
+
+    private val renderEngine = RenderEngine()
 
     private val selector = Selector()
     private val skyBox = SkyBox("textures/sky/box", camera.zFar)
@@ -72,7 +87,8 @@ object Main {
         UniversalParameters.init(window.aspectRatio, FontLoader(window.aspectRatio).load("fonts/candara.png"))
         RenderTargetManager.init(window)
 
-        ShadowRenderer += ShadowBox(camera)
+        renderEngine += ShadowBox(camera)
+
         val crossHair = Item("crossHair", ConstraintSet(
                 CenterConstraint(ConstraintDirection.HORIZONTAL),
                 CenterConstraint(ConstraintDirection.VERTICAL),
@@ -87,6 +103,22 @@ object Main {
 
         var i = 0
 
+        val testProgram = ShaderProgram.load("shaders/entities/entity2.vert", "shaders/entities/entity.frag")
+
+        entities += Entity(ModelCache.get("models/block.obj"), Matrix4().translate(0.0f, 20.0f, 0.0f))
+
+        val entity = Entity(ModelCache.get("models/block.obj"), Matrix4())
+
+        val grassSide = ImageCache.get("textures/blocks/colorMaps/dirt.png")
+//        val grassTop = ImageCache.get("textures/test/grass_block_top.png")
+//        val dirt = ImageCache.get("textures/test/dirt.png")
+
+        val textureArray = TextureArray(arrayListOf(grassSide))
+        val tex = ImageMap(grassSide)
+        val textures = FaceTextures.load("src/main/resources/textures/blocks/")
+
+        val sampler = Sampler(0)
+
         timer.reset()
         mouse.capture()
 
@@ -97,11 +129,34 @@ object Main {
             updateChunkManager()
 
 //            val selectedBlock = selector.findSelectedItem(window, chunkRenderer, environment.terrain.chunks, camera)
-            val shadows = ShadowRenderer.render(camera, sun, entities, entityRenderer, chunks, chunkRenderer)
-            doMainRenderPass(shadows)
 
-            ui.update(mouse, timer.getDelta())
-            ui.draw(window.width, window.height)
+            renderEngine.render(camera, ambientLight, sun, skyBox, arrayListOf(
+                    RenderData(entities, entityRenderer, RenderType.FORWARD),
+                    RenderData(chunks, chunkRenderer, RenderType.FORWARD)
+            ))
+
+//            GraphicsContext.enable(GraphicsOption.FACE_CULLING, GraphicsOption.DEPTH_TESTING)
+
+//            glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
+//            sampler.bind(tex)
+//            sampler.bind(textureArray)
+//            glActiveTexture(GL_TEXTURE0)
+//            glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, textureArray.handle)
+//            glActiveTexture(GL_TEXTURE0)
+
+//            testProgram.start()
+//            testProgram.set("projection", camera.projectionMatrix)
+//            testProgram.set("view", camera.viewMatrix)
+//            testProgram.set("model", Matrix4())
+//            testProgram.set("sampler", sampler.index)
+
+//            entity.render(testProgram)
+
+//            testProgram.stop()
+//
+//            ui.update(mouse, timer.getDelta())
+//            ui.draw(window.width, window.height)
+
             window.synchronize()
             timer.update()
 
@@ -116,15 +171,6 @@ object Main {
     private fun updateChunkManager() {
         chunkManager.updatePosition(camera.position)
         chunks = chunkManager.determineVisibleChunks()
-    }
-
-    private fun doMainRenderPass(shadows: List<ShadowData>) {
-        RenderTargetManager.getDefault().start()
-        RenderTargetManager.getDefault().clear()
-        skyBox.render(camera)
-
-        chunkRenderer.render(chunks, camera, ambientLight, sun, shadows)
-        entityRenderer.render(camera, ambientLight, sun, entities, shadows)
     }
 
     private fun processInput() {

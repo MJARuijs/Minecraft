@@ -3,7 +3,7 @@ package graphics.samplers
 import graphics.textures.TextureMap
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL12.GL_TEXTURE_WRAP_R
-import org.lwjgl.opengl.GL13
+import org.lwjgl.opengl.GL13.GL_TEXTURE0
 import org.lwjgl.opengl.GL13.glActiveTexture
 import org.lwjgl.opengl.GL20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS
 import org.lwjgl.opengl.GL33.glSamplerParameterf
@@ -39,9 +39,9 @@ data class Sampler(
     }
 
     fun bind(map: TextureMap) {
-        glActiveTexture(GL13.GL_TEXTURE0 + index)
+        glActiveTexture(GL_TEXTURE0 + index)
         glBindTexture(GL_TEXTURE_2D, map.handle)
-        glActiveTexture(GL13.GL_TEXTURE0)
+        glActiveTexture(GL_TEXTURE0)
     }
 
     fun setMagnification(magnification: SampleFilter) {

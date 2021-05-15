@@ -2,7 +2,7 @@
 
 uniform sampler2D sampler;
 
-in vec2 passTexCoords;
+in vec2 passTextureCoordinates;
 
 out vec4 outColor;
 
@@ -14,9 +14,9 @@ float linearizeDepth(float depth) {
 }
 
 void main() {
-    float depth = linearizeDepth(texture(sampler, passTexCoords).x);
-    outColor = vec4(depth, depth, depth, 1.0);
-//    outColor = texture(sampler, passTexCoords);
+//    float depth = linearizeDepth(texture(sampler, passTexCoords).x);
+//    outColor = vec4(depth, depth, depth, 1.0);
+    outColor = texture(sampler, passTextureCoordinates);
 //        outColor = vec4(1.0, 0.0, 0.0, 1.0);
 
 }

@@ -1,36 +1,54 @@
 package environment.terrain.chunks
 
+import environment.terrain.FaceTextures
 import graphics.Camera
 import graphics.GraphicsContext
 import graphics.GraphicsOption
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
+import graphics.renderer.Renderable
+import graphics.renderer.Renderer
 import graphics.samplers.Sampler
 import graphics.shaders.ShaderProgram
 import graphics.shadows.ShadowData
 import graphics.textures.ImageMap
-import math.matrices.Matrix4
 import math.vectors.Vector2
+import org.lwjgl.opengl.GL11
+import org.lwjgl.opengl.GL13.GL_TEXTURE0
+import org.lwjgl.opengl.GL13.glActiveTexture
+import org.lwjgl.opengl.GL30
 import resources.images.ImageCache
 
-class ChunkRenderer {
+@Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
+class ChunkRenderer : Renderer() {
 
-    private val shaderProgram = ShaderProgram.load("shaders/environment/terrain/chunk.vert", "shaders/environment/terrain/chunk.geom", "shaders/environment/terrain/chunk.frag")
-    private val shadowProgram = ShaderProgram.load("shaders/environment/terrain/shadowChunk.vert", "shaders/environment/terrain/shadowChunk.frag")
+    private val shaderProgram = ShaderProgram.load("shaders/environment/terrain/chunk.vert", "shaders/environment/terrain/chunk.geom", "shaders/environment/terrain/chunkForwardRendering.frag")
+    private val deferredGeometryProgram = ShaderProgram.load("shaders/environment/terrain/chunk.vert", "shaders/environment/terrain/chunk.geom", "shaders/environment/terrain/chunkGeometryPass.frag")
 
-    private val blockTexture = ImageMap(ImageCache.get("textures/blocks/blocks.png"))
+    private val blockTexture = ImageMap(ImageCache.get("textures/blocks.png"))
+
+    private val colorMaps = FaceTextures.colorMaps
+    private val normalMaps = FaceTextures.normalMaps
+
     private val blockSampler = Sampler(0)
+    private val normalSampler = Sampler(2)
 
-    fun render(chunks: List<Chunk>, camera: Camera, ambientLight: AmbientLight, sun: Sun, shadows: List<ShadowData>) {
+    override val shadowProgram = ShaderProgram.load("shaders/environment/terrain/shadowChunk.vert", "shaders/environment/terrain/shadowChunk.frag")
+    override val deferredLightingProgram = ShaderProgram.load("shaders/debug/2D.vert", "shaders/environment/terrain/chunkLightingPass.frag")
+
+    override fun render(camera: Camera, ambient: AmbientLight, sun: Sun, chunks: List<Renderable>, shadows: List<ShadowData>) {
         GraphicsContext.enable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING)
-
-        blockSampler.bind(blockTexture)
         shaderProgram.start()
         shaderProgram.set("projection", camera.projectionMatrix)
         shaderProgram.set("view", camera.viewMatrix)
         shaderProgram.set("textureMap", blockSampler.index)
+        glActiveTexture(GL_TEXTURE0)
+        GL11.glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, FaceTextures.t!!.handle)
+        glActiveTexture(GL_TEXTURE0)
 
-        ambientLight.apply(shaderProgram)
+//        blockSampler.bind()
+
+        ambient.apply(shaderProgram)
         sun.apply(shaderProgram)
 
         if (shadows.isNotEmpty()) {
@@ -56,21 +74,21 @@ class ChunkRenderer {
         GraphicsContext.disable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING)
     }
 
-    fun renderBlack(chunks: List<Chunk>, projection: Matrix4, view: Matrix4) {
-        GraphicsContext.enable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
-//        GraphicsContext.disable(GraphicsOption.FACE_CULLING)
+    override fun renderDeferredGeometry(camera: Camera, ambient: AmbientLight, chunks: List<Renderable>) {
+        blockSampler.bind(blockTexture)
 
-        shadowProgram.start()
-        shadowProgram.set("projection", projection)
-        shadowProgram.set("view", view)
+        deferredGeometryProgram.start()
+        deferredGeometryProgram.set("projection", camera.projectionMatrix)
+        deferredGeometryProgram.set("view", camera.viewMatrix)
+        deferredGeometryProgram.set("textureMap", blockSampler.index)
+
+        ambient.apply(deferredGeometryProgram)
 
         for (chunk in chunks) {
-            chunk.render(shadowProgram)
+            chunk.render(deferredGeometryProgram)
         }
 
-        shadowProgram.stop()
-//        GraphicsContext.enable(GraphicsOption.FACE_CULLING)
-
-        GraphicsContext.disable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING)
+        deferredGeometryProgram.stop()
     }
+
 }

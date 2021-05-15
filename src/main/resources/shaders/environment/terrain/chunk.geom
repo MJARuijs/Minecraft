@@ -11,9 +11,9 @@ in vec2 textureCoordinates[3];
 
 uniform mat4 projection;
 uniform mat4 view;
-uniform mat4 shadowMatrix;
-uniform vec3 cameraPosition;
-uniform float shadowDistance;
+//uniform mat4 shadowMatrix;
+//uniform vec3 cameraPosition;
+//uniform float shadowDistance;
 
 out flat int passOverlayColor;
 out vec4 passShadowCoords;
@@ -29,12 +29,12 @@ void main() {
         passTextureCoordinates = textureCoordinates[i];
         worldPosition = vec4(position[i], 1.0);
 
-        passShadowCoords = shadowMatrix * worldPosition;
-        vec3 toCameraVector = cameraPosition - worldPosition.xyz;
-        float toCameraDistance = length(toCameraVector);
-        float distance = toCameraDistance - (shadowDistance - transitionDistance);
-        distance /= transitionDistance;
-        passShadowCoords.w = clamp(1.0 - distance, 0.0, 1.0);
+//        passShadowCoords = shadowMatrix * worldPosition;
+//        vec3 toCameraVector = cameraPosition - worldPosition.xyz;
+//        float toCameraDistance = length(toCameraVector);
+//        float distance = toCameraDistance - (shadowDistance - transitionDistance);
+//        distance /= transitionDistance;
+//        passShadowCoords.w = clamp(1.0 - distance, 0.0, 1.0);
 
         gl_Position = projection * view * worldPosition;
 

@@ -3,12 +3,13 @@ package environment.terrain.chunks
 import environment.terrain.Biome
 import environment.terrain.blocks.BlockData
 import environment.terrain.blocks.BlockType
+import graphics.renderer.Renderable
 import graphics.shaders.ShaderProgram
 import math.vectors.Vector3
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private val blocks: ArrayList<BlockData>, private var positionData: FloatArray, private var textureData: IntArray, private var vertexCount: Int) {
+class Chunk(val x: Int, val z: Int, private val biome: Biome, private val blocks: ArrayList<BlockData>, private var positionData: FloatArray, private var textureData: IntArray, private var vertexCount: Int) : Renderable{
 
     private val hiddenBlocks = ArrayList<BlockData>()
     private var initialized = false
@@ -24,7 +25,7 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private 
         mesh.updateInstanceData(bufferData(), vertexCount)
     }
 
-    fun render(shaderProgram: ShaderProgram) {
+    override fun render(shaderProgram: ShaderProgram) {
         shaderProgram.set("overlayColor", biome.overlayColor)
 
         if (initialized) {
@@ -47,19 +48,13 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private 
         return hiddenBlocks.any { block -> block.position == position }
     }
 
-    private fun getVisibleBlock(position: Vector3, remove: Boolean): BlockData? {
-        val blockData = blocks.find { block -> block.position == position }
-        if (remove) {
-            blocks.removeIf { block -> block.position == position }
-        }
-        return blockData
+    private fun getVisibleBlock(position: Vector3): BlockData? {
+        return blocks.find { block -> block.position == position }
     }
 
-    private fun getHiddenBlock(position: Vector3, remove: Boolean): BlockData? {
+    private fun getHiddenBlock(position: Vector3): BlockData? {
         val blockData = hiddenBlocks.find { block -> block.position == position }
-        if (remove) {
-            hiddenBlocks.removeIf { block -> block.position == position }
-        }
+        hiddenBlocks.removeIf { block -> block.position == position }
         return blockData
     }
 
@@ -115,7 +110,7 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private 
             }
         }
 
-    updateMesh()
+        updateMesh()
     }
 
     fun removeBlock(position: Vector3) {
@@ -126,11 +121,11 @@ class Chunk(val chunkX: Int, val chunkZ: Int, private val biome: Biome, private 
                 removeFaceData(position, direction)
             } else {
                 if (containsHiddenBlock(position + direction.normal)) {
-                    val block = getHiddenBlock(position + direction.normal, true)!!
+                    val block = getHiddenBlock(position + direction.normal)!!
                     blocks += block
                     addFaceData(block, direction)
                 } else if (containsVisibleBlock(position + direction.normal)) {
-                    val block = getVisibleBlock(position + direction.normal, false)!!
+                    val block = getVisibleBlock(position + direction.normal)!!
                     addFaceData(block, direction)
                 }
             }
