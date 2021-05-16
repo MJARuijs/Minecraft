@@ -47,6 +47,7 @@ class Window(title: String, private val onWindowResized: (Int, Int) -> Unit) {
         }
 
         glfwDefaultWindowHints()
+//        glfwWindowHint(GLFW_SAMPLES, 1)
         glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE)
 //        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
 //        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE)

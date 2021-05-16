@@ -6,6 +6,7 @@ import org.lwjgl.opengl.GL14.GL_TEXTURE_LOD_BIAS
 import org.lwjgl.opengl.GL30.GL_TEXTURE_2D_ARRAY
 import org.lwjgl.opengl.GL30.glGenerateMipmap
 import org.lwjgl.opengl.GL42.glTexStorage3D
+import org.lwjgl.opengl.GL46.GL_TEXTURE_MAX_ANISOTROPY
 import resources.images.ImageData
 
 class TextureArray(val textures: List<ImageData>) {
@@ -26,6 +27,7 @@ class TextureArray(val textures: List<ImageData>) {
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
         glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_LOD_BIAS, 0f)
+        glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_ANISOTROPY, 4f)
 
         glGenerateMipmap(GL_TEXTURE_2D_ARRAY)
 

@@ -19,13 +19,21 @@ class ChunkMesh(vertices: ByteBuffer, vertexCount: Int) {
 
         glNamedBufferData(vbo, vertices.rewind(), GL_DYNAMIC_DRAW)
 
-        glVertexArrayVertexBuffer(vao, 0, vbo, 0, 16)
+        glVertexArrayVertexBuffer(vao, 0, vbo, 0, 24)
         glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, false, 0)
         glEnableVertexArrayAttrib(vao, 0)
 
-        glVertexArrayVertexBuffer(vao, 1, vbo, 12, 16)
+        glVertexArrayVertexBuffer(vao, 1, vbo, 12, 24)
         glVertexArrayAttribIFormat(vao, 1, 1, GL_INT, 0)
         glEnableVertexArrayAttrib(vao, 1)
+
+        glVertexArrayVertexBuffer(vao, 2, vbo, 16, 24)
+        glVertexArrayAttribIFormat(vao, 2, 1, GL_INT, 0)
+        glEnableVertexArrayAttrib(vao, 2)
+
+        glVertexArrayVertexBuffer(vao, 3, vbo, 20, 24)
+        glVertexArrayAttribIFormat(vao, 3, 1, GL_INT, 0)
+        glEnableVertexArrayAttrib(vao, 3)
     }
 
     fun updateInstanceData(data: ByteBuffer, vertexCount: Int) {

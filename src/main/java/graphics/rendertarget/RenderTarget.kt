@@ -2,13 +2,14 @@ package graphics.rendertarget
 
 import graphics.rendertarget.attachments.*
 import graphics.textures.ColorMap
+import graphics.textures.DataType
 import graphics.textures.DepthMap
 import org.lwjgl.BufferUtils.createIntBuffer
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL20.glDrawBuffers
 import org.lwjgl.opengl.GL30.*
 
-class RenderTarget(private var width: Int, private var height: Int, vararg attachmentTypes: AttachmentType, val handle: Int = glGenFramebuffers()) {
+class RenderTarget(private var width: Int, private var height: Int, vararg attachmentTypes: Pair<AttachmentType, DataType>, val handle: Int = glGenFramebuffers()) {
 
     private val attachments = ArrayList<Attachment>()
     private var available = true
@@ -18,9 +19,9 @@ class RenderTarget(private var width: Int, private var height: Int, vararg attac
 
         var colorCounter = 0
 
-        for (type in attachmentTypes) {
-            attachments += when (type) {
-                AttachmentType.COLOR_TEXTURE -> ColorTextureAttachment(colorCounter++, width, height)
+        for (attachmentType in attachmentTypes) {
+            attachments += when (attachmentType.first) {
+                AttachmentType.COLOR_TEXTURE -> ColorTextureAttachment(colorCounter++, width, height, attachmentType.second)
                 AttachmentType.DEPTH_TEXTURE -> DepthTextureAttachment(width, height)
                 AttachmentType.DEPTH_BUFFER -> DepthBufferAttachment(width, height)
             }
@@ -99,24 +100,24 @@ class RenderTarget(private var width: Int, private var height: Int, vararg attac
 
     fun renderToScreen() = renderTo(0, GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
 
-    fun matches(width: Int, height: Int, vararg requiredTypes: AttachmentType): Boolean {
+    fun matches(width: Int, height: Int, vararg requiredTypes: Pair<AttachmentType, DataType>): Boolean {
 
         if (width != this.width) return false
         if (height != this.height) return false
 
         if (requiredTypes.size != attachments.size) return false
 
-        val requestedColorAttachments = requiredTypes.count { it == AttachmentType.COLOR_TEXTURE }
+        val requestedColorAttachments = requiredTypes.count { it.first == AttachmentType.COLOR_TEXTURE }
         val availableColorAttachments = attachments.count { it.type == AttachmentType.COLOR_TEXTURE }
 
         if (availableColorAttachments != requestedColorAttachments) return false
 
         for (type in requiredTypes) {
-            attachments.find { it.type == type } ?: return false
+            attachments.find { it.type == type.first } ?: return false
         }
 
         for (attachment in attachments) {
-            requiredTypes.find { it == attachment.type } ?: return false
+            requiredTypes.find { it.first == attachment.type } ?: return false
         }
 
         return true

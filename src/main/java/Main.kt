@@ -1,4 +1,3 @@
-import environment.terrain.chunks.*
 import devices.Button
 import devices.Key
 import devices.Timer
@@ -7,6 +6,10 @@ import environment.sky.SkyBox
 import environment.terrain.FaceTextures
 import environment.terrain.Selector
 import environment.terrain.blocks.BlockType
+import environment.terrain.chunks.Chunk
+import environment.terrain.chunks.ChunkGenerator.Companion.TERRAIN_HEIGHT
+import environment.terrain.chunks.ChunkManager
+import environment.terrain.chunks.ChunkRenderer
 import graphics.Camera
 import graphics.GraphicsContext
 import graphics.GraphicsOption
@@ -19,19 +22,12 @@ import graphics.renderer.RenderData
 import graphics.renderer.RenderEngine
 import graphics.renderer.RenderType
 import graphics.rendertarget.RenderTargetManager
-import graphics.samplers.Sampler
-import graphics.shaders.ShaderProgram
 import graphics.shadows.ShadowBox
-import graphics.test.TextureArray
-import graphics.textures.ImageMap
 import math.Color
 import math.matrices.Matrix4
 import math.vectors.Vector3
-import org.lwjgl.opengl.GL11.*
-import org.lwjgl.opengl.GL13.GL_TEXTURE0
-import org.lwjgl.opengl.GL13.glActiveTexture
-import org.lwjgl.opengl.GL30
-import resources.images.ImageCache
+import org.lwjgl.opengl.GL11.glGetInteger
+import org.lwjgl.opengl.GL46.GL_MAX_TEXTURE_MAX_ANISOTROPY
 import userinterface.UIColor
 import userinterface.UIPage
 import userinterface.UniversalParameters
@@ -55,10 +51,12 @@ object Main {
     private const val lightValue = 0.75f
     private const val directionalValue = 0.5f
 
-    private val ambientLight = AmbientLight(Color(lightValue, lightValue, lightValue))
-    private val sun = Sun(Color(directionalValue, directionalValue, directionalValue), Vector3(1.0f, 1.0f, -1.0f))
+    private val faceTextures = FaceTextures("src/main/resources/textures/blocks/")
 
-    private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, 0, 0))
+    private val ambientLight = AmbientLight(Color(lightValue, lightValue, lightValue))
+    private val sun = Sun(Color(directionalValue, directionalValue, directionalValue), Vector3(0.0f, 1.0f, -1.0f))
+
+    private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, TERRAIN_HEIGHT + 3, 0))
 
     private val chunkManager = ChunkManager(camera.position)
     private val chunkRenderer = ChunkRenderer()
@@ -103,21 +101,7 @@ object Main {
 
         var i = 0
 
-        val testProgram = ShaderProgram.load("shaders/entities/entity2.vert", "shaders/entities/entity.frag")
-
         entities += Entity(ModelCache.get("models/block.obj"), Matrix4().translate(0.0f, 20.0f, 0.0f))
-
-        val entity = Entity(ModelCache.get("models/block.obj"), Matrix4())
-
-        val grassSide = ImageCache.get("textures/blocks/colorMaps/dirt.png")
-//        val grassTop = ImageCache.get("textures/test/grass_block_top.png")
-//        val dirt = ImageCache.get("textures/test/dirt.png")
-
-        val textureArray = TextureArray(arrayListOf(grassSide))
-        val tex = ImageMap(grassSide)
-        val textures = FaceTextures.load("src/main/resources/textures/blocks/")
-
-        val sampler = Sampler(0)
 
         timer.reset()
         mouse.capture()
@@ -131,29 +115,9 @@ object Main {
 //            val selectedBlock = selector.findSelectedItem(window, chunkRenderer, environment.terrain.chunks, camera)
 
             renderEngine.render(camera, ambientLight, sun, skyBox, arrayListOf(
-                    RenderData(entities, entityRenderer, RenderType.FORWARD),
-                    RenderData(chunks, chunkRenderer, RenderType.FORWARD)
+                    RenderData(chunks, chunkRenderer, RenderType.DEFERRED)
             ))
 
-//            GraphicsContext.enable(GraphicsOption.FACE_CULLING, GraphicsOption.DEPTH_TESTING)
-
-//            glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
-//            sampler.bind(tex)
-//            sampler.bind(textureArray)
-//            glActiveTexture(GL_TEXTURE0)
-//            glBindTexture(GL30.GL_TEXTURE_2D_ARRAY, textureArray.handle)
-//            glActiveTexture(GL_TEXTURE0)
-//
-//            testProgram.start()
-//            testProgram.set("projection", camera.projectionMatrix)
-//            testProgram.set("view", camera.viewMatrix)
-//            testProgram.set("model", Matrix4())
-//            testProgram.set("sampler", sampler.index)
-//
-//            entity.render(testProgram)
-//
-//            testProgram.stop()
-//
             ui.update(mouse, timer.getDelta())
             ui.draw(window.width, window.height)
 
@@ -215,7 +179,7 @@ object Main {
                 if (selectedBlock != null) {
                     for (chunk in chunks) {
                         if (chunk.containsBlock(selectedBlock.first)) {
-                            chunk.addBlock(selectedBlock.first + selectedBlock.second.normal, BlockType.TNT)
+                            chunk.addBlock(selectedBlock.first + selectedBlock.second.normal, BlockType.DIAMOND_ORE)
                         }
                     }
                 }

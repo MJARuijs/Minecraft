@@ -119,7 +119,7 @@ class ChunkManager(x: Int, z: Int) {
     private fun generate(x: Int, z: Int) {
         try {
             if (chunks.none { chunk -> chunk.x == x && chunk.z == z }) {
-                chunks += ChunkGenerator().generate(x, z, Biome.HILLS, 0)
+                chunks += ChunkGenerator().generate(x, z, Biome.PLANES, 0)
             }
         } catch (e: ConcurrentModificationException) {
             generate(x, z)

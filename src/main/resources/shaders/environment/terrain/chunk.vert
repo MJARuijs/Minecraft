@@ -10,20 +10,26 @@ const vec2 TEXTURE_COORDINATES[6] = {
 };
 
 const int OVERLAYED_TEXTURE_INDICES[] = {
-    0, 38, 39, 40, 52, 53, 56, 76
+    204
 };
 
 layout (location = 0) in vec3 inPosition;
 layout (location = 1) in int textureIndex;
+layout (location = 2) in int normalIndex;
+layout (location = 3) in int specularIndex;
 
 out flat int useOverlayColor;
+out flat int passTextureIndex;
+out flat int passNormalIndex;
+out flat int passSpecularIndex;
 out vec2 textureCoordinates;
 
 out vec3 position;
 
 void main() {
-//    float u = int(textureIndex) % 16;
-//    float v = floor(textureIndex / 16);
+    passTextureIndex = textureIndex;
+    passNormalIndex = normalIndex;
+    passSpecularIndex = specularIndex;
     textureCoordinates = TEXTURE_COORDINATES[gl_VertexID % 6];
 
     useOverlayColor = 0;

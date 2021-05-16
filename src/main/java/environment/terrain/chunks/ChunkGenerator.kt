@@ -25,7 +25,9 @@ class ChunkGenerator {
     private lateinit var noise: Noise
 
     private var floats = FloatArray(0)
-    private var ints = IntArray(0)
+    private var textureIndices = IntArray(0)
+    private var normalIndices = IntArray(0)
+    private var specularIndices = IntArray(0)
     private var vertexCount = 0
 
     fun generate(chunkX: Int, chunkZ: Int, biome: Biome, seed: Long): Chunk {
@@ -81,7 +83,7 @@ class ChunkGenerator {
             }
         }
 
-        val chunk = Chunk(chunkX, chunkZ, biome, blockData, floats, ints, vertexCount)
+        val chunk = Chunk(chunkX, chunkZ, biome, blockData, floats, textureIndices, normalIndices, specularIndices, vertexCount)
 
         Thread {
             val newBlocks = ArrayList<BlockData>()
@@ -138,7 +140,9 @@ class ChunkGenerator {
             floats += faceVertices[i] + x
             floats += faceVertices[i + 1] + height.toFloat()
             floats += faceVertices[i + 2] + z
-            ints += blockType[face]
+            textureIndices += blockType.getTextureIndex(face)
+            normalIndices += blockType.getNormalIndex(face)
+            specularIndices += blockType.getSpecularIndex(face)
 
             vertexCount += 1
         }

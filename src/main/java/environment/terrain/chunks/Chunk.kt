@@ -9,7 +9,7 @@ import math.vectors.Vector3
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-class Chunk(val x: Int, val z: Int, private val biome: Biome, private val blocks: ArrayList<BlockData>, private var positionData: FloatArray, private var textureData: IntArray, private var vertexCount: Int) : Renderable{
+class Chunk(val x: Int, val z: Int, private val biome: Biome, private val blocks: ArrayList<BlockData>, private var positionData: FloatArray, private var textureIndices: IntArray, private var normalIndices: IntArray, private var specularIndices: IntArray, private var vertexCount: Int) : Renderable{
 
     private val hiddenBlocks = ArrayList<BlockData>()
     private var initialized = false
@@ -81,12 +81,14 @@ class Chunk(val x: Int, val z: Int, private val biome: Biome, private val blocks
     }
 
     private fun bufferData(): ByteBuffer {
-        val buffer = ByteBuffer.allocateDirect(vertexCount * 4 * 4).order(ByteOrder.nativeOrder())
+        val buffer = ByteBuffer.allocateDirect(vertexCount * 4 * 6).order(ByteOrder.nativeOrder())
         for (i in 0 until vertexCount * 3 step 3) {
             buffer.putFloat(positionData[i])
             buffer.putFloat(positionData[i + 1])
             buffer.putFloat(positionData[i + 2])
-            buffer.putInt(textureData[i / 3])
+            buffer.putInt(textureIndices[i / 3])
+            buffer.putInt(normalIndices[i / 3])
+            buffer.putInt(specularIndices[i / 3])
         }
         return buffer
     }
@@ -104,7 +106,9 @@ class Chunk(val x: Int, val z: Int, private val biome: Biome, private val blocks
                     positionData += direction.vertices[i] + position.x
                     positionData += direction.vertices[i + 1] + position.y
                     positionData += direction.vertices[i + 2] + position.z
-                    textureData += type[direction]
+                    textureIndices += type.getTextureIndex(direction)
+                    normalIndices += type.getNormalIndex(direction)
+                    specularIndices += type.getSpecularIndex(direction)
                     vertexCount += 1
                 }
             }
@@ -138,7 +142,9 @@ class Chunk(val x: Int, val z: Int, private val biome: Biome, private val blocks
             positionData += block.position.x + direction.getOpposite().vertices[i]
             positionData += block.position.y + direction.getOpposite().vertices[i + 1]
             positionData += block.position.z + direction.getOpposite().vertices[i + 2]
-            textureData += block.type[direction.getOpposite()]
+            textureIndices += block.type.getTextureIndex(direction.getOpposite())
+            normalIndices += block.type.getNormalIndex(direction.getOpposite())
+            specularIndices += block.type.getSpecularIndex(direction.getOpposite())
             vertexCount += 1
         }
     }
@@ -160,12 +166,28 @@ class Chunk(val x: Int, val z: Int, private val biome: Biome, private val blocks
         positionData = positionData.sliceArray(0 until positionData.size - POSITION_INSTANCE_SIZE)
 
         val startIndex = (index / POSITION_INSTANCE_SIZE) * TEXTURE_INSTANCE_SIZE
-        val lastTextureIndex = textureData.size - TEXTURE_INSTANCE_SIZE
+        val lastTextureIndex = textureIndices.size - TEXTURE_INSTANCE_SIZE
         for (k in startIndex until startIndex + TEXTURE_INSTANCE_SIZE) {
-            textureData[k] = textureData[lastTextureIndex + k - startIndex]
+            textureIndices[k] = textureIndices[lastTextureIndex + k - startIndex]
         }
 
-        textureData = textureData.sliceArray(0 until textureData.size - TEXTURE_INSTANCE_SIZE)
+        textureIndices = textureIndices.sliceArray(0 until textureIndices.size - TEXTURE_INSTANCE_SIZE)
+
+        val normalStartIndex = (index / POSITION_INSTANCE_SIZE) * TEXTURE_INSTANCE_SIZE
+        val lastNormalIndex = normalIndices.size - TEXTURE_INSTANCE_SIZE
+        for (k in normalStartIndex until normalStartIndex + TEXTURE_INSTANCE_SIZE) {
+            normalIndices[k] = normalIndices[lastNormalIndex + k - normalStartIndex]
+        }
+
+        normalIndices = normalIndices.sliceArray(0 until normalIndices.size - TEXTURE_INSTANCE_SIZE)
+
+        val specularStartIndex = (index / POSITION_INSTANCE_SIZE) * TEXTURE_INSTANCE_SIZE
+        val lastSpecularIndex = specularIndices.size - TEXTURE_INSTANCE_SIZE
+        for (k in specularStartIndex until specularStartIndex + TEXTURE_INSTANCE_SIZE) {
+            specularIndices[k] = specularIndices[lastSpecularIndex + k - specularStartIndex]
+        }
+
+        specularIndices = specularIndices.sliceArray(0 until specularIndices.size - TEXTURE_INSTANCE_SIZE)
         vertexCount -= 6
     }
 

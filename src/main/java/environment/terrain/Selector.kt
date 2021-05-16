@@ -5,7 +5,6 @@ import environment.terrain.chunks.FaceDirection
 import graphics.Camera
 import math.vectors.Vector3
 import math.vectors.Vector4
-import org.joml.Math.abs
 import util.FloatUtils
 import java.lang.Float.max
 import java.lang.Float.min
@@ -15,8 +14,8 @@ class Selector {
     private val maxDistance = 8.0f
 
     fun getSelected(chunks: List<Chunk>, camera: Camera, position: Vector3): Pair<Vector3, FaceDirection>? {
-        val clipCoords = Vector4(0f, 0f, -1f, 1f)
-        val eyeSpace = camera.projectionMatrix.inverse().dot(clipCoords)
+        val clipCoordinates = Vector4(0f, 0f, -1f, 1f)
+        val eyeSpace = camera.projectionMatrix.inverse().dot(clipCoordinates)
         eyeSpace.z = -1f
         eyeSpace.w = 0f
 

@@ -58,7 +58,7 @@ class EntityRenderer : Renderer() {
         GraphicsContext.disable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
     }
 
-    override fun renderDeferredGeometry(camera: Camera, ambient: AmbientLight, entities: List<Renderable>) {
+    override fun renderDeferredGeometry(camera: Camera, ambient: AmbientLight, entities: List<Renderable>, shadows: List<ShadowData>) {
         deferredGeometryProgram.start()
         deferredGeometryProgram.set("projection", camera.projectionMatrix)
         deferredGeometryProgram.set("view", camera.viewMatrix)

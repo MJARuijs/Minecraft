@@ -32,12 +32,11 @@ class RenderEngine {
     }
 
     fun render(camera: Camera, ambient: AmbientLight, sun: Sun, sky: SkyBox, renderData: List<RenderData>) {
-//        val shadows = shadowRenderer.render(camera, sun, shadowBoxes, renderData)
-
+        val shadows = shadowRenderer.render(camera, sun, shadowBoxes, renderData)
         val forwardTarget = forwardEngine.prepare()
-        val geometryTarget = deferredEngine.render(camera, ambient, sun, arrayListOf(), renderData, forwardTarget = forwardTarget)
+        val geometryTarget = deferredEngine.render(camera, ambient, sun, shadows, renderData, forwardTarget = forwardTarget)
 
-        val forwardResultTarget = forwardEngine.render(camera, ambient, sun, sky, arrayListOf(), renderData, geometryTarget = geometryTarget)
+        val forwardResultTarget = forwardEngine.render(camera, ambient, sun, sky, shadows, renderData, geometryTarget = geometryTarget)
 
         val defaultTarget = RenderTargetManager.getDefault()
         defaultTarget.start()

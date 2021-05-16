@@ -16,7 +16,7 @@ import org.lwjgl.opengl.GL46.GL_TEXTURE_MAX_ANISOTROPY
 data class Sampler(
     val index: Int,
     private var magnification: SampleFilter = SampleFilter.NEAREST,
-    private var minification: SampleFilter = SampleFilter.NEAREST,
+    private var minification: SampleFilter = SampleFilter.LINEAR,
     private var clamping: ClampMode = ClampMode.REPEAT,
     private var mipmapping: Boolean = true,
     private var anisotropy: Int = MAX_ANISOTROPY

@@ -11,13 +11,7 @@ import graphics.renderer.Renderer
 import graphics.samplers.Sampler
 import graphics.shaders.ShaderProgram
 import graphics.shadows.ShadowData
-import graphics.textures.ImageMap
 import math.vectors.Vector2
-import org.lwjgl.opengl.GL11
-import org.lwjgl.opengl.GL13.GL_TEXTURE0
-import org.lwjgl.opengl.GL13.glActiveTexture
-import org.lwjgl.opengl.GL30
-import resources.images.ImageCache
 
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
 class ChunkRenderer : Renderer() {
@@ -25,13 +19,9 @@ class ChunkRenderer : Renderer() {
     private val shaderProgram = ShaderProgram.load("shaders/environment/terrain/chunk.vert", "shaders/environment/terrain/chunk.geom", "shaders/environment/terrain/chunkForwardRendering.frag")
     private val deferredGeometryProgram = ShaderProgram.load("shaders/environment/terrain/chunk.vert", "shaders/environment/terrain/chunk.geom", "shaders/environment/terrain/chunkGeometryPass.frag")
 
-    private val blockTexture = ImageMap(ImageCache.get("textures/blocks.png"))
-
-    private val colorMaps = FaceTextures.colorMaps
-    private val normalMaps = FaceTextures.normalMaps
-
     private val blockSampler = Sampler(0)
-    private val normalSampler = Sampler(2)
+    private val normalSampler = Sampler(1)
+    private val specularSampler = Sampler(2)
 
     override val shadowProgram = ShaderProgram.load("shaders/environment/terrain/shadowChunk.vert", "shaders/environment/terrain/shadowChunk.frag")
     override val deferredLightingProgram = ShaderProgram.load("shaders/debug/2D.vert", "shaders/environment/terrain/chunkLightingPass.frag")
@@ -43,15 +33,20 @@ class ChunkRenderer : Renderer() {
         shaderProgram.set("projection", camera.projectionMatrix)
         shaderProgram.set("view", camera.viewMatrix)
         shaderProgram.set("textureMap", blockSampler.index)
+        shaderProgram.set("normalMap", normalSampler.index)
+        shaderProgram.set("specularMap", specularSampler.index)
+        shaderProgram.set("cameraPosition", camera.position)
 
-        blockSampler.bind(FaceTextures.t!!)
+        blockSampler.bind(FaceTextures.textures!!)
+        normalSampler.bind(FaceTextures.normals!!)
+        specularSampler.bind(FaceTextures.speculars!!)
 
         ambient.apply(shaderProgram)
         sun.apply(shaderProgram)
 
         if (shadows.isNotEmpty()) {
             val shadowData = shadows[0]
-            val shadowSampler = Sampler(1)
+            val shadowSampler = Sampler(4)
 
             shadowSampler.bind(shadowData.shadowMap)
 
@@ -72,14 +67,33 @@ class ChunkRenderer : Renderer() {
         GraphicsContext.disable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING)
     }
 
-    override fun renderDeferredGeometry(camera: Camera, ambient: AmbientLight, chunks: List<Renderable>) {
-        blockSampler.bind(blockTexture)
+    override fun renderDeferredGeometry(camera: Camera, ambient: AmbientLight, chunks: List<Renderable>, shadows: List<ShadowData>) {
+        blockSampler.bind(FaceTextures.textures!!)
+        normalSampler.bind(FaceTextures.normals!!)
+        specularSampler.bind(FaceTextures.speculars!!)
 
         deferredGeometryProgram.start()
         deferredGeometryProgram.set("projection", camera.projectionMatrix)
         deferredGeometryProgram.set("view", camera.viewMatrix)
         deferredGeometryProgram.set("textureMap", blockSampler.index)
+        deferredGeometryProgram.set("normalMap", normalSampler.index)
+        deferredGeometryProgram.set("specularMap", specularSampler.index)
 
+
+        if (shadows.isNotEmpty()) {
+            val shadowData = shadows[0]
+//            val shadowSampler = Sampler(6)
+
+//            shadowSampler.bind(shadowData.shadowMap)
+
+//            deferredGeometryProgram.set("shadowDistance", shadowData.shadowDistance)
+            deferredGeometryProgram.set("shadowMatrix", shadowData.getShadowMatrix())
+//            deferredGeometryProgram.set("shadowMap", shadowSampler.index)
+//            deferredGeometryProgram.set("shadowMapSize", Vector2(
+//                    shadowData.shadowMap.getWidth(),
+//                    shadowData.shadowMap.getHeight()
+//            ))
+        }
         ambient.apply(deferredGeometryProgram)
 
         for (chunk in chunks) {
