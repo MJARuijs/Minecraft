@@ -1,6 +1,6 @@
 package graphics.samplers
 
-import graphics.test.TextureArray
+import graphics.textures.TextureArray
 import graphics.textures.TextureMap
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL12.GL_TEXTURE_WRAP_R
@@ -8,6 +8,7 @@ import org.lwjgl.opengl.GL13.GL_TEXTURE0
 import org.lwjgl.opengl.GL13.glActiveTexture
 import org.lwjgl.opengl.GL20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS
 import org.lwjgl.opengl.GL30.GL_TEXTURE_2D_ARRAY
+import org.lwjgl.opengl.GL32.GL_TEXTURE_2D_MULTISAMPLE
 import org.lwjgl.opengl.GL33.glSamplerParameterf
 import org.lwjgl.opengl.GL33.glSamplerParameteri
 import org.lwjgl.opengl.GL46.GL_MAX_TEXTURE_MAX_ANISOTROPY
@@ -15,6 +16,7 @@ import org.lwjgl.opengl.GL46.GL_TEXTURE_MAX_ANISOTROPY
 
 data class Sampler(
     val index: Int,
+    private var multiSampled: Boolean = false,
     private var magnification: SampleFilter = SampleFilter.NEAREST,
     private var minification: SampleFilter = SampleFilter.LINEAR,
     private var clamping: ClampMode = ClampMode.REPEAT,
@@ -32,17 +34,31 @@ data class Sampler(
         if (index < 0 || index > MAX_INDEX) {
             throw Exception("Sampler index out of bounds. Must be between 0 and $MAX_INDEX.")
         }
-
-        setMagnification(magnification)
-        setMinification(minification)
-        setClamping(clamping)
-        setMipmapping(mipmapping)
-        setAnisotropy(anisotropy)
+//
+//        setMagnification(magnification)
+//        setMinification(minification)
+//        setClamping(clamping)
+//        setMipmapping(mipmapping)
+//        setAnisotropy(anisotropy)
     }
 
     fun bind(map: TextureMap) {
         glActiveTexture(GL_TEXTURE0 + index)
-        glBindTexture(GL_TEXTURE_2D, map.handle)
+        if (multiSampled) {
+            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, map.handle)
+        } else {
+            glBindTexture(GL_TEXTURE_2D, map.handle)
+        }
+        glActiveTexture(GL_TEXTURE0)
+    }
+
+    fun unbind() {
+        glActiveTexture(GL_TEXTURE0 + index)
+        if (multiSampled) {
+            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0)
+        } else {
+            glBindTexture(GL_TEXTURE_2D, 0)
+        }
         glActiveTexture(GL_TEXTURE0)
     }
 

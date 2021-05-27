@@ -22,8 +22,6 @@ class EntityRenderer : Renderer() {
     override val deferredLightingProgram = ShaderProgram.load("shaders/debug/2D.vert", "shaders/entities/entityLightingPass.frag")
 
     override fun render(camera: Camera, ambient: AmbientLight, sun: Sun, entities: List<Renderable>, shadows: List<ShadowData>) {
-        GraphicsContext.enable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
-
         entityProgram.start()
 
         if (shadows.isNotEmpty()) {
@@ -54,8 +52,6 @@ class EntityRenderer : Renderer() {
         }
 
         entityProgram.stop()
-
-        GraphicsContext.disable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
     }
 
     override fun renderDeferredGeometry(camera: Camera, ambient: AmbientLight, entities: List<Renderable>, shadows: List<ShadowData>) {

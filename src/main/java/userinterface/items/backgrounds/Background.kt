@@ -20,4 +20,6 @@ abstract class Background(var cornerRadius: Float, var outline: Float = 0.0f, va
         shaderProgram.set("outlineColor", outlineColor)
     }
 
+    open fun reset() {}
+
 }

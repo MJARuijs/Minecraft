@@ -114,5 +114,8 @@ void main() {
 
     outColor = ambientColor;
     outColor.rgb += sunColor.rgb * lightFactor;
+//    outColor = texture(normalMap, vec3(passTextureCoordinates, normalIndex));
+//    outColor = texture(textureMap, vec3(passTextureCoordinates, textureIndex));
+//    outColor = texture(specularMap, vec3(passTextureCoordinates, specularIndex));
     outColor = clamp(outColor, 0.0, 1.0);
 }

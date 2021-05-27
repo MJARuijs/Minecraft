@@ -14,20 +14,15 @@ import graphics.Camera
 import graphics.GraphicsContext
 import graphics.GraphicsOption
 import graphics.entity.Entity
-import graphics.entity.EntityRenderer
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
-import graphics.model.ModelCache
 import graphics.renderer.RenderData
 import graphics.renderer.RenderEngine
 import graphics.renderer.RenderType
 import graphics.rendertarget.RenderTargetManager
 import graphics.shadows.ShadowBox
 import math.Color
-import math.matrices.Matrix4
 import math.vectors.Vector3
-import org.lwjgl.opengl.GL11.glGetInteger
-import org.lwjgl.opengl.GL46.GL_MAX_TEXTURE_MAX_ANISOTROPY
 import userinterface.UIColor
 import userinterface.UIPage
 import userinterface.UniversalParameters
@@ -54,13 +49,12 @@ object Main {
     private val faceTextures = FaceTextures("src/main/resources/textures/blocks/")
 
     private val ambientLight = AmbientLight(Color(lightValue, lightValue, lightValue))
-    private val sun = Sun(Color(directionalValue, directionalValue, directionalValue), Vector3(0.0f, 1.0f, -1.0f))
+    private val sun = Sun(Color(directionalValue, directionalValue, directionalValue), Vector3(1.0f, 1.0f, -1.0f))
 
     private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, TERRAIN_HEIGHT + 3, 0))
 
     private val chunkManager = ChunkManager(camera.position)
     private val chunkRenderer = ChunkRenderer()
-    private val entityRenderer = EntityRenderer()
 
     private val renderEngine = RenderEngine()
 
@@ -80,7 +74,7 @@ object Main {
     @JvmStatic
     fun main(args: Array<String>) {
         GraphicsContext.init(Color(0f, 0f, 0f))
-        GraphicsContext.enable(GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING, GraphicsOption.TEXTURE_MAPPING)
+        GraphicsContext.enable(GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING, GraphicsOption.TEXTURE_MAPPING, GraphicsOption.MULTI_SAMPLE)
 
         UniversalParameters.init(window.aspectRatio, FontLoader(window.aspectRatio).load("fonts/candara.png"))
         RenderTargetManager.init(window)
@@ -101,8 +95,6 @@ object Main {
 
         var i = 0
 
-        entities += Entity(ModelCache.get("models/block.obj"), Matrix4().translate(0.0f, 20.0f, 0.0f))
-
         timer.reset()
         mouse.capture()
 
@@ -115,7 +107,7 @@ object Main {
 //            val selectedBlock = selector.findSelectedItem(window, chunkRenderer, environment.terrain.chunks, camera)
 
             renderEngine.render(camera, ambientLight, sun, skyBox, arrayListOf(
-                    RenderData(chunks, chunkRenderer, RenderType.DEFERRED)
+                    RenderData(chunks, chunkRenderer, RenderType.FORWARD)
             ))
 
             ui.update(mouse, timer.getDelta())

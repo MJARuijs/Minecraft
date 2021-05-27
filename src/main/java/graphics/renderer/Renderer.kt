@@ -51,8 +51,6 @@ abstract class Renderer {
     }
 
     fun renderBlack(items: List<Renderable>, projection: Matrix4, view: Matrix4) {
-        GraphicsContext.enable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
-
         shadowProgram.start()
         shadowProgram.set("projection", projection)
         shadowProgram.set("view", view)
@@ -62,8 +60,5 @@ abstract class Renderer {
         }
 
         shadowProgram.stop()
-
-        GraphicsContext.disable(GraphicsOption.ALPHA_BLENDING, GraphicsOption.DEPTH_TESTING)
     }
-
 }

@@ -1,8 +1,6 @@
 package graphics.renderer
 
 import graphics.Camera
-import graphics.GraphicsContext
-import graphics.GraphicsOption
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
 import graphics.rendertarget.RenderTarget
@@ -10,30 +8,35 @@ import graphics.rendertarget.RenderTargetManager
 import graphics.rendertarget.attachments.AttachmentType
 import graphics.samplers.Sampler
 import graphics.shadows.ShadowData
-import graphics.textures.DataType
 
 class DeferredRenderEngine {
 
     private lateinit var geometryTarget: RenderTarget
 
-    private val positionSampler = Sampler(0)
-    private val surfaceNormal = Sampler(1)
-    private val colorSampler = Sampler(2)
-    private val normalSampler = Sampler(3)
-    private val specularSampler = Sampler(4)
+    private val multiSampled = true
+
+    private val positionSampler = Sampler(0, multiSampled)
+    private val surfaceNormal = Sampler(1, multiSampled)
+    private val colorSampler = Sampler(2, multiSampled)
+    private val normalSampler = Sampler(3, multiSampled)
+    private val specularSampler = Sampler(4, multiSampled)
     private val shadowCoordinateSampler = Sampler(5)
 
     fun render(camera: Camera, ambient: AmbientLight, sun: Sun, shadows: List<ShadowData>, renderData: List<RenderData>, forwardTarget: RenderTarget): RenderTarget {
-        GraphicsContext.enable(GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING, GraphicsOption.ALPHA_BLENDING)
         geometryTarget = RenderTargetManager.getAvailableTarget(
-                Pair(AttachmentType.COLOR_TEXTURE, DataType.FLOAT),
-                Pair(AttachmentType.COLOR_TEXTURE, DataType.FLOAT),
-                Pair(AttachmentType.COLOR_TEXTURE, DataType.FLOAT),
-                Pair(AttachmentType.COLOR_TEXTURE, DataType.FLOAT),
-                Pair(AttachmentType.COLOR_TEXTURE, DataType.FLOAT),
-                Pair(AttachmentType.COLOR_TEXTURE, DataType.FLOAT),
-                Pair(AttachmentType.DEPTH_TEXTURE, DataType.UNSIGNED_BYTE)
+                multiSampled,
+                AttachmentType.COLOR_TEXTURE,
+                AttachmentType.COLOR_TEXTURE,
+                AttachmentType.COLOR_TEXTURE,
+                AttachmentType.COLOR_TEXTURE,
+                AttachmentType.COLOR_TEXTURE,
+                AttachmentType.COLOR_TEXTURE,
+                AttachmentType.DEPTH_TEXTURE
         )
+
+        if (renderData.none { data -> data.type == RenderType.DEFERRED }) {
+            return geometryTarget
+        }
 
         geometryTarget.start()
         geometryTarget.clear()
@@ -60,7 +63,7 @@ class DeferredRenderEngine {
             if (data.type == RenderType.DEFERRED) {
                 data.renderer.renderDeferredLighting(camera, sun,
                         Pair("positionMap", positionSampler.index),
-                        Pair("surfaceNormal", surfaceNormal.index),
+                        Pair("surfaceNormalMap", surfaceNormal.index),
                         Pair("colorMap", colorSampler.index),
                         Pair("normalMap", normalSampler.index),
                         Pair("specularMap", specularSampler.index),
@@ -69,8 +72,6 @@ class DeferredRenderEngine {
                 )
             }
         }
-
-//        GraphicsContext.disable(GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING, GraphicsOption.ALPHA_BLENDING)
 
         return geometryTarget
     }

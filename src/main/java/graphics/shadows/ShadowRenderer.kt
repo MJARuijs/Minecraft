@@ -1,19 +1,14 @@
 package graphics.shadows
 
-import environment.terrain.chunks.Chunk
-import environment.terrain.chunks.ChunkRenderer
-import graphics.*
-import graphics.entity.Entity
-import graphics.entity.EntityRenderer
+import graphics.Camera
 import graphics.lights.Sun
 import graphics.renderer.RenderData
 import graphics.rendertarget.RenderTargetManager
 import graphics.rendertarget.attachments.AttachmentType
-import graphics.textures.DataType
 
 class ShadowRenderer {
 
-    private val renderTarget = RenderTargetManager.getAvailableTarget(Pair(AttachmentType.DEPTH_TEXTURE, DataType.UNSIGNED_BYTE), width = SHADOW_MAP_SIZE, height = SHADOW_MAP_SIZE)
+    private val renderTarget = RenderTargetManager.getAvailableTarget(false, AttachmentType.DEPTH_TEXTURE, width = SHADOW_MAP_SIZE, height = SHADOW_MAP_SIZE)
 
     fun render(camera: Camera, sun: Sun, shadowBoxes: List<ShadowBox>, renderData: List<RenderData>): List<ShadowData> {
         val shadowData = ArrayList<ShadowData>()

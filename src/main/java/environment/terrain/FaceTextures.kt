@@ -1,7 +1,6 @@
 package environment.terrain
 
-import graphics.test.TextureArray
-import org.w3c.dom.Text
+import graphics.textures.TextureArray
 import resources.images.ImageCache
 import resources.images.ImageData
 import java.io.File
@@ -16,7 +15,7 @@ class FaceTextures(path: String) {
 
         val fileDirectories = pathFile.list() ?: throw IllegalArgumentException("Directory at $path does not exist")
 
-        for ((i, directory) in fileDirectories.sorted().withIndex()) {
+        for (directory in fileDirectories.sorted()) {
             if (directory.endsWith("mcmeta")) {
                 continue
             }

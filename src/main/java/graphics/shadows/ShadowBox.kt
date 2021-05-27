@@ -28,9 +28,9 @@ class ShadowBox(camera: Camera, val maxDistance: Float = 50f) {
     private var viewMatrix = Matrix4()
 
     init {
-        val renderTarget = RenderTargetManager.getDefault()
-        nearHeight = nearWidth / renderTarget.getAspectRatio()
-        farHeight = farWidth / renderTarget.getAspectRatio()
+        val defaultAspectRatio = RenderTargetManager.getDefault().getAspectRatio()
+        nearHeight = nearWidth / defaultAspectRatio
+        farHeight = farWidth / defaultAspectRatio
     }
 
     private fun height() = abs(maxY - minY)

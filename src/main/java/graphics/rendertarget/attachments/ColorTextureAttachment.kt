@@ -1,17 +1,22 @@
 package graphics.rendertarget.attachments
 
 import graphics.textures.ColorMap
-import graphics.textures.DataType
-import org.lwjgl.opengl.GL30.GL_COLOR_ATTACHMENT0
-import org.lwjgl.opengl.GL30.GL_FRAMEBUFFER
+import org.lwjgl.opengl.GL11.GL_TEXTURE_2D
+import org.lwjgl.opengl.GL30.*
+import org.lwjgl.opengl.GL32.GL_TEXTURE_2D_MULTISAMPLE
 import org.lwjgl.opengl.GL32.glFramebufferTexture
 
-class ColorTextureAttachment(val index: Int, width: Int, height: Int, type: DataType = DataType.UNSIGNED_BYTE) : Attachment {
+class ColorTextureAttachment(val index: Int, width: Int, height: Int, multiSampled: Boolean) : Attachment {
 
-    val colorMap = ColorMap(width, height, type)
+    val colorMap = ColorMap(width, height, multiSampled)
 
     init {
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, colorMap.handle, 0)
+        if (multiSampled) {
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_TEXTURE_2D_MULTISAMPLE, colorMap.handle, 0)
+        } else {
+            glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, colorMap.handle, 0)
+        }
+
     }
 
     override val type = AttachmentType.COLOR_TEXTURE

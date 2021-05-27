@@ -10,6 +10,7 @@ import graphics.samplers.Sampler
 import graphics.shaders.ShaderProgram
 import graphics.shadows.ShadowBox
 import graphics.shadows.ShadowRenderer
+import org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT
 
 class RenderEngine {
 
@@ -34,19 +35,20 @@ class RenderEngine {
     fun render(camera: Camera, ambient: AmbientLight, sun: Sun, sky: SkyBox, renderData: List<RenderData>) {
         val shadows = shadowRenderer.render(camera, sun, shadowBoxes, renderData)
         val forwardTarget = forwardEngine.prepare()
-        val geometryTarget = deferredEngine.render(camera, ambient, sun, shadows, renderData, forwardTarget = forwardTarget)
+        val geometryTarget = deferredEngine.render(camera, ambient, sun, shadows, renderData, forwardTarget)
 
-        val forwardResultTarget = forwardEngine.render(camera, ambient, sun, sky, shadows, renderData, geometryTarget = geometryTarget)
+        val forwardResultTarget = forwardEngine.render(camera, ambient, sun, sky, shadows, renderData, geometryTarget)
 
         val defaultTarget = RenderTargetManager.getDefault()
-        defaultTarget.start()
-        defaultTarget.clear()
+//        defaultTarget.start()
+//        defaultTarget.clear()
+        forwardResultTarget.renderTo(defaultTarget, GL_COLOR_BUFFER_BIT)
 
-        sampler.bind(forwardResultTarget.getColorMap())
-        program.start()
-        program.set("sampler", sampler.index)
-        quad.draw()
-        program.stop()
+//        sampler.bind(geometryTarget.getColorMap())
+//        program.start()
+//        program.set("sampler", sampler.index)
+//        quad.draw()
+//        program.stop()
     }
 
 }

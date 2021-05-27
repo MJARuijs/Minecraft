@@ -2,14 +2,15 @@ package graphics.rendertarget
 
 import graphics.rendertarget.attachments.*
 import graphics.textures.ColorMap
-import graphics.textures.DataType
 import graphics.textures.DepthMap
 import org.lwjgl.BufferUtils.createIntBuffer
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL20.glDrawBuffers
 import org.lwjgl.opengl.GL30.*
+import org.lwjgl.opengl.GL45.glBlitNamedFramebuffer
+import org.lwjgl.opengl.GL45.glCreateFramebuffers
 
-class RenderTarget(private var width: Int, private var height: Int, vararg attachmentTypes: Pair<AttachmentType, DataType>, val handle: Int = glGenFramebuffers()) {
+class RenderTarget(private var width: Int, private var height: Int, private val multiSampled: Boolean, vararg types: AttachmentType, private val handle: Int = glCreateFramebuffers()) {
 
     private val attachments = ArrayList<Attachment>()
     private var available = true
@@ -19,11 +20,12 @@ class RenderTarget(private var width: Int, private var height: Int, vararg attac
 
         var colorCounter = 0
 
-        for (attachmentType in attachmentTypes) {
-            attachments += when (attachmentType.first) {
-                AttachmentType.COLOR_TEXTURE -> ColorTextureAttachment(colorCounter++, width, height, attachmentType.second)
-                AttachmentType.DEPTH_TEXTURE -> DepthTextureAttachment(width, height)
-                AttachmentType.DEPTH_BUFFER -> DepthBufferAttachment(width, height)
+        for (attachmentType in types) {
+            attachments += when (attachmentType) {
+                AttachmentType.COLOR_TEXTURE -> ColorTextureAttachment(colorCounter++, width, height, multiSampled)
+                AttachmentType.COLOR_BUFFER -> ColorBufferAttachment(colorCounter++, width, height, multiSampled)
+                AttachmentType.DEPTH_TEXTURE -> DepthTextureAttachment(width, height, multiSampled)
+                AttachmentType.DEPTH_BUFFER -> DepthBufferAttachment(width, height, multiSampled)
             }
         }
 
@@ -73,7 +75,6 @@ class RenderTarget(private var width: Int, private var height: Int, vararg attac
     }
 
     fun clear() {
-//        glViewport(0, 0, width, height)
         glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
     }
 
@@ -82,42 +83,38 @@ class RenderTarget(private var width: Int, private var height: Int, vararg attac
         available = true
     }
 
-    fun renderTo(renderTarget: RenderTarget, buffers: Int) {
-        renderTo(renderTarget.handle, buffers)
-    }
-
-    private fun renderTo(targetId: Int, buffers: Int) {
-        if (handle == targetId) {
+    private fun renderTo(targetHandle: Int, buffers: Int) {
+        if (handle == targetHandle) {
             return
         }
 
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, handle)
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, targetId)
-        glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, buffers, GL_NEAREST)
+        glBlitNamedFramebuffer(handle, targetHandle, 0, 0, width, height, 0, 0, width, height, buffers, GL_NEAREST)
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0)
     }
 
-    fun renderToScreen() = renderTo(0, GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
+    fun renderTo(renderTarget: RenderTarget, buffers: Int) = renderTo(renderTarget.handle, buffers)
 
-    fun matches(width: Int, height: Int, vararg requiredTypes: Pair<AttachmentType, DataType>): Boolean {
+    fun matches(width: Int, height: Int, multiSampled: Boolean, vararg requiredTypes: AttachmentType): Boolean {
 
         if (width != this.width) return false
         if (height != this.height) return false
 
+        if (multiSampled != this.multiSampled) return false
+
         if (requiredTypes.size != attachments.size) return false
 
-        val requestedColorAttachments = requiredTypes.count { it.first == AttachmentType.COLOR_TEXTURE }
+        val requestedColorAttachments = requiredTypes.count { it == AttachmentType.COLOR_TEXTURE }
         val availableColorAttachments = attachments.count { it.type == AttachmentType.COLOR_TEXTURE }
 
         if (availableColorAttachments != requestedColorAttachments) return false
 
         for (type in requiredTypes) {
-            attachments.find { it.type == type.first } ?: return false
+            attachments.find { it.type == type } ?: return false
         }
 
         for (attachment in attachments) {
-            requiredTypes.find { it.first == attachment.type } ?: return false
+            requiredTypes.find { it == attachment.type } ?: return false
         }
 
         return true

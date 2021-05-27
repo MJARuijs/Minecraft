@@ -36,6 +36,7 @@ open class Item(id: String, constraints: ConstraintSet, background: Background =
 
         quad.draw()
 
+        background.reset()
         children.forEach { child ->
             child.draw(shaderProgram, iconProgram, textProgram, aspectRatio, this)
         }

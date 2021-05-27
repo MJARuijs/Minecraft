@@ -10,11 +10,11 @@ const float samplesPerPixel = (samples * 2.0 + 1.0) * (samples * 2.0 + 1.0);
 
 in vec2 passTextureCoordinates;
 
-uniform sampler2D positionMap;
-uniform sampler2D surfaceNormal;
-uniform sampler2D colorMap;
-uniform sampler2D normalMap;
-uniform sampler2D specularMap;
+uniform sampler2DMS positionMap;
+uniform sampler2DMS surfaceNormalMap;
+uniform sampler2DMS colorMap;
+uniform sampler2DMS normalMap;
+uniform sampler2DMS specularMap;
 uniform sampler2D shadowCoordinatesMap;
 uniform sampler2D shadowMap;
 
@@ -77,12 +77,33 @@ vec3 computeTangent(vec3 normal) {
 }
 
 void main() {
-    vec3 position = texture(positionMap, passTextureCoordinates).xyz;
-    vec3 surfaceNormal = texture(surfaceNormal, passTextureCoordinates).xyz;
-    vec4 color = texture(colorMap, passTextureCoordinates);
-    vec3 normal = normalize(2.0 * texture(normalMap, passTextureCoordinates).xyz - 1.0);
+    vec3 position = vec3(0);
+    vec3 surfaceNormal = vec3(0);
+    vec4 color = vec4(0);
+    vec3 normal = vec3(0);
+    float specularStrength = 0.0;
 
-    float specularStrength = texture(specularMap, passTextureCoordinates).r;
+//    position = texture(positionMap, passTextureCoordinates).xyz;
+//    surfaceNormal = texture(surfaceNormalMap, passTextureCoordinates).xyz;
+//    color = texture(colorMap, passTextureCoordinates);
+//    normal = normalize(2.0 * texture(normalMap, passTextureCoordinates).xyz - 1.0);
+//    specularStrength = texture(specularMap, passTextureCoordinates).r;
+
+    float msaaSamples = 1.0;
+
+    for (int i = 0; i < int(msaaSamples); i++) {
+        position += texelFetch(positionMap, ivec2(gl_FragCoord.xy), i).xyz;
+        surfaceNormal += texelFetch(surfaceNormalMap, ivec2(gl_FragCoord.xy), i).xyz;
+        color += texelFetch(colorMap, ivec2(gl_FragCoord.xy), i);
+        normal += normalize(2.0 * texelFetch(normalMap, ivec2(gl_FragCoord.xy), i).xyz - 1.0);
+        specularStrength += texelFetch(specularMap, ivec2(gl_FragCoord.xy), i).r;
+    }
+
+    position /= msaaSamples;
+    surfaceNormal /= msaaSamples;
+    color /= msaaSamples;
+    normal /= msaaSamples;
+    specularStrength /= msaaSamples;
 
     vec3 tangent = computeTangent(surfaceNormal);
     vec3 biTangent = normalize(cross(surfaceNormal, tangent));
@@ -116,9 +137,7 @@ void main() {
 
     shadowValue /= samplesPerPixel;
     float lightFactor = 1.0 - (shadowValue * shadowCoordinates.w);
-
     outColor = color;
     outColor.rgb += sunColor.rgb * lightFactor;
-//    outColor = shadowCoordinates;
     outColor = clamp(outColor, 0.0, 1.0);
 }

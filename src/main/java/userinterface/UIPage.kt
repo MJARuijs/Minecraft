@@ -11,6 +11,7 @@ class UIPage(id: String, private val background: Background = UniversalParameter
         shaderProgram.set("allowedToOverdraw", true)
         background.setProperties(shaderProgram)
         quad.draw()
+        background.reset()
         children.forEach { child -> child.draw(shaderProgram, iconProgram, textProgram, aspectRatio, null) }
     }
 
