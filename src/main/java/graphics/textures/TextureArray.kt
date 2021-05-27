@@ -5,8 +5,6 @@ import org.lwjgl.opengl.EXTTextureFilterAnisotropic.GL_TEXTURE_MAX_ANISOTROPY_EX
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL30.GL_TEXTURE_2D_ARRAY
 import org.lwjgl.opengl.GL45.*
-import org.lwjgl.opengl.GL46.GL_MAX_TEXTURE_MAX_ANISOTROPY
-import org.lwjgl.opengl.GL46.GL_TEXTURE_MAX_ANISOTROPY
 import resources.images.ImageData
 import java.lang.Integer.max
 import kotlin.math.log2

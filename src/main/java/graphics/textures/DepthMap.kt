@@ -36,10 +36,6 @@ class DepthMap(private var width: Int, private var height: Int, multiSampled: Bo
         }
     }
 
-    private fun setParameters() {
-
-    }
-
     fun getWidth() = width
 
     fun getHeight() = height
