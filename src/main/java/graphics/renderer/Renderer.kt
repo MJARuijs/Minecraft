@@ -1,8 +1,6 @@
 package graphics.renderer
 
 import graphics.Camera
-import graphics.GraphicsContext
-import graphics.GraphicsOption
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
 import graphics.model.Quad

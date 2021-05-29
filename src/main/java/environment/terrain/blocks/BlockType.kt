@@ -2,7 +2,7 @@ package environment.terrain.blocks
 
 import environment.terrain.FaceTextures
 import environment.terrain.chunks.FaceDirection
-import tools.ToolType
+import game.tools.ToolType
 
 enum class BlockType(val bestTool: ToolType, val hardness: Float, private var textureIndices: IntArray, private var normalIndices: IntArray, private var specularIndices: IntArray) {
 

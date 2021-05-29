@@ -9,7 +9,7 @@ import math.vectors.Vector3
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-class Chunk(val x: Int, val z: Int, private val biome: Biome, private val blocks: ArrayList<BlockData>, private var positionData: FloatArray, private var textureIndices: IntArray, private var normalIndices: IntArray, private var specularIndices: IntArray, private var vertexCount: Int) : Renderable{
+class Chunk(val x: Int, val z: Int, private val biome: Biome, private val blocks: ArrayList<BlockData>, private var positionData: FloatArray, private var textureIndices: IntArray, private var normalIndices: IntArray, private var specularIndices: IntArray, private var vertexCount: Int) : Renderable {
 
     private val hiddenBlocks = ArrayList<BlockData>()
     private var initialized = false

@@ -14,7 +14,6 @@ class MeshLoader: Loader<Mesh> {
     override fun load(path: String): Mesh {
         val scene = loadScene(path)
         val aiMeshes = scene.mMeshes()
-
         return parseData(AIMesh.create(aiMeshes!!.get(0)), Matrix4())
     }
 
@@ -85,8 +84,7 @@ class MeshLoader: Loader<Mesh> {
         }
 
         val layout = Layout(Primitive.TRIANGLE, attributes)
-
-        return Mesh(layout, vertices, indices)
+        return Mesh(layout, vertices, floatArrayOf(), floatArrayOf(), indices)
     }
 
 }

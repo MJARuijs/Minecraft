@@ -14,14 +14,18 @@ import graphics.Camera
 import graphics.GraphicsContext
 import graphics.GraphicsOption
 import graphics.entity.Entity
+import graphics.entity.EntityRenderer
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
+import graphics.model.ModelCache
+import graphics.model.animation.AnimatedModelLoader
 import graphics.renderer.RenderData
 import graphics.renderer.RenderEngine
 import graphics.renderer.RenderType
 import graphics.rendertarget.RenderTargetManager
 import graphics.shadows.ShadowBox
 import math.Color
+import math.matrices.Matrix4
 import math.vectors.Vector3
 import userinterface.UIColor
 import userinterface.UIPage
@@ -51,18 +55,19 @@ object Main {
     private val ambientLight = AmbientLight(Color(lightValue, lightValue, lightValue))
     private val sun = Sun(Color(directionalValue, directionalValue, directionalValue), Vector3(1.0f, 1.0f, -1.0f))
 
-    private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, TERRAIN_HEIGHT + 3, 0))
+    private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, 0, 0))
 
     private val chunkManager = ChunkManager(camera.position)
     private val chunkRenderer = ChunkRenderer()
 
     private val renderEngine = RenderEngine()
+    private val entities = ArrayList<Entity>()
+    private val entityRenderer = EntityRenderer()
 
     private val selector = Selector()
     private val skyBox = SkyBox("textures/sky/box", camera.zFar)
 
     private var chunks = ArrayList<Chunk>()
-    private val entities = ArrayList<Entity>()
 
     private val ui = UserInterface(window.aspectRatio)
     private val page = UIPage("page")
@@ -93,6 +98,12 @@ object Main {
         ui += page
         ui.showPage("page")
 
+        val animatedModel = AnimatedModelLoader().load("models/box.dae")
+
+        val player = Entity(animatedModel, Matrix4().translate(0f, 0f, -5f))
+        entities += player
+        entities += Entity(ModelCache.get("models/box.dae"), Matrix4().translate(0f, 0f, -10f))
+
         var i = 0
 
         timer.reset()
@@ -107,6 +118,7 @@ object Main {
 //            val selectedBlock = selector.findSelectedItem(window, chunkRenderer, environment.terrain.chunks, camera)
 
             renderEngine.render(camera, ambientLight, sun, skyBox, arrayListOf(
+                    RenderData(entities, entityRenderer, RenderType.FORWARD),
                     RenderData(chunks, chunkRenderer, RenderType.FORWARD)
             ))
 

@@ -1,4 +1,4 @@
-package tools
+package game.tools
 
 enum class ToolMaterial(val speedMultiplier: Float) {
 
