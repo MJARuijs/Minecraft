@@ -1,7 +1,7 @@
 #version 460
 
 layout (location = 0) in vec3 inPosition;
-//layout (location = 1) in vec3 inNormal;
+layout (location = 1) in vec3 inNormal;
 //layout (location = 2) in vec2 inTextureCoordinates;
 
 const float transitionDistance = 0.0;
@@ -20,7 +20,7 @@ out vec4 shadowCoords;
 
 void main() {
     worldPosition = model * vec4(inPosition, 1.0);
-    passNormal = mat3(model) * vec3(0,0,0);
+    passNormal = mat3(model) * inNormal;
     shadowCoords = shadowMatrix * worldPosition;
 
     vec3 toCameraVector = cameraPosition - worldPosition.xyz;

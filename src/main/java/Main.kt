@@ -98,7 +98,7 @@ object Main {
         ui += page
         ui.showPage("page")
 
-        val animatedModel = AnimatedModelLoader().load("models/box.dae")
+        val animatedModel = AnimatedModelLoader().load("models/riggedPlayer.dae")
 
         val player = Entity(animatedModel, Matrix4().translate(0f, 0f, -5f))
         entities += player

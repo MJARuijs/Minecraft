@@ -84,7 +84,7 @@ class MeshLoader: Loader<Mesh> {
         }
 
         val layout = Layout(Primitive.TRIANGLE, attributes)
-        return Mesh(layout, vertices, floatArrayOf(), floatArrayOf(), indices)
+        return Mesh(layout, vertices, indices)
     }
 
 }
