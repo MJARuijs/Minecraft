@@ -6,7 +6,7 @@ import graphics.shaders.ShaderProgram
 
 class Shape(val mesh: Mesh, private val material: Material) {
 
-    fun render(shaderProgram: ShaderProgram, instances: Int = 1) {
+    fun render(shaderProgram: ShaderProgram) {
         material.setProperties(shaderProgram)
         mesh.draw()
     }

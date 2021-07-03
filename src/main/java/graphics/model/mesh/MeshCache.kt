@@ -6,8 +6,8 @@ import resources.Cache
 
 object MeshCache : Cache<Mesh>(MeshLoader()) {
 
-    fun get(aiMesh: AIMesh, transformation: Matrix4): Mesh {
-        return (loader as MeshLoader).parseData(aiMesh, transformation)
+    fun get(aiMesh: AIMesh, transformation: Matrix4, isRigged: Boolean): Mesh {
+        return (loader as MeshLoader).parseData(aiMesh, transformation, isRigged)
     }
 
 }

@@ -7,7 +7,6 @@ import environment.terrain.FaceTextures
 import environment.terrain.Selector
 import environment.terrain.blocks.BlockType
 import environment.terrain.chunks.Chunk
-import environment.terrain.chunks.ChunkGenerator.Companion.TERRAIN_HEIGHT
 import environment.terrain.chunks.ChunkManager
 import environment.terrain.chunks.ChunkRenderer
 import graphics.Camera
@@ -18,7 +17,7 @@ import graphics.entity.EntityRenderer
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
 import graphics.model.ModelCache
-import graphics.model.animation.AnimatedModelLoader
+import graphics.model.animation.AnimatedModelLoader2
 import graphics.renderer.RenderData
 import graphics.renderer.RenderEngine
 import graphics.renderer.RenderType
@@ -98,7 +97,7 @@ object Main {
         ui += page
         ui.showPage("page")
 
-        val animatedModel = AnimatedModelLoader().load("models/riggedPlayer.dae")
+        val animatedModel = AnimatedModelLoader2().load("models/riggedPlayer2.dae")
 
         val player = Entity(animatedModel, Matrix4().translate(0f, 0f, -5f))
         entities += player

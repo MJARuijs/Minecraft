@@ -3,12 +3,17 @@
 layout (location = 0) in vec3 inPosition;
 layout (location = 1) in vec3 inNormal;
 //layout (location = 2) in vec2 inTextureCoordinates;
+layout(location = 3) in vec4 inBoneIds;
+layout(location = 4) in vec4 inBoneWeights;
 
 const float transitionDistance = 0.0;
+const int MAX_BONES = 100;
+const int MAX_BONES_PER_VERTEX = 4;
 
 uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
+uniform mat4 boneMatrices[MAX_BONES];
 
 uniform mat4 shadowMatrix;
 uniform vec3 cameraPosition;
@@ -19,8 +24,21 @@ out vec3 passNormal;
 out vec4 shadowCoords;
 
 void main() {
-    worldPosition = model * vec4(inPosition, 1.0);
-    passNormal = mat3(model) * inNormal;
+
+    vec4 position = vec4(0.0);
+    vec3 normal = vec3(0.0);
+
+    for (int i = 0; i < MAX_BONES_PER_VERTEX; i++) {
+        vec4 unscaledPosition = boneMatrices[int(inBoneIds[i])] * vec4(inPosition, 1.0);
+        position += unscaledPosition * inBoneWeights[i];
+
+        vec3 unscaledNormal = mat3(boneMatrices[int(inBoneIds[i])]) * inNormal;
+        normal += unscaledNormal * inBoneWeights[i];
+    }
+
+    worldPosition = model * position;
+    passNormal = mat3(model) * normal;
+
     shadowCoords = shadowMatrix * worldPosition;
 
     vec3 toCameraVector = cameraPosition - worldPosition.xyz;

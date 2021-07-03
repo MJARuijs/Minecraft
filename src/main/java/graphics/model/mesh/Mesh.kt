@@ -28,6 +28,7 @@ open class Mesh(layout: Layout, vertices: FloatArray, indices: IntArray): Resour
             glEnableVertexAttribArray(attribute.location)
             offset += attribute.size
         }
+
         glBindBuffer(GL_ARRAY_BUFFER, 0)
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)

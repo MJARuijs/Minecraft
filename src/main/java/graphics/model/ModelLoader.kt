@@ -16,7 +16,7 @@ class ModelLoader: Loader<Model> {
     override fun load(path: String): Model {
         val scene = loadScene(path)
         val root = scene.mRootNode() ?: throw Exception("Scene does not contain root node")
-        val shapes = parseNode(scene, root)
+        val shapes = parseShapes(scene, root, false)
 
         return Model(shapes)
     }
@@ -26,8 +26,8 @@ class ModelLoader: Loader<Model> {
             aiProcess_Triangulate or aiProcess_OptimizeGraph or aiProcess_RemoveRedundantMaterials
     ) ?: throw Exception("Could not load scene: $path")
 
-    private fun parseNode(scene: AIScene, node: AINode): List<Shape> {
-
+    fun parseShapes(scene: AIScene, node: AINode, isRigged: Boolean): List<Shape> {
+        println("Parsing shapes")
         val materials = ArrayList<Material>()
         val aiMaterials = scene.mMaterials()
         for (index in 0 until scene.mNumMaterials()) {
@@ -43,14 +43,9 @@ class ModelLoader: Loader<Model> {
 
             val material = materials[aiMesh.mMaterialIndex()]
             val transformation = parseMatrix(aiTransformation)
-
-            shapes += Shape(MeshCache.get(aiMesh, transformation), material)
+            println("Parsing Mesh")
+            shapes += Shape(MeshCache.get(aiMesh, transformation, isRigged), material)
         }
-
-//        val aiNodes = node.mChildren()
-//        for (i in 0 until node.mNumChildren()) {
-//            shapes += parseNode(scene, AINode.create(aiNodes!!.get(i)))
-//        }
 
         return shapes
     }

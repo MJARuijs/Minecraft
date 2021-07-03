@@ -22,13 +22,19 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
 
     private class GeometryData(val positions: ArrayList<Vector3>, val normals: ArrayList<Vector3>, val textureCoordinates: ArrayList<Vector2>, val indexData: IntArray)
 
-    private class JointData(val id: Int, val name: String, val transformation: Matrix4)
+    private class JointData(val name: String = "", val transformation: Matrix4 = Matrix4(), val requiredMaterialId: String = "", val children: ArrayList<JointData> = ArrayList()) {
+
+        operator fun plusAssign(child: JointData) {
+            children += child
+        }
+
+    }
 
     private val rotationMatrix = Matrix4().rotateX(-PI.toFloat() / 2f)
 
     override fun load(path: String): AnimatedModel {
 
-        val rootJoint = Joint("root", Matrix4(), listOf())
+        val rootJoint = Bone("root", Matrix4(), listOf())
 
         val file = File(path)
         val content = file.getContent()
@@ -74,13 +80,98 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
 
     private fun getRiggedShapeRequirements(content: String) {
 
-        println(content)
+//        println(content)
 
         val lines = content.split("\n")
-        for (line in lines) {
-
+        var startIndex = 0
+        for ((i, line) in lines.withIndex()) {
+            if (line.startsWith("<node id")) {
+                startIndex = i
+                break
+            }
         }
 
+        println(lines.size)
+        val jointData = getBoneData(lines, 0)
+
+        printJointData(jointData.first, 0)
+    }
+
+    private fun printJointData(data: JointData, i: Int) {
+        for (j in 0 until i) {
+            print("\t")
+        }
+        println("${data.name}\t ${data.requiredMaterialId}\t${data.children.size}")
+//        println(data.name)
+//        println(data.transformation)
+//        println(data.children.size)
+        for (child in data.children) {
+            printJointData(child, i + 1)
+        }
+//        println()
+//        println()
+
+    }
+
+    private fun getBoneData(lines: List<String>, index: Int): Pair<JointData, Int> {
+        var i = index
+        var bindMatrix = Matrix4()
+        var name = ""
+        var materialId = ""
+        val children = ArrayList<JointData>()
+
+        var jointData = JointData()
+
+        while (true) {
+            val line = lines[i].trim()
+            println("New line: $i :: $line $name")
+            if (line.startsWith("<node id")) {
+                val type = getString("type", line)
+                if (type == "NODE") {
+                    if (!name.isBlank()) {
+                        if (line.contains(name) || !line.contains("Armature")) {
+                            i++
+                            continue
+                        } else {
+                            val result = getBoneData(lines, i)
+                            children += result.first
+                            i = result.second
+                        }
+                    }
+                    if (i >= lines.size) {
+                        return Pair(JointData(name, bindMatrix, materialId, children), i)
+                    }
+                    i++
+                    val bindMatrixLine = lines[i].trim()
+
+                    bindMatrix = try {
+                        getMatrix("transform", bindMatrixLine)
+                    } catch (e: IllegalArgumentException) {
+                        continue
+                    }
+
+                    name = getString("name", line)
+                    jointData = JointData(name, bindMatrix)
+
+                    println(name)
+                    println(bindMatrix)
+                } else if (type == "JOINT") {
+                    i += 1
+                }
+            } else if (line.contains("<instance_material")) {
+                materialId = getString("instance_material", line)
+                jointData = JointData(name, bindMatrix, materialId, children)
+                println("returning $name $i")
+                return Pair(jointData, i)
+            }
+            i++
+            if (i >= lines.size) {
+//                println("breaking")
+                break
+            }
+        }
+//        println("END")
+        return Pair(jointData, i)
     }
 
     private fun getShapeRequirements(content: String): List<ShapeData> {
@@ -162,7 +253,11 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
 
             val positions = getFloatArray("$id-positions-array", geometryContent)
             val normalValues = getFloatArray("$id-normals-array", geometryContent)
-            val textureValues = getFloatArray("$id-map-0-array", geometryContent)
+            val textureValues = try {
+                getFloatArray("$id-map-0-array", geometryContent)
+            } catch (e: IllegalArgumentException) {
+                FloatArray(0)
+            }
 
             val indices = getIntArray("p", geometryContent)
 
@@ -201,7 +296,11 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
             val id = getId(materialContent).replace("-effect", "-material")
             val diffuse = getColor("diffuse", materialContent)
             val specular = getColor("specular", materialContent)
-            val shininess = getFloatValue("shininess", materialContent)
+            val shininess = try {
+                getFloatValue("shininess", materialContent)
+            } catch (e: IllegalArgumentException) {
+                0.0f
+            }
 
             val material = ColoredMaterial(diffuse, specular, shininess)
             materials[id] = material
@@ -228,7 +327,11 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
     }
 
     private fun getColor(name: String, content: String): Color {
-        val values = getFloatArray(name, content)
+        val values = try {
+            getFloatArray(name, content)
+        } catch (e: IllegalArgumentException) {
+            floatArrayOf(0f, 0f, 0f, 0f)
+        }
         if (values.size != 4) {
             throw IllegalArgumentException("Invalid color: $name")
         }
@@ -239,7 +342,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
     private fun getFloatArray(name: String, content: String): FloatArray {
         val nameIndex = content.indexOf("\"$name\"")
         if (nameIndex == -1) {
-            return FloatArray(0)
+            throw IllegalArgumentException("No floatarray found with name: $name $content")
         }
 
         val startIndex = content.indexOf(">", nameIndex + name.length) + 1
