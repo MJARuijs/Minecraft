@@ -43,7 +43,7 @@ class AnimatedModelLoader2: Loader<AnimatedModel> {
         val rootName = rootNode.mName().toString()
         val bindMatrix = parseMatrix(rootNode.mTransformation())
 
-        val rootBone = Bone(rootName, bindMatrix)
+        val rootBone = Bone(rootName,0, bindMatrix)
         println("ROOT BONE: $rootName, $bindMatrix")
 
         print(rootNode)

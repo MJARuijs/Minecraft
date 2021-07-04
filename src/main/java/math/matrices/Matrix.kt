@@ -7,7 +7,7 @@ import java.util.*
  * @param dimensions the dimensions of the matrix.
  * @param elements the initial elements representing the matrix.
  */
-abstract class Matrix<T: Matrix<T>>(private val dimensions: Int, val elements: FloatArray) {
+abstract class Matrix<T: Matrix<T>>(private val dimensions: Int, var elements: FloatArray) {
 
     companion object {
 
@@ -174,6 +174,13 @@ abstract class Matrix<T: Matrix<T>>(private val dimensions: Int, val elements: F
             }
             sum
         }
+    }
+
+    fun isZeroMatrix(): Boolean {
+        if (elements.all { element -> element == 0f }) {
+            return true
+        }
+        return false
     }
 
     fun determinant() = computeDeterminant(dimensions, elements)

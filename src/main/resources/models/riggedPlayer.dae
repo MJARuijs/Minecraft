@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.79.0 commit date:2017-09-11, commit time:10:43, hash:5bd8ac9abfa</authoring_tool>
     </contributor>
-    <created>2021-07-03T14:26:09</created>
-    <modified>2021-07-03T14:26:09</modified>
+    <created>2021-07-03T16:14:45</created>
+    <modified>2021-07-03T16:14:45</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -326,236 +326,236 @@
     </geometry>
   </library_geometries>
   <library_controllers>
-    <controller id="leg_left_leftLeg-skin" name="leg_left">
+    <controller id="LegLeft_Object_LegLeft_Mesh-skin" name="LegLeft_Object">
       <skin source="#Cube_001-mesh">
         <bind_shape_matrix>0.1155 0 0 0.1155 0 0.1155 0 0 -8.20677e-16 0 0.347 0.347 0 0 0 1</bind_shape_matrix>
-        <source id="leg_left_leftLeg-skin-joints">
-          <Name_array id="leg_left_leftLeg-skin-joints-array" count="1">leg_left_bone</Name_array>
+        <source id="LegLeft_Object_LegLeft_Mesh-skin-joints">
+          <Name_array id="LegLeft_Object_LegLeft_Mesh-skin-joints-array" count="1">LegLeft_Bone</Name_array>
           <technique_common>
-            <accessor source="#leg_left_leftLeg-skin-joints-array" count="1" stride="1">
+            <accessor source="#LegLeft_Object_LegLeft_Mesh-skin-joints-array" count="1" stride="1">
               <param name="JOINT" type="name"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="leg_left_leftLeg-skin-bind_poses">
-          <float_array id="leg_left_leftLeg-skin-bind_poses-array" count="16">-2.289454 0 1.78814e-7 0.2721326 -1.73058e-7 0 -1.979553 1.128618 0 -2.289454 0 0 0 0 0 1</float_array>
+        <source id="LegLeft_Object_LegLeft_Mesh-skin-bind_poses">
+          <float_array id="LegLeft_Object_LegLeft_Mesh-skin-bind_poses-array" count="16">-2.289454 0 1.78814e-7 0.2721326 -1.73058e-7 0 -1.979553 1.128618 0 -2.289454 0 0 0 0 0 1</float_array>
           <technique_common>
-            <accessor source="#leg_left_leftLeg-skin-bind_poses-array" count="1" stride="16">
+            <accessor source="#LegLeft_Object_LegLeft_Mesh-skin-bind_poses-array" count="1" stride="16">
               <param name="TRANSFORM" type="float4x4"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="leg_left_leftLeg-skin-weights">
-          <float_array id="leg_left_leftLeg-skin-weights-array" count="8">1 1 1 1 1 1 1 1</float_array>
+        <source id="LegLeft_Object_LegLeft_Mesh-skin-weights">
+          <float_array id="LegLeft_Object_LegLeft_Mesh-skin-weights-array" count="8">1 2 3 4 5 6 7 8</float_array>
           <technique_common>
-            <accessor source="#leg_left_leftLeg-skin-weights-array" count="8" stride="1">
+            <accessor source="#LegLeft_Object_LegLeft_Mesh-skin-weights-array" count="8" stride="1">
               <param name="WEIGHT" type="float"/>
             </accessor>
           </technique_common>
         </source>
         <joints>
-          <input semantic="JOINT" source="#leg_left_leftLeg-skin-joints"/>
-          <input semantic="INV_BIND_MATRIX" source="#leg_left_leftLeg-skin-bind_poses"/>
+          <input semantic="JOINT" source="#LegLeft_Object_LegLeft_Mesh-skin-joints"/>
+          <input semantic="INV_BIND_MATRIX" source="#LegLeft_Object_LegLeft_Mesh-skin-bind_poses"/>
         </joints>
         <vertex_weights count="8">
-          <input semantic="JOINT" source="#leg_left_leftLeg-skin-joints" offset="0"/>
-          <input semantic="WEIGHT" source="#leg_left_leftLeg-skin-weights" offset="1"/>
+          <input semantic="JOINT" source="#LegLeft_Object_LegLeft_Mesh-skin-joints" offset="0"/>
+          <input semantic="WEIGHT" source="#LegLeft_Object_LegLeft_Mesh-skin-weights" offset="1"/>
           <vcount>1 1 1 1 1 1 1 1 </vcount>
           <v>0 0 0 1 0 2 0 3 0 4 0 5 0 6 0 7</v>
         </vertex_weights>
       </skin>
     </controller>
-    <controller id="leg_right_rightLeg-skin" name="leg_right">
+    <controller id="LegRight_Object_LegRight_Mesh-skin" name="LegRight_Object">
       <skin source="#Cube-mesh">
         <bind_shape_matrix>0.1155 0 0 -0.1155 0 0.1155 0 0 -8.20677e-16 0 0.347 0.347 0 0 0 1</bind_shape_matrix>
-        <source id="leg_right_rightLeg-skin-joints">
-          <Name_array id="leg_right_rightLeg-skin-joints-array" count="1">leg_right_bone</Name_array>
+        <source id="LegRight_Object_LegRight_Mesh-skin-joints">
+          <Name_array id="LegRight_Object_LegRight_Mesh-skin-joints-array" count="1">LegRight_Bone</Name_array>
           <technique_common>
-            <accessor source="#leg_right_rightLeg-skin-joints-array" count="1" stride="1">
+            <accessor source="#LegRight_Object_LegRight_Mesh-skin-joints-array" count="1" stride="1">
               <param name="JOINT" type="name"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="leg_right_rightLeg-skin-bind_poses">
-          <float_array id="leg_right_rightLeg-skin-bind_poses-array" count="16">-2.289454 0 2.08616e-7 -0.2446801 -1.73058e-7 0 -1.979553 1.128618 0 -2.289454 0 0 0 0 0 1</float_array>
+        <source id="LegRight_Object_LegRight_Mesh-skin-bind_poses">
+          <float_array id="LegRight_Object_LegRight_Mesh-skin-bind_poses-array" count="16">-2.289454 0 2.08616e-7 -0.2446801 -1.73058e-7 0 -1.979553 1.128618 0 -2.289454 0 0 0 0 0 1</float_array>
           <technique_common>
-            <accessor source="#leg_right_rightLeg-skin-bind_poses-array" count="1" stride="16">
+            <accessor source="#LegRight_Object_LegRight_Mesh-skin-bind_poses-array" count="1" stride="16">
               <param name="TRANSFORM" type="float4x4"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="leg_right_rightLeg-skin-weights">
-          <float_array id="leg_right_rightLeg-skin-weights-array" count="8">1 1 1 1 1 1 1 1</float_array>
+        <source id="LegRight_Object_LegRight_Mesh-skin-weights">
+          <float_array id="LegRight_Object_LegRight_Mesh-skin-weights-array" count="8">1 1 1 1 1 1 1 1</float_array>
           <technique_common>
-            <accessor source="#leg_right_rightLeg-skin-weights-array" count="8" stride="1">
+            <accessor source="#LegRight_Object_LegRight_Mesh-skin-weights-array" count="8" stride="1">
               <param name="WEIGHT" type="float"/>
             </accessor>
           </technique_common>
         </source>
         <joints>
-          <input semantic="JOINT" source="#leg_right_rightLeg-skin-joints"/>
-          <input semantic="INV_BIND_MATRIX" source="#leg_right_rightLeg-skin-bind_poses"/>
+          <input semantic="JOINT" source="#LegRight_Object_LegRight_Mesh-skin-joints"/>
+          <input semantic="INV_BIND_MATRIX" source="#LegRight_Object_LegRight_Mesh-skin-bind_poses"/>
         </joints>
         <vertex_weights count="8">
-          <input semantic="JOINT" source="#leg_right_rightLeg-skin-joints" offset="0"/>
-          <input semantic="WEIGHT" source="#leg_right_rightLeg-skin-weights" offset="1"/>
-          <vcount>1 1 1 1 1 1 1 1 </vcount>
+          <input semantic="JOINT" source="#LegRight_Object_LegRight_Mesh-skin-joints" offset="0"/>
+          <input semantic="WEIGHT" source="#LegRight_Object_LegRight_Mesh-skin-weights" offset="1"/>
+          <vcount>1 1 1 1 1 1 1 1</vcount>
           <v>0 0 0 1 0 2 0 3 0 4 0 5 0 6 0 7</v>
         </vertex_weights>
       </skin>
     </controller>
-    <controller id="arm_right_rightArm-skin" name="arm_right">
+    <controller id="ArmRight_Object_RightArm_Mesh-skin" name="ArmRight_Object">
       <skin source="#Cube_004-mesh">
         <bind_shape_matrix>0.1155 0 3.23385e-9 -0.3465 0 0.1155 0 0 -8.20677e-16 0 0.347 1.041 0 0 0 1</bind_shape_matrix>
-        <source id="arm_right_rightArm-skin-joints">
-          <Name_array id="arm_right_rightArm-skin-joints-array" count="1">arm_right_bone</Name_array>
+        <source id="ArmRight_Object_RightArm_Mesh-skin-joints">
+          <Name_array id="ArmRight_Object_RightArm_Mesh-skin-joints-array" count="1">ArmRight_Bone</Name_array>
           <technique_common>
-            <accessor source="#arm_right_rightArm-skin-joints-array" count="1" stride="1">
+            <accessor source="#ArmRight_Object_RightArm_Mesh-skin-joints-array" count="1" stride="1">
               <param name="JOINT" type="name"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="arm_right_rightArm-skin-bind_poses">
-          <float_array id="arm_right_rightArm-skin-bind_poses-array" count="16">-2.289454 0 2.38419e-7 -0.8188097 -1.638e-7 0 -1.873656 2.435362 0 -2.289454 0 0 0 0 0 1</float_array>
+        <source id="ArmRight_Object_RightArm_Mesh-skin-bind_poses">
+          <float_array id="ArmRight_Object_RightArm_Mesh-skin-bind_poses-array" count="16">-2.289454 0 2.38419e-7 -0.8188097 -1.638e-7 0 -1.873656 2.435362 0 -2.289454 0 0 0 0 0 1</float_array>
           <technique_common>
-            <accessor source="#arm_right_rightArm-skin-bind_poses-array" count="1" stride="16">
+            <accessor source="#ArmRight_Object_RightArm_Mesh-skin-bind_poses-array" count="1" stride="16">
               <param name="TRANSFORM" type="float4x4"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="arm_right_rightArm-skin-weights">
-          <float_array id="arm_right_rightArm-skin-weights-array" count="8">1 1 1 1 1 1 1 1</float_array>
+        <source id="ArmRight_Object_RightArm_Mesh-skin-weights">
+          <float_array id="ArmRight_Object_RightArm_Mesh-skin-weights-array" count="8">1 1 1 1 1 1 1 1</float_array>
           <technique_common>
-            <accessor source="#arm_right_rightArm-skin-weights-array" count="8" stride="1">
+            <accessor source="#ArmRight_Object_RightArm_Mesh-skin-weights-array" count="8" stride="1">
               <param name="WEIGHT" type="float"/>
             </accessor>
           </technique_common>
         </source>
         <joints>
-          <input semantic="JOINT" source="#arm_right_rightArm-skin-joints"/>
-          <input semantic="INV_BIND_MATRIX" source="#arm_right_rightArm-skin-bind_poses"/>
+          <input semantic="JOINT" source="#ArmRight_Object_RightArm_Mesh-skin-joints"/>
+          <input semantic="INV_BIND_MATRIX" source="#ArmRight_Object_RightArm_Mesh-skin-bind_poses"/>
         </joints>
         <vertex_weights count="8">
-          <input semantic="JOINT" source="#arm_right_rightArm-skin-joints" offset="0"/>
-          <input semantic="WEIGHT" source="#arm_right_rightArm-skin-weights" offset="1"/>
-          <vcount>1 1 1 1 1 1 1 1 </vcount>
+          <input semantic="JOINT" source="#ArmRight_Object_RightArm_Mesh-skin-joints" offset="0"/>
+          <input semantic="WEIGHT" source="#ArmRight_Object_RightArm_Mesh-skin-weights" offset="1"/>
+          <vcount>1 1 1 1 1 1 1 1</vcount>
           <v>0 0 0 1 0 2 0 3 0 4 0 5 0 6 0 7</v>
         </vertex_weights>
       </skin>
     </controller>
-    <controller id="arm_left_leftArm-skin" name="arm_left">
+    <controller id="ArmLeft_Object_LeftArm_Mesh-skin" name="ArmLeft_Object">
       <skin source="#Cube_003-mesh">
         <bind_shape_matrix>0.1155 5.62971e-10 -5.81282e-9 0.3485666 -5.62971e-10 0.1155 3.86756e-12 -1.70178e-9 -8.20677e-16 -1.72192e-12 0.347 1.041 0 0 0 1</bind_shape_matrix>
-        <source id="arm_left_leftArm-skin-joints">
-          <Name_array id="arm_left_leftArm-skin-joints-array" count="1">arm_left_bone</Name_array>
+        <source id="ArmLeft_Object_LeftArm_Mesh-skin-joints">
+          <Name_array id="ArmLeft_Object_LeftArm_Mesh-skin-joints-array" count="1">ArmLeft_Bone</Name_array>
           <technique_common>
-            <accessor source="#arm_left_leftArm-skin-joints-array" count="1" stride="1">
+            <accessor source="#ArmLeft_Object_LeftArm_Mesh-skin-joints-array" count="1" stride="1">
               <param name="JOINT" type="name"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="arm_left_leftArm-skin-bind_poses">
-          <float_array id="arm_left_leftArm-skin-bind_poses-array" count="16">-2.289454 0 2.38419e-7 0.8037204 -1.638e-7 0 -1.873656 2.435362 0 -2.289454 0 0 0 0 0 1</float_array>
+        <source id="ArmLeft_Object_LeftArm_Mesh-skin-bind_poses">
+          <float_array id="ArmLeft_Object_LeftArm_Mesh-skin-bind_poses-array" count="16">-2.289454 0 2.38419e-7 0.8037204 -1.638e-7 0 -1.873656 2.435362 0 -2.289454 0 0 0 0 0 1</float_array>
           <technique_common>
-            <accessor source="#arm_left_leftArm-skin-bind_poses-array" count="1" stride="16">
+            <accessor source="#ArmLeft_Object_LeftArm_Mesh-skin-bind_poses-array" count="1" stride="16">
               <param name="TRANSFORM" type="float4x4"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="arm_left_leftArm-skin-weights">
-          <float_array id="arm_left_leftArm-skin-weights-array" count="8">1 1 1 1 1 1 1 1</float_array>
+        <source id="ArmLeft_Object_LeftArm_Mesh-skin-weights">
+          <float_array id="ArmLeft_Object_LeftArm_Mesh-skin-weights-array" count="8">1 1 1 1 1 1 1 1</float_array>
           <technique_common>
-            <accessor source="#arm_left_leftArm-skin-weights-array" count="8" stride="1">
+            <accessor source="#ArmLeft_Object_LeftArm_Mesh-skin-weights-array" count="8" stride="1">
               <param name="WEIGHT" type="float"/>
             </accessor>
           </technique_common>
         </source>
         <joints>
-          <input semantic="JOINT" source="#arm_left_leftArm-skin-joints"/>
-          <input semantic="INV_BIND_MATRIX" source="#arm_left_leftArm-skin-bind_poses"/>
+          <input semantic="JOINT" source="#ArmLeft_Object_LeftArm_Mesh-skin-joints"/>
+          <input semantic="INV_BIND_MATRIX" source="#ArmLeft_Object_LeftArm_Mesh-skin-bind_poses"/>
         </joints>
         <vertex_weights count="8">
-          <input semantic="JOINT" source="#arm_left_leftArm-skin-joints" offset="0"/>
-          <input semantic="WEIGHT" source="#arm_left_leftArm-skin-weights" offset="1"/>
-          <vcount>1 1 1 1 1 1 1 1 </vcount>
+          <input semantic="JOINT" source="#ArmLeft_Object_LeftArm_Mesh-skin-joints" offset="0"/>
+          <input semantic="WEIGHT" source="#ArmLeft_Object_LeftArm_Mesh-skin-weights" offset="1"/>
+          <vcount>1 1 1 1 1 1 1 1</vcount>
           <v>0 0 0 1 0 2 0 3 0 4 0 5 0 6 0 7</v>
         </vertex_weights>
       </skin>
     </controller>
-    <controller id="Torso_body-skin" name="Torso">
+    <controller id="Torso_Object_Torso_Mesh-skin" name="Torso_Object">
       <skin source="#Cube_002-mesh">
         <bind_shape_matrix>0.2314999 0 -1.27175e-11 0.002066553 0 0.1155 0 0 1.64491e-15 0 0.347 1.041 0 0 0 1</bind_shape_matrix>
-        <source id="Torso_body-skin-joints">
-          <Name_array id="Torso_body-skin-joints-array" count="1">torso_bone</Name_array>
+        <source id="Torso_Object_Torso_Mesh-skin-joints">
+          <Name_array id="Torso_Object_Torso_Mesh-skin-joints-array" count="1">Torso_Bone</Name_array>
           <technique_common>
-            <accessor source="#Torso_body-skin-joints-array" count="1" stride="1">
+            <accessor source="#Torso_Object_Torso_Mesh-skin-joints-array" count="1" stride="1">
               <param name="JOINT" type="name"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="Torso_body-skin-bind_poses">
-          <float_array id="Torso_body-skin-bind_poses-array" count="16">-2.289454 0 2.0015e-7 -2.07977e-7 -1.73058e-7 0 -1.979553 2.556964 0 -2.289454 0 0 0 0 0 1</float_array>
+        <source id="Torso_Object_Torso_Mesh-skin-bind_poses">
+          <float_array id="Torso_Object_Torso_Mesh-skin-bind_poses-array" count="16">-2.289454 0 2.0015e-7 -2.07977e-7 -1.73058e-7 0 -1.979553 2.556964 0 -2.289454 0 0 0 0 0 1</float_array>
           <technique_common>
-            <accessor source="#Torso_body-skin-bind_poses-array" count="1" stride="16">
+            <accessor source="#Torso_Object_Torso_Mesh-skin-bind_poses-array" count="1" stride="16">
               <param name="TRANSFORM" type="float4x4"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="Torso_body-skin-weights">
-          <float_array id="Torso_body-skin-weights-array" count="8">1 1 1 1 1 1 1 1</float_array>
+        <source id="Torso_Object_Torso_Mesh-skin-weights">
+          <float_array id="Torso_Object_Torso_Mesh-skin-weights-array" count="8">1 1 1 1 1 1 1 1</float_array>
           <technique_common>
-            <accessor source="#Torso_body-skin-weights-array" count="8" stride="1">
+            <accessor source="#Torso_Object_Torso_Mesh-skin-weights-array" count="8" stride="1">
               <param name="WEIGHT" type="float"/>
             </accessor>
           </technique_common>
         </source>
         <joints>
-          <input semantic="JOINT" source="#Torso_body-skin-joints"/>
-          <input semantic="INV_BIND_MATRIX" source="#Torso_body-skin-bind_poses"/>
+          <input semantic="JOINT" source="#Torso_Object_Torso_Mesh-skin-joints"/>
+          <input semantic="INV_BIND_MATRIX" source="#Torso_Object_Torso_Mesh-skin-bind_poses"/>
         </joints>
         <vertex_weights count="8">
-          <input semantic="JOINT" source="#Torso_body-skin-joints" offset="0"/>
-          <input semantic="WEIGHT" source="#Torso_body-skin-weights" offset="1"/>
-          <vcount>1 1 1 1 1 1 1 1 </vcount>
+          <input semantic="JOINT" source="#Torso_Object_Torso_Mesh-skin-joints" offset="0"/>
+          <input semantic="WEIGHT" source="#Torso_Object_Torso_Mesh-skin-weights" offset="1"/>
+          <vcount>1 1 1 1 1 1 1 1</vcount>
           <v>0 0 0 1 0 2 0 3 0 4 0 5 0 6 0 7</v>
         </vertex_weights>
       </skin>
     </controller>
-    <controller id="Head_head-skin" name="Head">
+    <controller id="Head_Object_Head_Mesh-skin" name="Head_Object">
       <skin source="#Cube_005-mesh">
         <bind_shape_matrix>0.2314999 0 0 0 0 0.2314999 0 0 0 0 0.2315 1.619 0 0 0 1</bind_shape_matrix>
-        <source id="Head_head-skin-joints">
-          <Name_array id="Head_head-skin-joints-array" count="1">head_bone</Name_array>
+        <source id="Head_Object_Head_Mesh-skin-joints">
+          <Name_array id="Head_Object_Head_Mesh-skin-joints-array" count="1">Head_Bone</Name_array>
           <technique_common>
-            <accessor source="#Head_head-skin-joints-array" count="1" stride="1">
+            <accessor source="#Head_Object_Head_Mesh-skin-joints-array" count="1" stride="1">
               <param name="JOINT" type="name"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="Head_head-skin-bind_poses">
-          <float_array id="Head_head-skin-bind_poses-array" count="16">4.265081 0 0 0 0 0 3.687759 -5.50826 0 -4.265081 0 0 0 0 0 1</float_array>
+        <source id="Head_Object_Head_Mesh-skin-bind_poses">
+          <float_array id="Head_Object_Head_Mesh-skin-bind_poses-array" count="16">4.265081 0 0 0 0 0 3.687759 -5.50826 0 -4.265081 0 0 0 0 0 1</float_array>
           <technique_common>
-            <accessor source="#Head_head-skin-bind_poses-array" count="1" stride="16">
+            <accessor source="#Head_Object_Head_Mesh-skin-bind_poses-array" count="1" stride="16">
               <param name="TRANSFORM" type="float4x4"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="Head_head-skin-weights">
-          <float_array id="Head_head-skin-weights-array" count="8">1 1 1 1 1 1 1 1</float_array>
+        <source id="Head_Object_Head_Mesh-skin-weights">
+          <float_array id="Head_Object_Head_Mesh-skin-weights-array" count="8">1 1 1 1 1 1 1 1</float_array>
           <technique_common>
-            <accessor source="#Head_head-skin-weights-array" count="8" stride="1">
+            <accessor source="#Head_Object_Head_Mesh-skin-weights-array" count="8" stride="1">
               <param name="WEIGHT" type="float"/>
             </accessor>
           </technique_common>
         </source>
         <joints>
-          <input semantic="JOINT" source="#Head_head-skin-joints"/>
-          <input semantic="INV_BIND_MATRIX" source="#Head_head-skin-bind_poses"/>
+          <input semantic="JOINT" source="#Head_Object_Head_Mesh-skin-joints"/>
+          <input semantic="INV_BIND_MATRIX" source="#Head_Object_Head_Mesh-skin-bind_poses"/>
         </joints>
         <vertex_weights count="8">
-          <input semantic="JOINT" source="#Head_head-skin-joints" offset="0"/>
-          <input semantic="WEIGHT" source="#Head_head-skin-weights" offset="1"/>
-          <vcount>1 1 1 1 1 1 1 1 </vcount>
+          <input semantic="JOINT" source="#Head_Object_Head_Mesh-skin-joints" offset="0"/>
+          <input semantic="WEIGHT" source="#Head_Object_Head_Mesh-skin-weights" offset="1"/>
+          <vcount>1 1 1 1 1 1 1 1</vcount>
           <v>0 0 0 1 0 2 0 3 0 4 0 5 0 6 0 7</v>
         </vertex_weights>
       </skin>
@@ -563,13 +563,13 @@
   </library_controllers>
   <library_visual_scenes>
     <visual_scene id="Scene" name="Scene">
-      <node id="Torso" name="Torso" type="NODE">
+      <node id="Torso_Object" name="Torso_Object" type="NODE">
         <matrix sid="transform">-0.4367854 0 -4.41629e-8 0 0 0.4367854 0 0 3.8185e-8 0 -0.5051646 1.039105 0 0 0 1</matrix>
-        <node id="Torso_torso_bone" name="torso_bone" sid="torso_bone" type="JOINT">
+        <node id="Torso_Object_Torso_Bone" name="Torso_Bone" sid="Torso_Bone" type="JOINT">
           <matrix sid="transform">1 0 0 0 0 0 -1 0 0 1 0 -0.5 0 0 0 1</matrix>
-          <node id="leg_left" name="leg_left" type="NODE">
+          <node id="LegLeft_Object" name="LegLeft_Object" type="NODE">
             <matrix sid="transform">1 4.87421e-9 2.13163e-14 -0.2721329 7.10543e-15 -1.289e-11 0.9999998 0.9283461 4.87421e-9 -1 -1.289e-11 -1.35129e-9 0 0 0 1</matrix>
-            <node id="leg_left_leg_left_bone" name="leg_left_bone" sid="leg_left_bone" type="JOINT">
+            <node id="LegLeft_Object_LegLeft_Bone" name="LegLeft_Bone" sid="LegLeft_Bone" type="JOINT">
               <matrix sid="transform">1 0 0 0 0 0 -1 0 0 1 0 -0.5 0 0 0 1</matrix>
               <extra>
                 <technique profile="blender">
@@ -581,9 +581,9 @@
               </extra>
             </node>
           </node>
-          <node id="leg_left" name="leg_left" type="NODE">
+          <node id="LegLeft_Object" name="LegLeft_Object" type="NODE">
             <matrix sid="transform">1 4.87421e-9 2.13163e-14 -0.2721329 7.10543e-15 -1.289e-11 0.9999998 0.9283461 4.87421e-9 -1 -1.289e-11 -1.35129e-9 0 0 0 1</matrix>
-            <node id="leg_left_leg_left_bone" name="leg_left_bone" sid="leg_left_bone" type="JOINT">
+            <node id="LegLeft_Object_LegLeft_Bone" name="LegLeft_Bone" sid="LegLeft_Bone" type="JOINT">
               <matrix sid="transform">1 0 0 0 0 0 -1 0 0 1 0 -0.5 0 0 0 1</matrix>
               <extra>
                 <technique profile="blender">
@@ -595,14 +595,14 @@
               </extra>
             </node>
           </node>
-          <node id="leftLeg" name="leftLeg" type="NODE">
+          <node id="LegLeft_Mesh" name="LegLeft_Mesh" type="NODE">
             <translate sid="location">0 0 0</translate>
             <rotate sid="rotationZ">0 0 1 0</rotate>
             <rotate sid="rotationY">0 1 0 0</rotate>
             <rotate sid="rotationX">1 0 0 0</rotate>
             <scale sid="scale">1 1 1</scale>
-            <instance_controller url="#leg_left_leftLeg-skin">
-              <skeleton>#leg_left_leg_left_bone</skeleton>
+            <instance_controller url="#LegLeft_Object_LegLeft_Mesh-skin">
+              <skeleton>#LegLeft_Object_LegLeft_Bone</skeleton>
               <bind_material>
                 <technique_common>
                   <instance_material symbol="LegMaterial-material" target="#LegMaterial-material"/>
@@ -610,9 +610,9 @@
               </bind_material>
             </instance_controller>
           </node>
-          <node id="leg_right" name="leg_right" type="NODE">
+          <node id="LegRight_Object" name="LegRight_Object" type="NODE">
             <matrix sid="transform">1 4.87421e-9 2.13163e-14 0.24468 7.10543e-15 -1.289e-11 0.9999998 0.9283461 4.87421e-9 -1 -1.289e-11 1.16776e-9 0 0 0 1</matrix>
-            <node id="leg_right_leg_right_bone" name="leg_right_bone" sid="leg_right_bone" type="JOINT">
+            <node id="LegRight_Object_LegRight_Bone" name="LegRight_Bone" sid="LegRight_Bone" type="JOINT">
               <matrix sid="transform">1 0 0 0 0 0 -1 0 0 1 0 -0.5 0 0 0 1</matrix>
               <extra>
                 <technique profile="blender">
@@ -624,9 +624,9 @@
               </extra>
             </node>
           </node>
-          <node id="leg_right" name="leg_right" type="NODE">
+          <node id="LegRight_Object" name="LegRight_Object" type="NODE">
             <matrix sid="transform">1 4.87421e-9 2.13163e-14 0.24468 7.10543e-15 -1.289e-11 0.9999998 0.9283461 4.87421e-9 -1 -1.289e-11 1.16776e-9 0 0 0 1</matrix>
-            <node id="leg_right_leg_right_bone" name="leg_right_bone" sid="leg_right_bone" type="JOINT">
+            <node id="LegRight_Object_LegRight_Bone" name="LegRight_Bone" sid="LegRight_Bone" type="JOINT">
               <matrix sid="transform">1 0 0 0 0 0 -1 0 0 1 0 -0.5 0 0 0 1</matrix>
               <extra>
                 <technique profile="blender">
@@ -638,14 +638,14 @@
               </extra>
             </node>
           </node>
-          <node id="rightLeg" name="rightLeg" type="NODE">
+          <node id="LegRight_Mesh" name="LegRight_Mesh" type="NODE">
             <translate sid="location">0 0 0</translate>
             <rotate sid="rotationZ">0 0 1 0</rotate>
             <rotate sid="rotationY">0 1 0 0</rotate>
             <rotate sid="rotationX">1 0 0 0</rotate>
             <scale sid="scale">1 1 1</scale>
-            <instance_controller url="#leg_right_rightLeg-skin">
-              <skeleton>#leg_right_leg_right_bone</skeleton>
+            <instance_controller url="#LegRight_Object_LegRight_Mesh-skin">
+              <skeleton>#LegRight_Object_LegRight_Bone</skeleton>
               <bind_material>
                 <technique_common>
                   <instance_material symbol="LegMaterial-material" target="#LegMaterial-material"/>
@@ -653,9 +653,9 @@
               </bind_material>
             </instance_controller>
           </node>
-          <node id="arm_right" name="arm_right" type="NODE">
+          <node id="ArmRight_Object" name="ArmRight_Object" type="NODE">
             <matrix sid="transform">1 4.87421e-9 2.84217e-14 0.8188095 7.10543e-15 -1.289e-11 1.056519 -0.4877837 4.87421e-9 -1 -1.36185e-11 3.98445e-9 0 0 0 1</matrix>
-            <node id="arm_right_arm_right_bone" name="arm_right_bone" sid="arm_right_bone" type="JOINT">
+            <node id="ArmRight_Object_ArmRight_Bone" name="ArmRight_Bone" sid="ArmRight_Bone" type="JOINT">
               <matrix sid="transform">1 0 0 0 0 0 -1 0 0 1 0 -0.5 0 0 0 1</matrix>
               <extra>
                 <technique profile="blender">
@@ -667,9 +667,9 @@
               </extra>
             </node>
           </node>
-          <node id="arm_right" name="arm_right" type="NODE">
+          <node id="ArmRight_Object" name="ArmRight_Object" type="NODE">
             <matrix sid="transform">1 4.87421e-9 2.84217e-14 0.8188095 7.10543e-15 -1.289e-11 1.056519 -0.4877837 4.87421e-9 -1 -1.36185e-11 3.98445e-9 0 0 0 1</matrix>
-            <node id="arm_right_arm_right_bone" name="arm_right_bone" sid="arm_right_bone" type="JOINT">
+            <node id="ArmRight_Object_ArmRight_Bone" name="ArmRight_Bone" sid="ArmRight_Bone" type="JOINT">
               <matrix sid="transform">1 0 0 0 0 0 -1 0 0 1 0 -0.5 0 0 0 1</matrix>
               <extra>
                 <technique profile="blender">
@@ -681,58 +681,14 @@
               </extra>
             </node>
           </node>
-          <node id="rightArm" name="rightArm" type="NODE">
+          <node id="RightArm_Mesh" name="RightArm_Mesh" type="NODE">
             <translate sid="location">0 0 0</translate>
             <rotate sid="rotationZ">0 0 1 0</rotate>
             <rotate sid="rotationY">0 1 0 0</rotate>
             <rotate sid="rotationX">1 0 0 0</rotate>
             <scale sid="scale">1 1 1</scale>
-            <instance_controller url="#arm_right_rightArm-skin">
-              <skeleton>#arm_right_arm_right_bone</skeleton>
-              <bind_material>
-                <technique_common>
-                  <instance_material symbol="ArmMaterial-material" target="#ArmMaterial-material"/>
-                  <instance_material symbol="LegMaterial-material" target="#LegMaterial-material"/>
-                </technique_common>
-              </bind_material>
-            </instance_controller>
-          </node>
-          <node id="arm_left" name="arm_left" type="NODE">
-            <matrix sid="transform">1 0 -4.47784e-11 -0.8037207 7.10543e-15 0 1.056519 -0.4877837 0 -1 0 0 0 0 0 1</matrix>
-            <node id="arm_left_arm_left_bone" name="arm_left_bone" sid="arm_left_bone" type="JOINT">
-              <matrix sid="transform">1 0 0 0 0 0 -1 0 0 1 0 -0.5 0 0 0 1</matrix>
-              <extra>
-                <technique profile="blender">
-                  <layer sid="layer" type="string">0</layer>
-                  <tip_x sid="tip_x" type="float">0</tip_x>
-                  <tip_y sid="tip_y" type="float">0</tip_y>
-                  <tip_z sid="tip_z" type="float">1</tip_z>
-                </technique>
-              </extra>
-            </node>
-          </node>
-          <node id="arm_left" name="arm_left" type="NODE">
-            <matrix sid="transform">1 0 -4.47784e-11 -0.8037207 7.10543e-15 0 1.056519 -0.4877837 0 -1 0 0 0 0 0 1</matrix>
-            <node id="arm_left_arm_left_bone" name="arm_left_bone" sid="arm_left_bone" type="JOINT">
-              <matrix sid="transform">1 0 0 0 0 0 -1 0 0 1 0 -0.5 0 0 0 1</matrix>
-              <extra>
-                <technique profile="blender">
-                  <layer sid="layer" type="string">0</layer>
-                  <tip_x sid="tip_x" type="float">0</tip_x>
-                  <tip_y sid="tip_y" type="float">0</tip_y>
-                  <tip_z sid="tip_z" type="float">1</tip_z>
-                </technique>
-              </extra>
-            </node>
-          </node>
-          <node id="leftArm" name="leftArm" type="NODE">
-            <translate sid="location">0 0 0</translate>
-            <rotate sid="rotationZ">0 0 1 0</rotate>
-            <rotate sid="rotationY">0 1 0 0</rotate>
-            <rotate sid="rotationX">1 0 0 0</rotate>
-            <scale sid="scale">1 1 1</scale>
-            <instance_controller url="#arm_left_leftArm-skin">
-              <skeleton>#arm_left_arm_left_bone</skeleton>
+            <instance_controller url="#ArmRight_Object_RightArm_Mesh-skin">
+              <skeleton>#ArmRight_Object_ArmRight_Bone</skeleton>
               <bind_material>
                 <technique_common>
                   <instance_material symbol="ArmMaterial-material" target="#ArmMaterial-material"/>
@@ -740,9 +696,9 @@
               </bind_material>
             </instance_controller>
           </node>
-          <node id="Head" name="Head" type="NODE">
-            <matrix sid="transform">-0.5367903 0 5.4297e-8 1.18117e-7 -4.05756e-8 0 -0.5367902 -1.668212 -2.22045e-16 -0.5367903 0 0 0 0 0 1</matrix>
-            <node id="Head_head_bone" name="head_bone" sid="head_bone" type="JOINT">
+          <node id="ArmLeft_Object" name="ArmLeft_Object" type="NODE">
+            <matrix sid="transform">1 0 -4.47784e-11 -0.8037207 7.10543e-15 0 1.056519 -0.4877837 0 -1 0 0 0 0 0 1</matrix>
+            <node id="ArmLeft_Object_ArmLeft_Bone" name="ArmLeft_Bone" sid="ArmLeft_Bone" type="JOINT">
               <matrix sid="transform">1 0 0 0 0 0 -1 0 0 1 0 -0.5 0 0 0 1</matrix>
               <extra>
                 <technique profile="blender">
@@ -754,9 +710,9 @@
               </extra>
             </node>
           </node>
-          <node id="Head" name="Head" type="NODE">
-            <matrix sid="transform">-0.5367903 0 5.4297e-8 1.18117e-7 -4.05756e-8 0 -0.5367902 -1.668212 -2.22045e-16 -0.5367903 0 0 0 0 0 1</matrix>
-            <node id="Head_head_bone" name="head_bone" sid="head_bone" type="JOINT">
+          <node id="ArmLeft_Object" name="ArmLeft_Object" type="NODE">
+            <matrix sid="transform">1 0 -4.47784e-11 -0.8037207 7.10543e-15 0 1.056519 -0.4877837 0 -1 0 0 0 0 0 1</matrix>
+            <node id="ArmLeft_Object_ArmLeft_Bone" name="ArmLeft_Bone" sid="ArmLeft_Bone" type="JOINT">
               <matrix sid="transform">1 0 0 0 0 0 -1 0 0 1 0 -0.5 0 0 0 1</matrix>
               <extra>
                 <technique profile="blender">
@@ -768,14 +724,57 @@
               </extra>
             </node>
           </node>
-          <node id="head" name="head" type="NODE">
+          <node id="LeftArm_Mesh" name="LeftArm_Mesh" type="NODE">
             <translate sid="location">0 0 0</translate>
             <rotate sid="rotationZ">0 0 1 0</rotate>
             <rotate sid="rotationY">0 1 0 0</rotate>
             <rotate sid="rotationX">1 0 0 0</rotate>
             <scale sid="scale">1 1 1</scale>
-            <instance_controller url="#Head_head-skin">
-              <skeleton>#Head_head_bone</skeleton>
+            <instance_controller url="#ArmLeft_Object_LeftArm_Mesh-skin">
+              <skeleton>#ArmLeft_Object_ArmLeft_Bone</skeleton>
+              <bind_material>
+                <technique_common>
+                  <instance_material symbol="ArmMaterial-material" target="#ArmMaterial-material"/>
+                </technique_common>
+              </bind_material>
+            </instance_controller>
+          </node>
+          <node id="Head_Object" name="Head_Object" type="NODE">
+            <matrix sid="transform">-0.5367903 0 5.4297e-8 1.18117e-7 -4.05756e-8 0 -0.5367902 -1.668212 -2.22045e-16 -0.5367903 0 0 0 0 0 1</matrix>
+            <node id="Head_Object_Head_Bone" name="Head_Bone" sid="Head_Bone" type="JOINT">
+              <matrix sid="transform">1 0 0 0 0 0 -1 0 0 1 0 -0.5 0 0 0 1</matrix>
+              <extra>
+                <technique profile="blender">
+                  <layer sid="layer" type="string">0</layer>
+                  <tip_x sid="tip_x" type="float">0</tip_x>
+                  <tip_y sid="tip_y" type="float">0</tip_y>
+                  <tip_z sid="tip_z" type="float">1</tip_z>
+                </technique>
+              </extra>
+            </node>
+          </node>
+          <node id="Head_Object" name="Head_Object" type="NODE">
+            <matrix sid="transform">-0.5367903 0 5.4297e-8 1.18117e-7 -4.05756e-8 0 -0.5367902 -1.668212 -2.22045e-16 -0.5367903 0 0 0 0 0 1</matrix>
+            <node id="Head_Object_Head_Bone" name="Head_Bone" sid="Head_Bone" type="JOINT">
+              <matrix sid="transform">1 0 0 0 0 0 -1 0 0 1 0 -0.5 0 0 0 1</matrix>
+              <extra>
+                <technique profile="blender">
+                  <layer sid="layer" type="string">0</layer>
+                  <tip_x sid="tip_x" type="float">0</tip_x>
+                  <tip_y sid="tip_y" type="float">0</tip_y>
+                  <tip_z sid="tip_z" type="float">1</tip_z>
+                </technique>
+              </extra>
+            </node>
+          </node>
+          <node id="Head_Mesh" name="Head_Mesh" type="NODE">
+            <translate sid="location">0 0 0</translate>
+            <rotate sid="rotationZ">0 0 1 0</rotate>
+            <rotate sid="rotationY">0 1 0 0</rotate>
+            <rotate sid="rotationX">1 0 0 0</rotate>
+            <scale sid="scale">1 1 1</scale>
+            <instance_controller url="#Head_Object_Head_Mesh-skin">
+              <skeleton>#Head_Object_Head_Bone</skeleton>
               <bind_material>
                 <technique_common>
                   <instance_material symbol="HeadMaterial-material" target="#HeadMaterial-material"/>
@@ -793,14 +792,14 @@
           </extra>
         </node>
       </node>
-      <node id="body" name="body" type="NODE">
+      <node id="Torso_Mesh" name="Torso_Mesh" type="NODE">
         <translate sid="location">0 0 0</translate>
         <rotate sid="rotationZ">0 0 1 0</rotate>
         <rotate sid="rotationY">0 1 0 0</rotate>
         <rotate sid="rotationX">1 0 0 0</rotate>
         <scale sid="scale">1 1 1</scale>
-        <instance_controller url="#Torso_body-skin">
-          <skeleton>#Torso_torso_bone</skeleton>
+        <instance_controller url="#Torso_Object_Torso_Mesh-skin">
+          <skeleton>#Torso_Object_Torso_Bone</skeleton>
           <bind_material>
             <technique_common>
               <instance_material symbol="BodyMaterial-material" target="#BodyMaterial-material"/>

@@ -17,6 +17,8 @@ import graphics.entity.EntityRenderer
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
 import graphics.model.ModelCache
+import graphics.model.ModelLoader
+import graphics.model.MyModelLoader
 import graphics.model.animation.AnimatedModelLoader
 import graphics.model.animation.AnimatedModelLoader2
 import graphics.renderer.RenderData
@@ -102,7 +104,7 @@ object Main {
 
         val player = Entity(animatedModel, Matrix4().translate(0f, 0f, -5f))
         entities += player
-        entities += Entity(ModelCache.get("models/box.dae"), Matrix4().translate(0f, 0f, -10f))
+//        entities += Entity(MyModelLoader().load("models/box.dae"), Matrix4().translate(0f, 0f, -10f))
 
         var i = 0
 

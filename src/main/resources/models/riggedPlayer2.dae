@@ -399,7 +399,7 @@
         <vertex_weights count="8">
           <input semantic="JOINT" source="#LegRight_Object_LegRight_Mesh-skin-joints" offset="0"/>
           <input semantic="WEIGHT" source="#LegRight_Object_LegRight_Mesh-skin-weights" offset="1"/>
-          <vcount>1 1 1 1 1 1 1 1 </vcount>
+          <vcount>1 1 1 1 1 1 1 1</vcount>
           <v>0 0 0 1 0 2 0 3 0 4 0 5 0 6 0 7</v>
         </vertex_weights>
       </skin>
@@ -438,7 +438,7 @@
         <vertex_weights count="8">
           <input semantic="JOINT" source="#ArmRight_Object_RightArm_Mesh-skin-joints" offset="0"/>
           <input semantic="WEIGHT" source="#ArmRight_Object_RightArm_Mesh-skin-weights" offset="1"/>
-          <vcount>1 1 1 1 1 1 1 1 </vcount>
+          <vcount>1 1 1 1 1 1 1 1</vcount>
           <v>0 0 0 1 0 2 0 3 0 4 0 5 0 6 0 7</v>
         </vertex_weights>
       </skin>
@@ -477,7 +477,7 @@
         <vertex_weights count="8">
           <input semantic="JOINT" source="#ArmLeft_Object_LeftArm_Mesh-skin-joints" offset="0"/>
           <input semantic="WEIGHT" source="#ArmLeft_Object_LeftArm_Mesh-skin-weights" offset="1"/>
-          <vcount>1 1 1 1 1 1 1 1 </vcount>
+          <vcount>1 1 1 1 1 1 1 1</vcount>
           <v>0 0 0 1 0 2 0 3 0 4 0 5 0 6 0 7</v>
         </vertex_weights>
       </skin>
@@ -516,7 +516,7 @@
         <vertex_weights count="8">
           <input semantic="JOINT" source="#Torso_Object_Torso_Mesh-skin-joints" offset="0"/>
           <input semantic="WEIGHT" source="#Torso_Object_Torso_Mesh-skin-weights" offset="1"/>
-          <vcount>1 1 1 1 1 1 1 1 </vcount>
+          <vcount>1 1 1 1 1 1 1 1</vcount>
           <v>0 0 0 1 0 2 0 3 0 4 0 5 0 6 0 7</v>
         </vertex_weights>
       </skin>
@@ -555,7 +555,7 @@
         <vertex_weights count="8">
           <input semantic="JOINT" source="#Head_Object_Head_Mesh-skin-joints" offset="0"/>
           <input semantic="WEIGHT" source="#Head_Object_Head_Mesh-skin-weights" offset="1"/>
-          <vcount>1 1 1 1 1 1 1 1 </vcount>
+          <vcount>1 1 1 1 1 1 1 1</vcount>
           <v>0 0 0 1 0 2 0 3 0 4 0 5 0 6 0 7</v>
         </vertex_weights>
       </skin>

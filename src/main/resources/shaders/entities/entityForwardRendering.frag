@@ -81,4 +81,5 @@ void main() {
     outColor = ambientColor;
     outColor.rgb += sunColor.rgb * lightFactor;
     outColor = clamp(outColor, 0.0, 1.0);
+//    outColor = vec4(0.25, 0.25, 0.25, 1.0);
 }
