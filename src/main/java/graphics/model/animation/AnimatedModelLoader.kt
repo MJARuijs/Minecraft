@@ -30,6 +30,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
 
     }
 
+    private val jointIndices = HashMap<String, Int>()
     private val rotationMatrix = Matrix4().rotateX(-PI.toFloat() / 2f)
 
     override fun load(path: String): AnimatedModel {
@@ -44,9 +45,11 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
         val shapeContent = getContent("library_visual_scenes", content)
         val jointContent = getContent("library_controllers", content)
 
-        val riggedShapeRequirements = getRiggedShapeRequirements(shapeContent)
+        val riggedShapeRequirements = getJointHierarchy(shapeContent)
+        indexJoints(riggedShapeRequirements)
 
         val materials = parseMaterials(materialContent)
+
         val geometry = getGeometryData(geometryContent)
 
 //        val shapes = createShapes(riggedShapeRequirements, materials, geometry)
@@ -61,8 +64,19 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
         return content.substring(startIndex, endIndex)
     }
 
-    private fun getJointData(content: String) {
+    private fun getJointMeshData(content: String) {
+        val controllerContents = content.split("</controller>")
 
+        for (controllerContent in controllerContents) {
+            if (controllerContent.isBlank()) {
+                continue
+            }
+
+            println(controllerContent)
+            println()
+            println()
+            println()
+        }
     }
 
     private fun createShapes(requirements: List<ShapeData>, materials: HashMap<String, Material>, geometries: HashMap<String, GeometryData>): List<Shape> {
@@ -78,58 +92,56 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
         return shapes
     }
 
-    private fun getRiggedShapeRequirements(content: String) {
-
-//        println(content)
-
+    private fun getJointHierarchy(content: String): JointData {
         val lines = content.split("\n")
-        var startIndex = 0
-        for ((i, line) in lines.withIndex()) {
-            if (line.startsWith("<node id")) {
-                startIndex = i
-                break
-            }
-        }
 
-        println(lines.size)
         val jointData = getBoneData(lines, 0)
+//        println()
+//        println()
+//        printJointData(jointData.first, 0)
+        return jointData.first
+    }
 
-        printJointData(jointData.first, 0)
+    private fun indexJoints(joint: JointData) {
+        if (!jointIndices.contains(joint.name)) {
+            jointIndices[joint.name] = jointIndices.size
+        }
+        for (child in joint.children) {
+            indexJoints(child)
+        }
     }
 
     private fun printJointData(data: JointData, i: Int) {
-        for (j in 0 until i) {
-            print("\t")
-        }
-        println("${data.name}\t ${data.requiredMaterialId}\t${data.children.size}")
-//        println(data.name)
-//        println(data.transformation)
-//        println(data.children.size)
+        println("${data.name} ${data.requiredMaterialId} ${data.children.size}")
         for (child in data.children) {
             printJointData(child, i + 1)
         }
-//        println()
-//        println()
-
     }
 
     private fun getBoneData(lines: List<String>, index: Int): Pair<JointData, Int> {
         var i = index
-        var bindMatrix = Matrix4()
+        var transformationMatrix = Matrix4()
         var name = ""
-        var materialId = ""
         val children = ArrayList<JointData>()
-
-        var jointData = JointData()
 
         while (true) {
             val line = lines[i].trim()
-            println("New line: $i :: $line $name")
+
             if (line.startsWith("<node id")) {
                 val type = getString("type", line)
                 if (type == "NODE") {
+
+                    val transformationMatrixLine = lines[i + 1].trim()
+
+                    transformationMatrix = try {
+                        getMatrix("transform", transformationMatrixLine)
+                    } catch (e: IllegalArgumentException) {
+                        i++
+                        continue
+                    }
+
                     if (!name.isBlank()) {
-                        if (line.contains(name) || !line.contains("Armature")) {
+                        if (getString("name", line) == name) {
                             i++
                             continue
                         } else {
@@ -137,41 +149,20 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
                             children += result.first
                             i = result.second
                         }
+                    } else {
+                        name = getString("name", line)
                     }
-                    if (i >= lines.size) {
-                        return Pair(JointData(name, bindMatrix, materialId, children), i)
-                    }
-                    i++
-                    val bindMatrixLine = lines[i].trim()
-
-                    bindMatrix = try {
-                        getMatrix("transform", bindMatrixLine)
-                    } catch (e: IllegalArgumentException) {
-                        continue
-                    }
-
-                    name = getString("name", line)
-                    jointData = JointData(name, bindMatrix)
-
-                    println(name)
-                    println(bindMatrix)
                 } else if (type == "JOINT") {
                     i += 1
                 }
             } else if (line.contains("<instance_material")) {
-                materialId = getString("instance_material", line)
-                jointData = JointData(name, bindMatrix, materialId, children)
-                println("returning $name $i")
+                val materialId = getString("instance_material", line)
+                val jointData = JointData(name, transformationMatrix, materialId, children)
                 return Pair(jointData, i)
             }
+
             i++
-            if (i >= lines.size) {
-//                println("breaking")
-                break
-            }
         }
-//        println("END")
-        return Pair(jointData, i)
     }
 
     private fun getShapeRequirements(content: String): List<ShapeData> {

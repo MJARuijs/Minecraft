@@ -692,7 +692,6 @@
               <bind_material>
                 <technique_common>
                   <instance_material symbol="ArmMaterial-material" target="#ArmMaterial-material"/>
-                  <instance_material symbol="LegMaterial-material" target="#LegMaterial-material"/>
                 </technique_common>
               </bind_material>
             </instance_controller>
