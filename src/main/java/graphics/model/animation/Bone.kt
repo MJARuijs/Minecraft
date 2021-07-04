@@ -7,7 +7,7 @@ class Bone(val name: String, val id: Int, var transformation: Matrix4, val child
 
     fun loadTransformation(shaderProgram: ShaderProgram) {
         shaderProgram.set("boneMatrices[$id]", transformation)
-//        println("Setting to shader: $id $name $transformation")
+
         for (child in children) {
             child.loadTransformation(shaderProgram)
         }
@@ -15,7 +15,6 @@ class Bone(val name: String, val id: Int, var transformation: Matrix4, val child
 
     fun setTransformation(id: Int, transformation: Matrix4) {
         if (this.id == id) {
-//            println("Applying to $id $name ")
             this.transformation = transformation
         } else {
             for (child in children) {

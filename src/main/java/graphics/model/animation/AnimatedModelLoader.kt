@@ -19,8 +19,6 @@ import kotlin.math.PI
 
 class AnimatedModelLoader: Loader<AnimatedModel> {
 
-    private class ShapeData(val materialId: String, val geometryId: String, val transformation: Matrix4)
-
     private class GeometryData(val materialId: String, val positions: ArrayList<Vector3>, val normals: ArrayList<Vector3>, val textureCoordinates: ArrayList<Vector2>, val indexData: IntArray)
 
     private class MeshJointWeights(val jointIds: Vector4, val weights: Vector4)
@@ -46,7 +44,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
         val meshJointWeights = getJointMeshData(jointContent, rootJoint)
 
         val materials = parseMaterials(materialContent)
-        val geometry = getGeometryData(geometryContent, meshJointWeights)
+        val geometry = getGeometryData(geometryContent)
 
         val shapes = createAnimatedShapes(meshJointWeights, materials, geometry)
         return AnimatedModel(shapes, rootJoint)
@@ -96,12 +94,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
 
             val finalWeights = ArrayList<MeshJointWeights>()
 
-//            for (j in globalJoints) {
-//                println("${j.key} ${j.value.second}")
-//            }
-
             var counter = 0
-//            printJointTransforms(rootJoint)
 
             for (i in weightsPerVertices.indices) {
                 val weightsPerVertex = weightsPerVertices[i]
@@ -128,10 +121,6 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
             }
 
             meshJointWeights[meshId] = finalWeights
-
-//            for (p in finalWeights) {
-//                println("${p.first} ${p.second}")
-//            }
         }
 
         return meshJointWeights
@@ -141,7 +130,6 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
         val shapes = ArrayList<Shape>()
 
         for (geometry in geometries) {
-//            println(geometry.key)
             val material = materials[geometry.value.materialId] ?: throw IllegalArgumentException("No material found for id: ${geometry.value.materialId}")
             val mesh = createGeometry(rotationMatrix, geometry.value, meshJointWeights[geometry.key]!!)
 
@@ -151,27 +139,9 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
         return shapes
     }
 
-    private fun createShapes(requirements: List<ShapeData>, materials: HashMap<String, Material>, geometries: HashMap<String, GeometryData>): List<Shape> {
-        val shapes = ArrayList<Shape>()
-
-        for (requirement in requirements) {
-            val material = materials[requirement.materialId] ?: throw IllegalArgumentException("No material found for id: ${requirement.materialId}")
-//            val shape = createGeometry(requirement.transformation, geometries[requirement.geometryId] ?: throw IllegalArgumentException("No geometry found for id: ${requirement.geometryId}"))
-
-//            shapes += Shape(shape, material)
-        }
-
-        return shapes
-    }
-
     private fun getJointHierarchy(content: String): Bone {
         val lines = content.split("\n")
-
-        val jointData = getBoneData(lines, 0)
-//        println()
-//        println()
-//        printJointData(jointData.first, 0)
-        return jointData.first
+        return getBoneData(lines, 0).first
     }
 
     private fun indexJoints(joint: Bone) {
@@ -186,7 +156,6 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
     private fun getBoneData(lines: List<String>, index: Int): Pair<Bone, Int> {
         val boneId = currentBoneIndex++
         var i = index
-//        var transformationMatrix = Matrix4()
         var name = ""
         val children = ArrayList<Bone>()
 
@@ -196,16 +165,6 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
             if (line.startsWith("<node id")) {
                 val type = getString("type", line)
                 if (type == "JOINT") {
-
-                    val transformationMatrixLine = lines[i + 1].trim()
-
-//                    transformationMatrix = try {
-//                        getMatrix("transform", transformationMatrixLine)
-//                    } catch (e: IllegalArgumentException) {
-//                        i++
-//                        continue
-//                    }
-
                     if (!name.isBlank()) {
                         if (getString("name", line) == name) {
                             i++
@@ -223,7 +182,6 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
                 }
             } else if (line.contains("</instance_controller")) {
                 val jointData = Bone(name, boneId, Matrix4(FloatArray(16)), children)
-                println("Creating new Bone: $name, ${jointData.id}")
                 bones += jointData
                 return Pair(jointData, i)
             }
@@ -237,28 +195,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
         }
     }
 
-    private fun getShapeRequirements(content: String): List<ShapeData> {
-        val requirements = ArrayList<ShapeData>()
-
-        val shapeContents = content.split("</node>")
-
-        for (shapeContent in shapeContents) {
-            if (shapeContent.isBlank() || !shapeContent.contains("node")) {
-                continue
-            }
-
-            val transformation = rotationMatrix dot getMatrix("transform", shapeContent)
-            val geometryId = getString("instance_geometry url", shapeContent).removePrefix("#")
-            val materialId = getString("instance_material", shapeContent).removePrefix("#")
-
-            requirements += ShapeData(materialId, geometryId, transformation)
-        }
-
-        return requirements
-    }
-
     private fun createGeometry(transformation: Matrix4, geometryData: GeometryData, meshJointWeights: List<MeshJointWeights>): Mesh {
-//        val data = HashMap<Triple<Int, Int, Int?>, Int>()
         var indices = IntArray(0)
 
         val containsTextureCoordinates = geometryData.textureCoordinates.isNotEmpty()
@@ -267,11 +204,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
 
         var vertexData = FloatArray(0)
 
-        var j = 0
-
-//        println("${meshJointWeights.size} ${geometryData.indexData.size / stepSize}")
-
-        for (i in geometryData.indexData.indices step stepSize) {
+        for ((j, i) in (geometryData.indexData.indices step stepSize).withIndex()) {
 
             val positionIndex = geometryData.indexData[i]
             val normalIndex = geometryData.indexData[i + 1]
@@ -282,27 +215,18 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
                 null
             }
 
-//            val index = data[Triple(positionIndex, normalIndex, textureIndex)]
-//            if (index == null) {
-                vertexData += transformation.dot(geometryData.positions[positionIndex]).toArray()
-                vertexData += Matrix3(transformation).dot(geometryData.normals[normalIndex]).toArray()
-                if (textureIndex != null) {
-                    vertexData += geometryData.textureCoordinates[textureIndex].toArray()
-                }
+            vertexData += transformation.dot(geometryData.positions[positionIndex]).toArray()
+            vertexData += Matrix3(transformation).dot(geometryData.normals[normalIndex]).toArray()
+
+            if (textureIndex != null) {
+                vertexData += geometryData.textureCoordinates[textureIndex].toArray()
+            }
+
             vertexData +=meshJointWeights[positionIndex].jointIds.toArray()
             vertexData +=meshJointWeights[positionIndex].weights.toArray()
-//            println(positionIndex)
-                val newIndex = indices.size
-//                data[Triple(positionIndex, normalIndex, textureIndex)] = newIndex
-                indices += newIndex
-//            } else {
-//                println("NON-NULL INDEX")
-//                indices += index
-//            }
-            j++
-        }
 
-//        println("J: $j")
+            indices += indices.size
+        }
 
         val attributes = arrayListOf(Attribute(0, 3), Attribute(1, 3), Attribute(2, 4), Attribute(3, 4))
 
@@ -313,7 +237,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
         return Mesh(Layout(Primitive.TRIANGLE, attributes), vertexData, indices)
     }
 
-    private fun getGeometryData(content: String, meshJointWeights: HashMap<String, List<MeshJointWeights>>): HashMap<String, GeometryData> {
+    private fun getGeometryData(content: String): HashMap<String, GeometryData> {
         val geometries = HashMap<String, GeometryData>()
         val geometryContents = content.split("</geometry>")
 
@@ -460,10 +384,6 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
 
     private fun getIntArray(name: String, content: String): IntArray {
         return getArray(name, content).map(String::toInt).toIntArray()
-    }
-
-    private fun getMatrix(name: String, content: String): Matrix4 {
-        return Matrix4(getFloatArray(name, content))
     }
 
     private fun scale(weights: Vector4): Vector4 {
