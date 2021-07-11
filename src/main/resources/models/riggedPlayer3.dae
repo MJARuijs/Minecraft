@@ -5,108 +5,12 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.79.0 commit date:2018-03-22, commit time:14:10, hash:f4dc9f9d68b</authoring_tool>
     </contributor>
-    <created>2021-07-11T13:38:25</created>
-    <modified>2021-07-11T13:38:25</modified>
+    <created>2021-07-11T13:43:01</created>
+    <modified>2021-07-11T13:43:01</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
   <library_images/>
-  <library_effects>
-    <effect id="HeadMaterial-effect">
-      <profile_COMMON>
-        <technique sid="common">
-          <lambert>
-            <emission>
-              <color sid="emission">0 0 0 1</color>
-            </emission>
-            <ambient>
-              <color sid="ambient">0 0 0 1</color>
-            </ambient>
-            <diffuse>
-              <color sid="diffuse">0.64 0.3643459 0.07149718 1</color>
-            </diffuse>
-            <index_of_refraction>
-              <float sid="index_of_refraction">1</float>
-            </index_of_refraction>
-          </lambert>
-        </technique>
-      </profile_COMMON>
-    </effect>
-    <effect id="ArmMaterial-effect">
-      <profile_COMMON>
-        <technique sid="common">
-          <lambert>
-            <emission>
-              <color sid="emission">0 0 0 1</color>
-            </emission>
-            <ambient>
-              <color sid="ambient">0 0 0 1</color>
-            </ambient>
-            <diffuse>
-              <color sid="diffuse">0 0.00172948 0.64 1</color>
-            </diffuse>
-            <index_of_refraction>
-              <float sid="index_of_refraction">1</float>
-            </index_of_refraction>
-          </lambert>
-        </technique>
-      </profile_COMMON>
-    </effect>
-    <effect id="LegMaterial-effect">
-      <profile_COMMON>
-        <technique sid="common">
-          <lambert>
-            <emission>
-              <color sid="emission">0 0 0 1</color>
-            </emission>
-            <ambient>
-              <color sid="ambient">0 0 0 1</color>
-            </ambient>
-            <diffuse>
-              <color sid="diffuse">0 0.2306363 0.003381453 1</color>
-            </diffuse>
-            <index_of_refraction>
-              <float sid="index_of_refraction">1</float>
-            </index_of_refraction>
-          </lambert>
-        </technique>
-      </profile_COMMON>
-    </effect>
-    <effect id="TorsoMaterial-effect">
-      <profile_COMMON>
-        <technique sid="common">
-          <lambert>
-            <emission>
-              <color sid="emission">0 0 0 1</color>
-            </emission>
-            <ambient>
-              <color sid="ambient">0 0 0 1</color>
-            </ambient>
-            <diffuse>
-              <color sid="diffuse">1 1 1 1</color>
-            </diffuse>
-            <index_of_refraction>
-              <float sid="index_of_refraction">1</float>
-            </index_of_refraction>
-          </lambert>
-        </technique>
-      </profile_COMMON>
-    </effect>
-  </library_effects>
-  <library_materials>
-    <material id="HeadMaterial-material" name="HeadMaterial">
-      <instance_effect url="#HeadMaterial-effect"/>
-    </material>
-    <material id="ArmMaterial-material" name="ArmMaterial">
-      <instance_effect url="#ArmMaterial-effect"/>
-    </material>
-    <material id="LegMaterial-material" name="LegMaterial">
-      <instance_effect url="#LegMaterial-effect"/>
-    </material>
-    <material id="TorsoMaterial-material" name="TorsoMaterial">
-      <instance_effect url="#TorsoMaterial-effect"/>
-    </material>
-  </library_materials>
   <library_geometries>
     <geometry id="Cube_007-mesh" name="Cube.007">
       <mesh>
@@ -294,14 +198,6 @@
         <scale sid="scale">1 1 1</scale>
         <instance_controller url="#Armature_001_Head_Mesh-skin">
           <skeleton>#Armature_001_Torso_Bone</skeleton>
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="HeadMaterial-material" target="#HeadMaterial-material"/>
-              <instance_material symbol="ArmMaterial-material" target="#ArmMaterial-material"/>
-              <instance_material symbol="LegMaterial-material" target="#LegMaterial-material"/>
-              <instance_material symbol="TorsoMaterial-material" target="#TorsoMaterial-material"/>
-            </technique_common>
-          </bind_material>
         </instance_controller>
       </node>
     </visual_scene>

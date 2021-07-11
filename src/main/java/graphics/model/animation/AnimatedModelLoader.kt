@@ -204,6 +204,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
 
         var vertexData = FloatArray(0)
 
+        println(geometryData.materialId)
         for ((j, i) in (geometryData.indexData.indices step stepSize).withIndex()) {
 
             val positionIndex = geometryData.indexData[i]
