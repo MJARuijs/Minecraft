@@ -16,11 +16,7 @@ import graphics.entity.Entity
 import graphics.entity.EntityRenderer
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
-import graphics.model.ModelCache
-import graphics.model.ModelLoader
-import graphics.model.MyModelLoader
 import graphics.model.animation.AnimatedModelLoader
-import graphics.model.animation.AnimatedModelLoader2
 import graphics.renderer.RenderData
 import graphics.renderer.RenderEngine
 import graphics.renderer.RenderType
@@ -100,7 +96,7 @@ object Main {
         ui += page
         ui.showPage("page")
 
-        val animatedModel = AnimatedModelLoader().load("models/riggedPlayer2.dae")
+        val animatedModel = AnimatedModelLoader().load("models/animatedPlayer.dae")
 
         val player = Entity(animatedModel, Matrix4().translate(0f, 0f, -5f))
         entities += player

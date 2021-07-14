@@ -19,9 +19,11 @@ import kotlin.math.PI
 
 class AnimatedModelLoader: Loader<AnimatedModel> {
 
-    private class GeometryData(val materialId: String, val positions: ArrayList<Vector3>, val normals: ArrayList<Vector3>, val textureCoordinates: ArrayList<Vector2>, val indexData: IntArray, val positionOffset: Int, val normalOffset: Int, val textureOffset: Int)
+    private class GeometryData(val materialId: String, val positions: ArrayList<Vector3>, val normals: ArrayList<Vector3>, val textureCoordinates: ArrayList<Vector2>, val indexData: IntArray, val attributes: List<Attribute>)
 
     private class MeshJointWeights(val jointIds: Vector4, val weights: Vector4)
+
+    private class Attribute(val name: String, val offset: Int)
 
     private var currentBoneIndex = 0
     private val bones = ArrayList<Bone>()
@@ -37,6 +39,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
         val geometryContent = getContent("library_geometries", content)
         val shapeContent = getContent("library_visual_scenes", content)
         val jointContent = getContent("library_controllers", content)
+        val keyframeContent = getContent("library_animations", content)
 
         val rootJoint = getJointHierarchy(shapeContent)
         indexJoints(rootJoint)
@@ -46,8 +49,10 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
         val materials = parseMaterials(materialContent)
         val geometry = getGeometryData(geometryContent)
 
-//        val shapes = createAnimatedShapes(meshJointWeights, materials, geometry)
-        return AnimatedModel(listOf(), rootJoint)
+        val shapes = createAnimatedShapes(meshJointWeights, materials, geometry)
+
+        val keyframes = loadKeyframes(keyframeContent)
+        return AnimatedModel(shapes, rootJoint)
     }
 
     private fun getContent(name: String, content: String): String {
@@ -82,7 +87,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
                     continue
                 }
 
-                val values = inverseBindMatrices.copyOfRange(i * 16, i * 16 + 16)
+                val values = inverseBindMatrices.copyOfRange(i * 16, (i + 1)* 16)
                 val invBindMatrix = Matrix4(values)
                 rootJoint.setTransformation(requiredJoint.first, bindMatrix)
             }
@@ -132,7 +137,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
         for (geometry in geometries) {
             for (shapeData in geometry.value) {
                 val material = materials[shapeData.materialId] ?: throw IllegalArgumentException("No material found for id: ${shapeData.materialId}")
-                val mesh = createGeometry(rotationMatrix, shapeData, meshJointWeights[geometry.key]!!)
+                val mesh = createGeometry(Matrix4(), shapeData, meshJointWeights[geometry.key]!!)
 
                 shapes += Shape(mesh, material)
             }
@@ -182,7 +187,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
                 } else if (type == "NODE") {
                     i += 1
                 }
-            } else if (line.contains("</instance_controller")) {
+            } else if (line.contains("</node>")) {
                 val jointData = Bone(name, boneId, Matrix4(FloatArray(16)), children)
                 bones += jointData
                 return Pair(jointData, i)
@@ -219,17 +224,18 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
                     continue
                 }
 
-                println(shapeContent)
-                println()
-                println()
+                val attributes = ArrayList<Attribute>()
 
-                val positionOffset = getAttributeByTagValue("input semantic", "VERTEX", "offset", shapeContent).toInt()
-                val normalOffset = getAttributeByTagValue("input semantic", "NORMAL", "offset", shapeContent).toInt()
-                val textureOffset = getAttributeByTagValue("input semantic", "TEXCOORD", "offset", shapeContent).toInt()
+                for (line in shapeContent.lines()) {
+                    if (line.trim().startsWith("<input semantic")) {
+                        val attributeName = getString("input semantic", line)
+                        val offset = getString("offset", line).toInt()
+                        attributes += Attribute(attributeName, offset)
+                    }
+                }
 
-//                println(positionOffsetData)
+                val materialId = getString("<triangles material", shapeContent)
 
-                val materialId = getString("<triangles material", geometryContent)
                 val positions = getFloatArray("$id-positions-array", geometryContent)
                 val normalValues = getFloatArray("$id-normals-array", geometryContent)
                 val textureValues = try {
@@ -238,7 +244,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
                     FloatArray(0)
                 }
 
-                val indices = getIntArray("<p>", geometryContent)
+                val indices = getIntArray("<p>", shapeContent)
 
                 val vertices = ArrayList<Vector3>()
                 val normals = ArrayList<Vector3>()
@@ -256,7 +262,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
                     textureCoordinates += Vector2(textureValues[i], textureValues[i + 1])
                 }
 
-                shapes += GeometryData(materialId, vertices, normals, textureCoordinates, indices, positionOffset, normalOffset, textureOffset)
+                shapes += GeometryData(materialId, vertices, normals, textureCoordinates, indices, attributes)
             }
 
             geometries[id] = shapes
@@ -268,33 +274,41 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
     private fun createGeometry(transformation: Matrix4, geometryData: GeometryData, meshJointWeights: List<MeshJointWeights>): Mesh {
         var indices = IntArray(0)
 
-        val containsTextureCoordinates = geometryData.textureOffset != -1
+        val containsTextureCoordinates = geometryData.attributes.any { attribute -> attribute.name == "TEXCOORD" }
 
-        val stepSize = if (containsTextureCoordinates) 3 else 2
+        val stepSize = geometryData.attributes.size
+
+        val positionOffset = geometryData.attributes.find { attribute -> attribute.name == "VERTEX" }?.offset ?: -1
+        val normalOffset = geometryData.attributes.find { attribute -> attribute.name == "NORMAL" }?.offset ?: -1
+        val texCoordOffset = geometryData.attributes.find { attribute -> attribute.name == "TEXCOORD" }?.offset ?: -1
 
         var vertexData = FloatArray(0)
 
-        println(geometryData.materialId)
         for (i in geometryData.indexData.indices step stepSize) {
 
-            val positionIndex = geometryData.indexData[i + geometryData.positionOffset]
-            val normalIndex = geometryData.indexData[i + geometryData.normalOffset]
+            val positionIndex = geometryData.indexData[i + positionOffset]
+            val normalIndex = geometryData.indexData[i + normalOffset]
 
-            val textureIndex = if (stepSize == 3) {
-                geometryData.indexData[i + geometryData.textureOffset]
+            val textureIndex = if (containsTextureCoordinates) {
+                geometryData.indexData[i + texCoordOffset]
             } else {
                 null
             }
 
-            vertexData += transformation.dot(geometryData.positions[positionIndex]).toArray()
-            vertexData += Matrix3(transformation).dot(geometryData.normals[normalIndex]).toArray()
+            val position = transformation.dot(geometryData.positions[positionIndex]).toArray()
+            val normal = Matrix3(transformation).dot(geometryData.normals[normalIndex]).toArray()
+            vertexData += position
+            vertexData += normal
 
             if (textureIndex != null) {
                 vertexData += geometryData.textureCoordinates[textureIndex].toArray()
             }
 
-            vertexData += meshJointWeights[positionIndex].jointIds.toArray()
-            vertexData += meshJointWeights[positionIndex].weights.toArray()
+
+            val boneIds = meshJointWeights[positionIndex].jointIds.toArray()
+            val boneWeights = meshJointWeights[positionIndex].weights.toArray()
+            vertexData += boneIds
+            vertexData += boneWeights
 
             indices += indices.size
         }
@@ -306,6 +320,35 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
         }
 
         return Mesh(Layout(Primitive.TRIANGLE, attributes), vertexData, indices)
+    }
+
+    private fun loadKeyframes(content: String) {
+        val animationContents = content.split("</animation>")
+
+        for (animationContent in animationContents) {
+            if (animationContent.isBlank()) {
+                continue
+            }
+
+            val id = getString("<animation id", animationContent)
+            var boneId = ""
+            bones.forEach { bone ->
+                if (id.contains(bone.name)) {
+                    boneId = bone.name
+                }
+            }
+
+            val matrixContent = getTagContent("source", 0, animationContent)
+            val matrixData = getFloatArray("<float_array", matrixContent)
+
+            println(boneId)
+
+            val matrices = ArrayList<Matrix4>()
+            val numberOfMatrices = matrixData.size % 16
+            for (i in 0 until numberOfMatrices step 16) {
+                matrices += Matrix4(matrixData.copyOfRange(i * 16, (i + 1) * 16))
+            }
+        }
     }
 
     private fun parseMaterials(content: String): HashMap<String, Material> {
@@ -386,34 +429,6 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
         val endIndex = content.indexOf("\"", startIndex)
 
         return content.substring(startIndex, endIndex)
-    }
-
-    private fun getAttributeByTagValue(tagName: String, requiredValue: String, attributeName: String, content: String): String {
-        var i = 0
-
-        while (true) {
-            if (i > content.lines().size) {
-                return "-1"
-            }
-
-            val tagContent = try {
-                getTagContent(tagName, i++, content, true)
-            } catch (e: Exception) {
-                return "-1"
-            }
-
-            val startIndex = tagContent.indexOf("\"") + 1
-            val endIndex = tagContent.indexOf("\"", startIndex)
-
-            val value = tagContent.substring(startIndex, endIndex)
-            if (value != requiredValue) {
-                continue
-            }
-
-            val attribute = getString(attributeName, tagContent)
-
-            return attribute
-        }
     }
 
     private fun getTagContent(tagName: String, occurrence: Int, content: String, isOneLine: Boolean = false): String {
