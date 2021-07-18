@@ -69,4 +69,12 @@ class Matrix4(elements: FloatArray = generateIdentityElements(4)): Matrix<Matrix
 
     fun rotate(vector: Vector3) = rotateX(vector.x).rotateY(vector.y).rotateZ(vector.z)
 
+    fun getPosition(): Vector4 {
+        val x = get(0, 3)
+        val y = get(1, 3)
+        val z = get(2, 3)
+        val w = get(3, 3)
+        return Vector4(x, y, z, w)
+    }
+
 }

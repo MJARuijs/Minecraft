@@ -106,4 +106,62 @@ data class Quaternion(var w: Float = 1.0f, var x: Float = 0.0f, var y: Float = 0
      */
     override fun toString() = "<$w, $x, $y, $z>"
 
+    companion object {
+
+        fun interpolate(a: Quaternion, b: Quaternion, progress: Float): Quaternion {
+            val dot = a.dot(b)
+            val remaining = 1f - progress
+            return if (dot < 0) {
+                (a * remaining + b * -progress).normal()
+            } else {
+                (a * remaining + b * progress).normal()
+            }
+        }
+
+        fun fromMatrix(matrix: Matrix4): Quaternion {
+
+            val m00 = matrix[0, 0]
+            val m11 = matrix[1, 1]
+            val m22 = matrix[2, 2]
+            val trace = m00 + m11 + m22
+
+            return when {
+                trace > 0 -> {
+                    val s = sqrt(trace + 1.0f) * 2
+                    val w = 0.25f * s
+                    val x = (matrix[2, 1] - matrix[1, 2]) / s
+                    val y = (matrix[0, 2] - matrix[2, 0]) / s
+                    val z = (matrix[1, 0] - matrix[0, 1]) / s
+                    Quaternion(w, x, y, z)
+                }
+                m00 > m11 && m00 > m22 -> {
+                    val s = sqrt(1.0f + m00 - m11 - m22) * 2
+                    val w = (matrix[2, 1] - matrix[1, 2]) / s
+                    val x = 0.25f * s
+                    val y = (matrix[0, 1] + matrix[1, 0]) / s
+                    val z = (matrix[0, 2] + matrix[2, 0]) / s
+                    Quaternion(w, x, y, z)
+                }
+                m11 > m22 -> {
+                    val s = sqrt(1.0f + m11 - m00 - m22) * 2
+                    val w = (matrix[0, 2] - matrix[2, 0]) / s
+                    val x = (matrix[0, 1] + matrix[1, 0]) / s
+                    val y = 0.25f * s
+                    val z = (matrix[1, 2] + matrix[2, 1]) / s
+                    Quaternion(w, x, y, z)
+                }
+                else -> {
+                    val s = sqrt(1.0f + m22 - m00 - m11) * 2
+                    val w = (matrix[1, 0] - matrix[0, 1]) / s
+                    val x = (matrix[0, 2] + matrix[2, 0]) / s
+                    val y = (matrix[1, 2] + matrix[2, 1]) / s
+                    val z = 0.25f * s
+                    Quaternion(w, x, y, z)
+                }
+            }
+
+        }
+
+    }
+
 }

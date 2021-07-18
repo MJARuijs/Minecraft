@@ -8,6 +8,7 @@ import graphics.model.mesh.Layout
 import graphics.model.mesh.Mesh
 import graphics.model.mesh.Primitive
 import math.Color
+import math.Quaternion
 import math.matrices.Matrix3
 import math.matrices.Matrix4
 import math.vectors.Vector2
@@ -26,7 +27,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
     private class Attribute(val name: String, val offset: Int)
 
     private var currentBoneIndex = 0
-    private val bones = ArrayList<Bone>()
+    private val bones = ArrayList<Joint>()
     private val globalJoints = HashMap<String, Pair<Int, Matrix4>>()
     private val rotationMatrix = Matrix4().rotateX(-PI.toFloat() / 2f)
 
@@ -51,8 +52,8 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
 
         val shapes = createAnimatedShapes(meshJointWeights, materials, geometry)
 
-        val keyframes = loadKeyframes(keyframeContent)
-        return AnimatedModel(shapes, rootJoint)
+        val poses = loadPoses(keyframeContent)
+        return AnimatedModel(shapes, rootJoint, poses)
     }
 
     private fun getContent(name: String, content: String): String {
@@ -61,7 +62,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
         return content.substring(startIndex, endIndex)
     }
 
-    private fun getJointMeshData(content: String, rootJoint: Bone): HashMap<String, List<MeshJointWeights>> {
+    private fun getJointMeshData(content: String, rootJoint: Joint): HashMap<String, List<MeshJointWeights>> {
         val controllerContents = content.split("</controller>")
 
         val meshJointWeights = HashMap<String, List<MeshJointWeights>>()
@@ -87,9 +88,12 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
                     continue
                 }
 
+
                 val values = inverseBindMatrices.copyOfRange(i * 16, (i + 1)* 16)
                 val invBindMatrix = Matrix4(values)
+
                 rootJoint.setTransformation(requiredJoint.first, bindMatrix)
+                rootJoint.setInverseBindMatrix(requiredJoint.first, invBindMatrix)
             }
 
             val weights = getFloatArray("<float_array", weightContent)
@@ -146,12 +150,12 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
         return shapes
     }
 
-    private fun getJointHierarchy(content: String): Bone {
+    private fun getJointHierarchy(content: String): Joint {
         val lines = content.split("\n")
         return getBoneData(lines, 0).first
     }
 
-    private fun indexJoints(joint: Bone) {
+    private fun indexJoints(joint: Joint) {
         if (!globalJoints.contains(joint.name)) {
             globalJoints[joint.name] = Pair(globalJoints.size, Matrix4(FloatArray(16)))
         }
@@ -160,11 +164,11 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
         }
     }
 
-    private fun getBoneData(lines: List<String>, index: Int): Pair<Bone, Int> {
+    private fun getBoneData(lines: List<String>, index: Int): Pair<Joint, Int> {
         val boneId = currentBoneIndex++
         var i = index
         var name = ""
-        val children = ArrayList<Bone>()
+        val children = ArrayList<Joint>()
 
         while (true) {
             val line = lines[i].trim()
@@ -188,14 +192,14 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
                     i += 1
                 }
             } else if (line.contains("</node>")) {
-                val jointData = Bone(name, boneId, Matrix4(FloatArray(16)), children)
+                val jointData = Joint(name, boneId, children)
                 bones += jointData
                 return Pair(jointData, i)
             }
 
             i++
             if (i >= lines.size) {
-                val jointData = Bone(name, boneId, Matrix4(FloatArray(16)), children)
+                val jointData = Joint(name, boneId, children)
                 bones += jointData
                 return Pair(jointData, i)
             }
@@ -322,9 +326,12 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
         return Mesh(Layout(Primitive.TRIANGLE, attributes), vertexData, indices)
     }
 
-    private fun loadKeyframes(content: String) {
+    private fun loadPoses(content: String): List<Pose> {
         val animationContents = content.split("</animation>")
 
+        val poses = ArrayList<Pose>()
+
+        val poseTransformations = ArrayList<HashMap<String, JointTransformation>>()
         for (animationContent in animationContents) {
             if (animationContent.isBlank()) {
                 continue
@@ -332,23 +339,36 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
 
             val id = getString("<animation id", animationContent)
             var boneId = ""
+
             bones.forEach { bone ->
                 if (id.contains(bone.name)) {
                     boneId = bone.name
                 }
             }
 
-            val matrixContent = getTagContent("source", 0, animationContent)
-            val matrixData = getFloatArray("<float_array", matrixContent)
+            val poseContent = getTagContent("source", 1, animationContent)
+            val poseData = getFloatArray("<float_array", poseContent)
 
-            println(boneId)
+            val numberOfMatrices = poseData.size / 16
 
-            val matrices = ArrayList<Matrix4>()
-            val numberOfMatrices = matrixData.size % 16
-            for (i in 0 until numberOfMatrices step 16) {
-                matrices += Matrix4(matrixData.copyOfRange(i * 16, (i + 1) * 16))
+            if (poseTransformations.size != numberOfMatrices) {
+                for (i in 0 until numberOfMatrices) {
+                    poseTransformations += HashMap()
+                }
+            }
+
+            for (i in 0 until numberOfMatrices) {
+                val poseMatrix = rotationMatrix dot Matrix4(poseData.copyOfRange(i * 16, (i + 1) * 16))
+                val jointTransformation = JointTransformation(poseMatrix.getPosition().xyz(), Quaternion.fromMatrix(poseMatrix))
+                poseTransformations[i][boneId] = jointTransformation
             }
         }
+
+        for (poseList in poseTransformations) {
+            poses += Pose(poseList)
+        }
+
+        return poses
     }
 
     private fun parseMaterials(content: String): HashMap<String, Material> {

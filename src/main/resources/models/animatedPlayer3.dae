@@ -1,0 +1,530 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <asset>
+    <contributor>
+      <author>Blender User</author>
+      <authoring_tool>Blender 2.79.0 commit date:2017-09-11, commit time:10:43, hash:5bd8ac9abfa</authoring_tool>
+    </contributor>
+    <created>2021-07-18T12:04:28</created>
+    <modified>2021-07-18T12:04:28</modified>
+    <unit name="meter" meter="1"/>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_images/>
+  <library_effects>
+    <effect id="HeadMaterial_001-effect">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color sid="ambient">0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color sid="diffuse">0.64 0.3643459 0.07149718 1</color>
+            </diffuse>
+            <specular>
+              <color sid="specular">0.5 0.5 0.5 1</color>
+            </specular>
+            <shininess>
+              <float sid="shininess">50</float>
+            </shininess>
+            <index_of_refraction>
+              <float sid="index_of_refraction">1</float>
+            </index_of_refraction>
+          </phong>
+        </technique>
+      </profile_COMMON>
+    </effect>
+    <effect id="ArmMaterial_001-effect">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color sid="ambient">0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color sid="diffuse">0 0.00172948 0.64 1</color>
+            </diffuse>
+            <specular>
+              <color sid="specular">0.5 0.5 0.5 1</color>
+            </specular>
+            <shininess>
+              <float sid="shininess">50</float>
+            </shininess>
+            <index_of_refraction>
+              <float sid="index_of_refraction">1</float>
+            </index_of_refraction>
+          </phong>
+        </technique>
+      </profile_COMMON>
+    </effect>
+    <effect id="LegMaterial_001-effect">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color sid="ambient">0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color sid="diffuse">0 0.2306363 0.003381453 1</color>
+            </diffuse>
+            <specular>
+              <color sid="specular">0.5 0.5 0.5 1</color>
+            </specular>
+            <shininess>
+              <float sid="shininess">50</float>
+            </shininess>
+            <index_of_refraction>
+              <float sid="index_of_refraction">1</float>
+            </index_of_refraction>
+          </phong>
+        </technique>
+      </profile_COMMON>
+    </effect>
+    <effect id="TorsoMaterial-effect">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color sid="ambient">0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color sid="diffuse">1 1 1 1</color>
+            </diffuse>
+            <specular>
+              <color sid="specular">0.5 0.5 0.5 1</color>
+            </specular>
+            <shininess>
+              <float sid="shininess">50</float>
+            </shininess>
+            <index_of_refraction>
+              <float sid="index_of_refraction">1</float>
+            </index_of_refraction>
+          </phong>
+        </technique>
+      </profile_COMMON>
+    </effect>
+  </library_effects>
+  <library_materials>
+    <material id="HeadMaterial_001-material" name="HeadMaterial_001">
+      <instance_effect url="#HeadMaterial_001-effect"/>
+    </material>
+    <material id="ArmMaterial_001-material" name="ArmMaterial_001">
+      <instance_effect url="#ArmMaterial_001-effect"/>
+    </material>
+    <material id="LegMaterial_001-material" name="LegMaterial_001">
+      <instance_effect url="#LegMaterial_001-effect"/>
+    </material>
+    <material id="TorsoMaterial-material" name="TorsoMaterial">
+      <instance_effect url="#TorsoMaterial-effect"/>
+    </material>
+  </library_materials>
+  <library_geometries>
+    <geometry id="Cube_007-mesh" name="Cube.007">
+      <mesh>
+        <source id="Cube_007-mesh-positions">
+          <float_array id="Cube_007-mesh-positions-array" count="144">-2.000001 -1.500001 4 -2.000001 -1.500001 4.888888 -2.000001 1.500001 4 -2.000001 1.500001 4.888888 2.000001 -1.500001 4 2.000001 -1.500001 4.888888 2.000001 1.500001 4 2.000001 1.500001 4.888888 4.000001 1 2 4.000001 -1 2 2 -0.9999998 2 2 1 2 4.000002 0.9999995 4 4.000001 -1 4 2 -0.9999997 4 2 1 4 -4.96705e-7 1 0 -4.96705e-7 -1 0 -2 -0.9999998 0 -2 1 0 0 0.9999995 2 -1.21196e-6 -1.000001 2 -2.000001 -0.9999997 2.000004 -2 1 2 2 1 0 2 -1 0 3.3776e-7 -0.9999998 0 7.54992e-7 1 0 2.000001 0.9999995 2.000004 2 -1.000001 2.000004 0 -0.9999997 2 4.56969e-7 1 2 -2 1 2 -2 -1 2 -4.000001 -0.9999998 2 -4.000001 1 2 -2 0.9999995 4 -2 -1 4 -4.000002 -0.9999997 4 -4.000001 1 4 -2 -1 2 -2 -1 4 -2 1 2 -2 1 4 2 -1 2 2 -1 4 2 1 2 2 1 4</float_array>
+          <technique_common>
+            <accessor source="#Cube_007-mesh-positions-array" count="48" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Cube_007-mesh-normals">
+          <float_array id="Cube_007-mesh-normals-array" count="111">-1 0 0 0 1 0 1 0 0 0 -1 0 0 0 -1 0 0 1 0 0 1 1 0 -4.76837e-7 0 -1 0 2.38418e-7 1 2.38418e-7 0 0 1 0 -1 0 2.38418e-7 1 0 0 0 -1 1 -4.76837e-7 0 -1.49012e-7 -1 0 -1.49011e-7 -1 0 -1 4.76837e-7 -4.76837e-7 0 1 2.38418e-7 1 0 -2.38418e-7 0 -1 -4.17233e-7 2.38419e-7 1 0 -1.90735e-6 0 1 1 0 -4.76836e-7 0 -1 0 -1 2.08616e-7 -1.49011e-7 2.38418e-7 1 2.38418e-7 2.20537e-6 2.02656e-6 1 1 -5.96045e-7 3.57627e-7 -6.25849e-7 -1 0 -1 7.15253e-7 -5.36441e-7 0 1 2.38419e-7 -2.08616e-6 0 1 1 -4.76836e-7 0 -6.25848e-7 -1 -4.17232e-7 -1 1.78814e-7 -1.1921e-7 0 1 0</float_array>
+          <technique_common>
+            <accessor source="#Cube_007-mesh-normals-array" count="37" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Cube_007-mesh-colors-Col" name="Col">
+          <float_array id="Cube_007-mesh-colors-Col-array" count="648">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.003921568 0.003921568 0.003921568 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</float_array>
+          <technique_common>
+            <accessor source="#Cube_007-mesh-colors-Col-array" count="216" stride="3">
+              <param name="R" type="float"/>
+              <param name="G" type="float"/>
+              <param name="B" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Cube_007-mesh-vertices">
+          <input semantic="POSITION" source="#Cube_007-mesh-positions"/>
+        </vertices>
+        <triangles material="HeadMaterial_001-material" count="12">
+          <input semantic="VERTEX" source="#Cube_007-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Cube_007-mesh-normals" offset="1"/>
+          <input semantic="COLOR" source="#Cube_007-mesh-colors-Col" offset="2" set="0"/>
+          <p>1 0 0 2 0 1 0 0 2 3 1 3 6 1 4 2 1 5 7 2 6 4 2 7 6 2 8 5 3 9 0 3 10 4 3 11 6 4 12 0 4 13 2 4 14 3 5 15 5 5 16 7 5 17 1 0 18 3 0 19 2 0 20 3 1 21 7 1 22 6 1 23 7 2 24 5 2 25 4 2 26 5 3 27 1 3 28 0 3 29 6 4 30 4 4 31 0 4 32 3 5 33 1 5 34 5 5 35</p>
+        </triangles>
+        <triangles material="ArmMaterial_001-material" count="24">
+          <input semantic="VERTEX" source="#Cube_007-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Cube_007-mesh-normals" offset="1"/>
+          <input semantic="COLOR" source="#Cube_007-mesh-colors-Col" offset="2" set="0"/>
+          <p>8 4 36 10 4 37 11 4 38 12 6 39 14 6 40 13 6 41 12 7 42 9 7 43 8 7 44 13 8 45 10 8 46 9 8 47 14 0 48 11 0 49 10 0 50 8 9 51 15 9 52 12 9 53 32 4 54 34 4 55 35 4 56 36 10 57 38 10 58 37 10 59 36 2 60 33 2 61 32 2 62 37 11 63 34 11 64 33 11 65 34 0 66 39 0 67 35 0 68 36 12 69 35 12 70 39 12 71 8 13 72 9 13 73 10 13 74 12 5 75 15 5 76 14 5 77 12 14 78 13 14 79 9 14 80 13 15 81 14 15 82 10 15 83 14 0 84 15 0 85 11 0 86 8 1 87 11 1 88 15 1 89 32 13 90 33 13 91 34 13 92 36 5 93 39 5 94 38 5 95 36 2 96 37 2 97 33 2 98 37 16 99 38 16 100 34 16 101 34 17 102 38 17 103 39 17 104 36 18 105 32 18 106 35 18 107</p>
+        </triangles>
+        <triangles material="LegMaterial_001-material" count="24">
+          <input semantic="VERTEX" source="#Cube_007-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Cube_007-mesh-normals" offset="1"/>
+          <input semantic="COLOR" source="#Cube_007-mesh-colors-Col" offset="2" set="0"/>
+          <p>16 4 108 18 4 109 19 4 110 23 5 111 21 5 112 20 5 113 20 19 114 17 19 115 16 19 116 21 20 117 18 20 118 17 20 119 18 0 120 23 0 121 19 0 122 20 21 123 19 21 124 23 21 125 24 4 126 26 4 127 27 4 128 31 22 129 29 22 130 28 22 131 28 23 132 25 23 133 24 23 134 25 24 135 30 24 136 26 24 137 26 25 138 31 25 139 27 25 140 24 26 141 31 26 142 28 26 143 16 4 144 17 4 145 18 4 146 23 27 147 22 27 148 21 27 149 20 28 150 21 28 151 17 28 152 21 29 153 22 29 154 18 29 155 18 30 156 22 30 157 23 30 158 20 31 159 16 31 160 19 31 161 24 4 162 25 4 163 26 4 164 31 32 165 30 32 166 29 32 167 28 33 168 29 33 169 25 33 170 25 34 171 29 34 172 30 34 173 26 35 174 30 35 175 31 35 176 24 36 177 27 36 178 31 36 179</p>
+        </triangles>
+        <triangles material="TorsoMaterial-material" count="12">
+          <input semantic="VERTEX" source="#Cube_007-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Cube_007-mesh-normals" offset="1"/>
+          <input semantic="COLOR" source="#Cube_007-mesh-colors-Col" offset="2" set="0"/>
+          <p>41 0 180 42 0 181 40 0 182 43 1 183 46 1 184 42 1 185 46 2 186 45 2 187 44 2 188 45 3 189 40 3 190 44 3 191 46 4 192 40 4 193 42 4 194 43 5 195 45 5 196 47 5 197 41 0 198 43 0 199 42 0 200 43 1 201 47 1 202 46 1 203 46 2 204 47 2 205 45 2 206 45 3 207 41 3 208 40 3 209 46 4 210 44 4 211 40 4 212 43 5 213 41 5 214 45 5 215</p>
+        </triangles>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_animations>
+    <animation id="Armature_Torso_Bone_pose_matrix">
+      <source id="Armature_Torso_Bone_pose_matrix-input">
+        <float_array id="Armature_Torso_Bone_pose_matrix-input-array" count="3">0 0.04166662 0.4166666</float_array>
+        <technique_common>
+          <accessor source="#Armature_Torso_Bone_pose_matrix-input-array" count="3" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Torso_Bone_pose_matrix-output">
+        <float_array id="Armature_Torso_Bone_pose_matrix-output-array" count="48">1 0 0 0 0 0 -1 0 0 1 0 1.954855 0 0 0 1 1 0 0 0 0 0 -1 0 0 1 0 1.954855 0 0 0 1 1 0 0 0 0 0 -1 0 0 1 0 1.954855 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Torso_Bone_pose_matrix-output-array" count="3" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Torso_Bone_pose_matrix-interpolation">
+        <Name_array id="Armature_Torso_Bone_pose_matrix-interpolation-array" count="3">LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Torso_Bone_pose_matrix-interpolation-array" count="3" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Torso_Bone_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Torso_Bone_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Torso_Bone_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Torso_Bone_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Torso_Bone_pose_matrix-sampler" target="Armature_Torso_Bone/transform"/>
+    </animation>
+    <animation id="Armature_Arm_Right_Bone_pose_matrix">
+      <source id="Armature_Arm_Right_Bone_pose_matrix-input">
+        <float_array id="Armature_Arm_Right_Bone_pose_matrix-input-array" count="3">0 0.04166662 0.4166666</float_array>
+        <technique_common>
+          <accessor source="#Armature_Arm_Right_Bone_pose_matrix-input-array" count="3" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Arm_Right_Bone_pose_matrix-output">
+        <float_array id="Armature_Arm_Right_Bone_pose_matrix-output-array" count="48">1 0 -8.74228e-8 -0.5398015 0 -1 0 1.007664 -8.74228e-8 0 -1 -4.7191e-8 0 0 0 1 1 4.97181e-8 -7.19087e-8 -0.5398015 0 -0.8225391 -0.5687086 1.007664 -8.74228e-8 0.5687086 -0.8225391 -4.7191e-8 0 0 0 1 1 -4.97181e-8 -7.19087e-8 -0.5398015 0 -0.8225391 0.5687086 1.007664 -8.74228e-8 -0.5687086 -0.8225391 -4.7191e-8 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Arm_Right_Bone_pose_matrix-output-array" count="3" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Arm_Right_Bone_pose_matrix-interpolation">
+        <Name_array id="Armature_Arm_Right_Bone_pose_matrix-interpolation-array" count="3">LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Arm_Right_Bone_pose_matrix-interpolation-array" count="3" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Arm_Right_Bone_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Arm_Right_Bone_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Arm_Right_Bone_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Arm_Right_Bone_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Arm_Right_Bone_pose_matrix-sampler" target="Armature_Arm_Right_Bone/transform"/>
+    </animation>
+    <animation id="Armature_Arm_Left_Bone_pose_matrix">
+      <source id="Armature_Arm_Left_Bone_pose_matrix-input">
+        <float_array id="Armature_Arm_Left_Bone_pose_matrix-input-array" count="3">0 0.04166662 0.4166666</float_array>
+        <technique_common>
+          <accessor source="#Armature_Arm_Left_Bone_pose_matrix-input-array" count="3" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Arm_Left_Bone_pose_matrix-output">
+        <float_array id="Armature_Arm_Left_Bone_pose_matrix-output-array" count="48">1 0 -8.74228e-8 0.5398015 0 -1 0 1.007664 -8.74228e-8 0 -1 4.7191e-8 0 0 0 1 1 1.38879e-9 -8.78561e-8 0.5398015 5.11069e-8 -0.8225391 0.5687086 1.007664 -7.14753e-8 -0.5687086 -0.8225391 4.7191e-8 0 0 0 1 1 1.00825e-7 -5.59612e-8 0.5398015 5.11069e-8 -0.8225391 -0.5687086 1.007664 -1.0337e-7 0.5687086 -0.8225391 4.7191e-8 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Arm_Left_Bone_pose_matrix-output-array" count="3" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Arm_Left_Bone_pose_matrix-interpolation">
+        <Name_array id="Armature_Arm_Left_Bone_pose_matrix-interpolation-array" count="3">LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Arm_Left_Bone_pose_matrix-interpolation-array" count="3" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Arm_Left_Bone_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Arm_Left_Bone_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Arm_Left_Bone_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Arm_Left_Bone_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Arm_Left_Bone_pose_matrix-sampler" target="Armature_Arm_Left_Bone/transform"/>
+    </animation>
+    <animation id="Armature_Head_Bone_pose_matrix">
+      <source id="Armature_Head_Bone_pose_matrix-input">
+        <float_array id="Armature_Head_Bone_pose_matrix-input-array" count="3">0 0.04166662 0.4166666</float_array>
+        <technique_common>
+          <accessor source="#Armature_Head_Bone_pose_matrix-input-array" count="3" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Head_Bone_pose_matrix-output">
+        <float_array id="Armature_Head_Bone_pose_matrix-output-array" count="48">1 0 0 0 0 1 0 1.401445 0 0 1 0 0 0 0 1 0.9763756 0.2160804 -7.39612e-9 0 -0.2160804 0.9763756 8.0863e-10 1.401445 7.39612e-9 8.0863e-10 1 0 0 0 0 1 0.9763756 -0.2160804 -7.39612e-9 0 0.2160804 0.9763756 -8.0863e-10 1.401445 7.39612e-9 -8.0863e-10 1 0 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Head_Bone_pose_matrix-output-array" count="3" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Head_Bone_pose_matrix-interpolation">
+        <Name_array id="Armature_Head_Bone_pose_matrix-interpolation-array" count="3">LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Head_Bone_pose_matrix-interpolation-array" count="3" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Head_Bone_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Head_Bone_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Head_Bone_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Head_Bone_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Head_Bone_pose_matrix-sampler" target="Armature_Head_Bone/transform"/>
+    </animation>
+    <animation id="Armature_Leg_Right_Bone_pose_matrix">
+      <source id="Armature_Leg_Right_Bone_pose_matrix-input">
+        <float_array id="Armature_Leg_Right_Bone_pose_matrix-input-array" count="3">0 0.04166662 0.4166666</float_array>
+        <technique_common>
+          <accessor source="#Armature_Leg_Right_Bone_pose_matrix-input-array" count="3" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Leg_Right_Bone_pose_matrix-output">
+        <float_array id="Armature_Leg_Right_Bone_pose_matrix-output-array" count="48">1 0 -8.74228e-8 -0.1799338 0 -1 0 -0.6409278 -8.74228e-8 0 -1 2.71693e-8 0 0 0 1 1 -2.29143e-9 -8.67077e-8 -0.1799338 4.74267e-8 -0.8225391 0.5687086 -0.6409278 -7.26237e-8 -0.5687086 -0.8225391 2.71693e-8 0 0 0 1 1 9.71447e-8 -5.71095e-8 -0.1799338 4.74267e-8 -0.8225391 -0.5687086 -0.6409278 -1.02222e-7 0.5687086 -0.8225391 2.71693e-8 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Leg_Right_Bone_pose_matrix-output-array" count="3" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Leg_Right_Bone_pose_matrix-interpolation">
+        <Name_array id="Armature_Leg_Right_Bone_pose_matrix-interpolation-array" count="3">LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Leg_Right_Bone_pose_matrix-interpolation-array" count="3" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Leg_Right_Bone_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Leg_Right_Bone_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Leg_Right_Bone_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Leg_Right_Bone_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Leg_Right_Bone_pose_matrix-sampler" target="Armature_Leg_Right_Bone/transform"/>
+    </animation>
+    <animation id="Armature_Leg_Left_Bone_pose_matrix">
+      <source id="Armature_Leg_Left_Bone_pose_matrix-input">
+        <float_array id="Armature_Leg_Left_Bone_pose_matrix-input-array" count="3">0 0.04166662 0.4166666</float_array>
+        <technique_common>
+          <accessor source="#Armature_Leg_Left_Bone_pose_matrix-input-array" count="3" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Leg_Left_Bone_pose_matrix-output">
+        <float_array id="Armature_Leg_Left_Bone_pose_matrix-output-array" count="48">1 0 -8.74228e-8 0.1799338 0 -1 0 -0.6409278 -8.74228e-8 0 -1 -2.71693e-8 0 0 0 1 1 -1.06581e-14 -8.74228e-8 0.1799338 -4.97036e-8 -0.8226538 -0.5685426 -0.6409278 -7.19187e-8 0.5685426 -0.8226538 -2.71693e-8 0 0 0 1 1 -9.94071e-8 -5.64146e-8 0.1799338 -4.97036e-8 -0.8226541 0.5685422 -0.6409278 -1.02927e-7 -0.5685422 -0.8226541 -2.71693e-8 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Leg_Left_Bone_pose_matrix-output-array" count="3" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Leg_Left_Bone_pose_matrix-interpolation">
+        <Name_array id="Armature_Leg_Left_Bone_pose_matrix-interpolation-array" count="3">LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Leg_Left_Bone_pose_matrix-interpolation-array" count="3" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Leg_Left_Bone_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Leg_Left_Bone_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Leg_Left_Bone_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Leg_Left_Bone_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Leg_Left_Bone_pose_matrix-sampler" target="Armature_Leg_Left_Bone/transform"/>
+    </animation>
+  </library_animations>
+  <library_controllers>
+    <controller id="Armature_Head_Mesh-skin" name="Armature">
+      <skin source="#Cube_007-mesh">
+        <bind_shape_matrix>0.07499997 0 0 4.44089e-16 0 0.09999996 0 2.22045e-16 0 0 0.3375 1.19209e-7 0 0 0 1</bind_shape_matrix>
+        <source id="Armature_Head_Mesh-skin-joints">
+          <Name_array id="Armature_Head_Mesh-skin-joints-array" count="6">Torso_Bone Arm_Right_Bone Arm_Left_Bone Head_Bone Leg_Right_Bone Leg_Left_Bone</Name_array>
+          <technique_common>
+            <accessor source="#Armature_Head_Mesh-skin-joints-array" count="6" stride="1">
+              <param name="JOINT" type="name"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Armature_Head_Mesh-skin-bind_poses">
+          <float_array id="Armature_Head_Mesh-skin-bind_poses-array" count="96">5.75577 0 0 0 0 0 5.75577 -1.954856 0 -5.75577 0 0 0 0 0 1 5.75577 -5.03186e-7 -5.96046e-7 0.539802 -6.86141e-7 0 -5.755767 2.962519 5.03186e-7 5.75577 0 0 0 0 0 1 5.75577 -5.03186e-7 -7.15256e-7 -0.5398014 -6.86141e-7 0 -5.755767 2.962519 5.03186e-7 5.75577 0 0 0 0 0 1 5.75577 0 0 0 0 0 5.75577 -3.356301 0 -5.75577 0 0 0 0 0 1 5.75577 8.69097e-7 -8.9407e-7 0.1799341 -1.02921e-6 0 -5.75577 1.313928 -8.69097e-7 5.75577 0 0 0 0 0 1 5.75577 8.69097e-7 -1.07288e-6 -0.1799336 -1.02921e-6 0 -5.75577 1.313928 -8.69097e-7 5.75577 0 0 0 0 0 1</float_array>
+          <technique_common>
+            <accessor source="#Armature_Head_Mesh-skin-bind_poses-array" count="6" stride="16">
+              <param name="TRANSFORM" type="float4x4"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Armature_Head_Mesh-skin-weights">
+          <float_array id="Armature_Head_Mesh-skin-weights-array" count="48">1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</float_array>
+          <technique_common>
+            <accessor source="#Armature_Head_Mesh-skin-weights-array" count="48" stride="1">
+              <param name="WEIGHT" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <joints>
+          <input semantic="JOINT" source="#Armature_Head_Mesh-skin-joints"/>
+          <input semantic="INV_BIND_MATRIX" source="#Armature_Head_Mesh-skin-bind_poses"/>
+        </joints>
+        <vertex_weights count="48">
+          <input semantic="JOINT" source="#Armature_Head_Mesh-skin-joints" offset="0"/>
+          <input semantic="WEIGHT" source="#Armature_Head_Mesh-skin-weights" offset="1"/>
+          <vcount>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 </vcount>
+          <v>3 0 3 1 3 2 3 3 3 4 3 5 3 6 3 7 2 8 2 9 2 10 2 11 2 12 2 13 2 14 2 15 4 16 4 17 4 18 4 19 4 20 4 21 4 22 4 23 5 24 5 25 5 26 5 27 5 28 5 29 5 30 5 31 1 32 1 33 1 34 1 35 1 36 1 37 1 38 1 39 0 40 0 41 0 42 0 43 0 44 0 45 0 46 0 47</v>
+        </vertex_weights>
+      </skin>
+    </controller>
+  </library_controllers>
+  <library_visual_scenes>
+    <visual_scene id="Scene" name="Scene">
+      <node id="Armature" name="Armature" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 0</rotate>
+        <scale sid="scale">0.4168198 0.4168198 0.4168198</scale>
+        <node id="Armature_Torso_Bone" name="Torso_Bone" sid="Torso_Bone" type="JOINT">
+          <matrix sid="transform">1 0 0 0 0 0 -1 0 0 1 0 0 0 0 0 1</matrix>
+          <node id="Armature_Arm_Right_Bone" name="Arm_Right_Bone" sid="Arm_Right_Bone" type="JOINT">
+            <matrix sid="transform">1 -1.19209e-7 8.74228e-8 -0.5398017 -1.19209e-7 -1 -5.2108e-15 1.007663 8.74228e-8 -5.2108e-15 -1 0 0 0 0 1</matrix>
+            <extra>
+              <technique profile="blender">
+                <layer sid="layer" type="string">0</layer>
+                <tip_x sid="tip_x" type="float">0</tip_x>
+                <tip_y sid="tip_y" type="float">0</tip_y>
+                <tip_z sid="tip_z" type="float">-1</tip_z>
+              </technique>
+            </extra>
+          </node>
+          <node id="Armature_Arm_Left_Bone" name="Arm_Left_Bone" sid="Arm_Left_Bone" type="JOINT">
+            <matrix sid="transform">1 -1.19209e-7 8.74228e-8 0.5398017 -1.19209e-7 -1 -5.2108e-15 1.007663 8.74228e-8 -5.2108e-15 -1 0 0 0 0 1</matrix>
+            <extra>
+              <technique profile="blender">
+                <layer sid="layer" type="string">0</layer>
+                <tip_x sid="tip_x" type="float">0</tip_x>
+                <tip_y sid="tip_y" type="float">0</tip_y>
+                <tip_z sid="tip_z" type="float">-1</tip_z>
+              </technique>
+            </extra>
+          </node>
+          <node id="Armature_Head_Bone" name="Head_Bone" sid="Head_Bone" type="JOINT">
+            <matrix sid="transform">1 0 0 0 0 1 0 1.401446 0 0 1 0 0 0 0 1</matrix>
+            <extra>
+              <technique profile="blender">
+                <layer sid="layer" type="string">0</layer>
+                <tip_x sid="tip_x" type="float">0</tip_x>
+                <tip_y sid="tip_y" type="float">0</tip_y>
+                <tip_z sid="tip_z" type="float">0.4621043</tip_z>
+              </technique>
+            </extra>
+          </node>
+          <node id="Armature_Leg_Right_Bone" name="Leg_Right_Bone" sid="Leg_Right_Bone" type="JOINT">
+            <matrix sid="transform">1 -1.78814e-7 -1.50996e-7 -0.1799339 -1.78814e-7 -1 1.35001e-14 -0.6409277 -1.50996e-7 1.35001e-14 -1 7.58571e-10 0 0 0 1</matrix>
+            <extra>
+              <technique profile="blender">
+                <layer sid="layer" type="string">0</layer>
+                <tip_x sid="tip_x" type="float">0</tip_x>
+                <tip_y sid="tip_y" type="float">0</tip_y>
+                <tip_z sid="tip_z" type="float">-1</tip_z>
+              </technique>
+            </extra>
+          </node>
+          <node id="Armature_Leg_Left_Bone" name="Leg_Left_Bone" sid="Leg_Left_Bone" type="JOINT">
+            <matrix sid="transform">1 -1.78814e-7 -1.50996e-7 0.1799339 -1.78814e-7 -1 1.35001e-14 -0.6409277 -1.50996e-7 1.35001e-14 -1 7.58571e-10 0 0 0 1</matrix>
+            <extra>
+              <technique profile="blender">
+                <layer sid="layer" type="string">0</layer>
+                <tip_x sid="tip_x" type="float">0</tip_x>
+                <tip_y sid="tip_y" type="float">0</tip_y>
+                <tip_z sid="tip_z" type="float">-1</tip_z>
+              </technique>
+            </extra>
+          </node>
+          <extra>
+            <technique profile="blender">
+              <layer sid="layer" type="string">0</layer>
+              <tip_x sid="tip_x" type="float">0</tip_x>
+              <tip_y sid="tip_y" type="float">0</tip_y>
+              <tip_z sid="tip_z" type="float">1</tip_z>
+            </technique>
+          </extra>
+        </node>
+      </node>
+      <node id="Head_Mesh" name="Head_Mesh" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 0</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_controller url="#Armature_Head_Mesh-skin">
+          <skeleton>#Armature_Torso_Bone</skeleton>
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="HeadMaterial_001-material" target="#HeadMaterial_001-material"/>
+              <instance_material symbol="ArmMaterial_001-material" target="#ArmMaterial_001-material"/>
+              <instance_material symbol="LegMaterial_001-material" target="#LegMaterial_001-material"/>
+              <instance_material symbol="TorsoMaterial-material" target="#TorsoMaterial-material"/>
+            </technique_common>
+          </bind_material>
+        </instance_controller>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#Scene"/>
+  </scene>
+</COLLADA>

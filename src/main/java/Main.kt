@@ -16,6 +16,7 @@ import graphics.entity.Entity
 import graphics.entity.EntityRenderer
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
+import graphics.model.animation.AnimatedModel
 import graphics.model.animation.AnimatedModelLoader
 import graphics.renderer.RenderData
 import graphics.renderer.RenderEngine
@@ -96,9 +97,18 @@ object Main {
         ui += page
         ui.showPage("page")
 
-        val animatedModel = AnimatedModelLoader().load("models/animatedPlayer.dae")
+        val animatedModel = AnimatedModelLoader().load("models/animatedPlayer3.dae")
+        animatedModel.addAnimation("start_walking", false, listOf(
+                Pair(0, 0),
+                Pair(0, 25)
+        ))
 
-        val player = Entity(animatedModel, Matrix4().translate(0f, 0f, -5f))
+//        animatedModel.addAnimation("walking", true, listOf(
+//                Pair(2, 250),
+//                Pair(1, 250)
+//        ))
+
+        val player = Entity(animatedModel, Matrix4().translate(0f, 0f, 0f))
         entities += player
 //        entities += Entity(MyModelLoader().load("models/box.dae"), Matrix4().translate(0f, 0f, -10f))
 
@@ -114,6 +124,16 @@ object Main {
             updateChunkManager()
 
 //            val selectedBlock = selector.findSelectedItem(window, chunkRenderer, environment.terrain.chunks, camera)
+
+            entities.forEach { entity -> entity.update(timer.getDelta()) }
+
+            if (keyboard.isPressed(Key.H)) {
+                player.animate("start_walking")
+            }
+
+            if (keyboard.isPressed(Key.P)) {
+                (player.model as AnimatedModel).print = !player.model.print
+            }
 
             renderEngine.render(camera, ambientLight, sun, skyBox, arrayListOf(
                     RenderData(entities, entityRenderer, RenderType.FORWARD),
@@ -161,7 +181,7 @@ object Main {
         }
 
         if (keyboard.isPressed(Key.P)) {
-            printPerformance = !printPerformance
+//            printPerformance = !printPerformance
         }
 
         if (mouse.isCaptured()) {
