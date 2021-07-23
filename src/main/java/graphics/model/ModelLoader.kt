@@ -27,7 +27,6 @@ class ModelLoader: Loader<Model> {
     ) ?: throw Exception("Could not load scene: $path")
 
     fun parseShapes(scene: AIScene, node: AINode, isRigged: Boolean): List<Shape> {
-        println("Parsing shapes")
         val materials = ArrayList<Material>()
         val aiMaterials = scene.mMaterials()
         for (index in 0 until scene.mNumMaterials()) {
@@ -43,7 +42,6 @@ class ModelLoader: Loader<Model> {
 
             val material = materials[aiMesh.mMaterialIndex()]
             val transformation = parseMatrix(aiTransformation)
-            println("Parsing Mesh")
             shapes += Shape(MeshCache.get(aiMesh, transformation, isRigged), material)
         }
 

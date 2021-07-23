@@ -22,7 +22,6 @@ class Entity(val model: Model, var transformation: Matrix4): Renderable {
 
     override fun render(shaderProgram: ShaderProgram) {
         shaderProgram.set("model", transformation)
-
         model.render(shaderProgram)
     }
 

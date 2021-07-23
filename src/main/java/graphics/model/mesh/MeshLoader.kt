@@ -34,8 +34,6 @@ class MeshLoader: Loader<Mesh> {
         val aiVertices = aiMesh.mVertices()
         val aiTexCoords = aiMesh.mTextureCoords(0)
         val aiNormals = aiMesh.mNormals()
-//        val aiBones = aiMesh.mBones()
-
 
         for (i in 0 until aiMesh.mNumVertices()) {
 
@@ -79,9 +77,7 @@ class MeshLoader: Loader<Mesh> {
                         vertices += weight.mWeight()
                     }
                 }
-//                println()
             }
-//            println(i)
         }
 
         for (i in 0 until aiMesh.mNumFaces()) {
@@ -106,11 +102,6 @@ class MeshLoader: Loader<Mesh> {
         if (isRigged) {
             attributes += Attribute(3, 4)
             attributes += Attribute(4, 4)
-        }
-
-        for (bone in boneIds) {
-//            println("${bone.key} :: ${bone.value.second}")
-//            println()
         }
 
         val layout = Layout(Primitive.TRIANGLE, attributes)

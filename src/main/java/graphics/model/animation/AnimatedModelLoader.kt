@@ -30,6 +30,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
     private val bones = ArrayList<Joint>()
     private val globalJoints = HashMap<String, Pair<Int, Matrix4>>()
     private val rotationMatrix = Matrix4().rotateX(-PI.toFloat() / 2f)
+    private var transformationMatrix = Matrix4()
 
     override fun load(path: String): AnimatedModel {
 
@@ -40,7 +41,11 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
         val geometryContent = getContent("library_geometries", content)
         val shapeContent = getContent("library_visual_scenes", content)
         val jointContent = getContent("library_controllers", content)
-        val keyframeContent = getContent("library_animations", content)
+        val keyframeContent = try {
+            getContent("library_animations", content)
+        } catch (e: Exception) {
+            ""
+        }
 
         val rootJoint = getJointHierarchy(shapeContent)
         indexJoints(rootJoint)
@@ -52,7 +57,14 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
 
         val shapes = createAnimatedShapes(meshJointWeights, materials, geometry)
 
-        val poses = loadPoses(keyframeContent)
+        val poses = if (keyframeContent.isNotBlank()) {
+            loadPoses(keyframeContent)
+        } else {
+            listOf()
+        }
+
+        rootJoint.calculateWorldTransformation(rotationMatrix)
+
         return AnimatedModel(shapes, rootJoint, poses)
     }
 
@@ -77,10 +89,11 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
             val inverseBindMatrixContent = getTagContent("source", 1, controllerContent)
             val weightContent = getTagContent("source", 2, controllerContent)
             val vertexWeightContent = getTagContent("vertex_weights", 0, controllerContent)
-            val bindMatrix = rotationMatrix dot Matrix4(getFloatArray("<bind_shape_matrix>", controllerContent))
             val influencingJoints = getArray("<Name_array", requiredJointsContent)
-
             val inverseBindMatrices = getFloatArray("<float_array", inverseBindMatrixContent)
+
+            transformationMatrix = Matrix4(getFloatArray("<bind_shape_matrix>", controllerContent))
+//            transformationMatrix = rotationMatrix dot Matrix4(getFloatArray("<bind_shape_matrix>", controllerContent))
 
             for (i in influencingJoints.indices) {
                 val requiredJoint = globalJoints[influencingJoints[i]] ?: continue
@@ -92,7 +105,6 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
                 val values = inverseBindMatrices.copyOfRange(i * 16, (i + 1)* 16)
                 val invBindMatrix = Matrix4(values)
 
-                rootJoint.setTransformation(requiredJoint.first, bindMatrix)
                 rootJoint.setInverseBindMatrix(requiredJoint.first, invBindMatrix)
             }
 
@@ -117,7 +129,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
                     }
                     val localJointIndex = vertexJointWeights[j * 2]
                     val jointName = influencingJoints[localJointIndex]
-                    val globalJointIndex = globalJoints[jointName]?.first ?: throw IllegalArgumentException("No global joint was found with Id: $jointName")
+                    val globalJointIndex = globalJoints[jointName]?.first ?: throw IllegalArgumentException("No global joint was found with Id: $jointName, necessary for mesh: $meshId")
 
                     jointIndices[j - counter] = globalJointIndex.toFloat()
 
@@ -165,9 +177,10 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
     }
 
     private fun getBoneData(lines: List<String>, index: Int): Pair<Joint, Int> {
-        val boneId = currentBoneIndex++
+        val jointId = currentBoneIndex++
         var i = index
         var name = ""
+        var localJointTransformation = Matrix4()
         val children = ArrayList<Joint>()
 
         while (true) {
@@ -176,6 +189,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
             if (line.startsWith("<node id")) {
                 val type = getString("type", line)
                 if (type == "JOINT") {
+
                     if (!name.isBlank()) {
                         if (getString("name", line) == name) {
                             i++
@@ -186,23 +200,24 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
                             i = result.second
                         }
                     } else {
-                        name = getString("name", line)
+                        name = getString("sid", line)
+                        val bindMatrixLine = lines[i + 1].trim()
+                        localJointTransformation = Matrix4(getFloatArray("transform", bindMatrixLine))
                     }
                 } else if (type == "NODE") {
                     i += 1
                 }
             } else if (line.contains("</node>")) {
-                val jointData = Joint(name, boneId, children)
+//                println("$name $localJointTransformation")
+                if (jointId == 0) {
+//                    localJointTransformation = rotationMatrix dot localJointTransformation
+                }
+                val jointData = Joint(name, jointId, children, localJointTransformation)
                 bones += jointData
                 return Pair(jointData, i)
             }
 
             i++
-            if (i >= lines.size) {
-                val jointData = Joint(name, boneId, children)
-                bones += jointData
-                return Pair(jointData, i)
-            }
         }
     }
 
@@ -299,15 +314,16 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
                 null
             }
 
-            val position = transformation.dot(geometryData.positions[positionIndex]).toArray()
-            val normal = Matrix3(transformation).dot(geometryData.normals[normalIndex]).toArray()
+//            val position = ((geometryData.positions[positionIndex])).toArray()
+            val position = (transformationMatrix.dot(geometryData.positions[positionIndex])).toArray()
+//            val normal = (geometryData.normals[normalIndex]).toArray()
+            val normal = (Matrix3(transformationMatrix).dot(geometryData.normals[normalIndex])).toArray()
             vertexData += position
             vertexData += normal
 
             if (textureIndex != null) {
                 vertexData += geometryData.textureCoordinates[textureIndex].toArray()
             }
-
 
             val boneIds = meshJointWeights[positionIndex].jointIds.toArray()
             val boneWeights = meshJointWeights[positionIndex].weights.toArray()
@@ -337,11 +353,11 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
                 continue
             }
 
-            val id = getString("<animation id", animationContent)
+            val id = getString("<animation id", animationContent).removePrefix("Armature_").removeSuffix("_pose_matrix")
             var boneId = ""
 
             bones.forEach { bone ->
-                if (id.contains(bone.name)) {
+                if (id == bone.name) {
                     boneId = bone.name
                 }
             }
@@ -358,14 +374,19 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
             }
 
             for (i in 0 until numberOfMatrices) {
-                val poseMatrix = rotationMatrix dot Matrix4(poseData.copyOfRange(i * 16, (i + 1) * 16))
+                val poseMatrix = if (boneId == "Bone") {
+                    rotationMatrix dot Matrix4(poseData.copyOfRange(i * 16, (i + 1) * 16))
+                } else {
+                    Matrix4(poseData.copyOfRange(i * 16, (i + 1) * 16))
+                }
+
                 val jointTransformation = JointTransformation(poseMatrix.getPosition().xyz(), Quaternion.fromMatrix(poseMatrix))
                 poseTransformations[i][boneId] = jointTransformation
             }
         }
 
-        for (poseList in poseTransformations) {
-            poses += Pose(poseList)
+        for (jointTransforms in poseTransformations) {
+            poses += Pose(jointTransforms)
         }
 
         return poses

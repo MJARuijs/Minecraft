@@ -7,6 +7,7 @@ import environment.terrain.FaceTextures
 import environment.terrain.Selector
 import environment.terrain.blocks.BlockType
 import environment.terrain.chunks.Chunk
+import environment.terrain.chunks.ChunkGenerator
 import environment.terrain.chunks.ChunkManager
 import environment.terrain.chunks.ChunkRenderer
 import graphics.Camera
@@ -16,12 +17,14 @@ import graphics.entity.Entity
 import graphics.entity.EntityRenderer
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
+import graphics.model.ModelLoader
 import graphics.model.animation.AnimatedModel
 import graphics.model.animation.AnimatedModelLoader
 import graphics.renderer.RenderData
 import graphics.renderer.RenderEngine
 import graphics.renderer.RenderType
 import graphics.rendertarget.RenderTargetManager
+import graphics.shaders.ShaderProgram
 import graphics.shadows.ShadowBox
 import math.Color
 import math.matrices.Matrix4
@@ -97,10 +100,15 @@ object Main {
         ui += page
         ui.showPage("page")
 
-        val animatedModel = AnimatedModelLoader().load("models/animatedPlayer3.dae")
-        animatedModel.addAnimation("start_walking", false, listOf(
+        val animatedModel = AnimatedModelLoader().load("models/animatedPlayer6.dae")
+        animatedModel.addAnimation("start_walking", true, listOf(
+                Pair(1, 0),
+                Pair(2, 500),
+                Pair(1, 1000)
+        ))
+        animatedModel.addAnimation("stop_walking", false, listOf(
                 Pair(0, 0),
-                Pair(0, 25)
+                Pair(0, 1500)
         ))
 
 //        animatedModel.addAnimation("walking", true, listOf(
@@ -108,7 +116,7 @@ object Main {
 //                Pair(1, 250)
 //        ))
 
-        val player = Entity(animatedModel, Matrix4().translate(0f, 0f, 0f))
+        val player = Entity(animatedModel, Matrix4().translate(Vector3(0, 0, 0)))
         entities += player
 //        entities += Entity(MyModelLoader().load("models/box.dae"), Matrix4().translate(0f, 0f, -10f))
 
@@ -116,6 +124,10 @@ object Main {
 
         timer.reset()
         mouse.capture()
+
+        val jointProgram = ShaderProgram.load("shaders/debug/bone.vert", "shaders/debug/bone.frag")
+
+        val sphere = ModelLoader().load("models/sphere.dae")
 
         while (!window.isClosed()) {
             window.poll()
@@ -127,8 +139,11 @@ object Main {
 
             entities.forEach { entity -> entity.update(timer.getDelta()) }
 
-            if (keyboard.isPressed(Key.H)) {
+            if (keyboard.isPressed(Key.RIGHT)) {
                 player.animate("start_walking")
+            }
+            if (keyboard.isPressed(Key.LEFT)) {
+                player.animate("stop_walking")
             }
 
             if (keyboard.isPressed(Key.P)) {
@@ -139,6 +154,20 @@ object Main {
                     RenderData(entities, entityRenderer, RenderType.FORWARD),
                     RenderData(chunks, chunkRenderer, RenderType.FORWARD)
             ))
+
+            GraphicsContext.disable(GraphicsOption.DEPTH_TESTING)
+            jointProgram.start()
+            jointProgram.set("projection", camera.projectionMatrix)
+            jointProgram.set("view", camera.viewMatrix)
+            val joints = animatedModel.getJoints()
+            for (joint in joints) {
+                joint.render(jointProgram)
+            }
+//            jointProgram.set("model", Matrix4())
+//            sphere.render(jointProgram)
+
+            jointProgram.stop()
+            GraphicsContext.enable(GraphicsOption.DEPTH_TESTING)
 
             ui.update(mouse, timer.getDelta())
             ui.draw(window.width, window.height)

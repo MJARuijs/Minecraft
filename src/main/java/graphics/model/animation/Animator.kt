@@ -1,20 +1,28 @@
 package graphics.model.animation
 
 import math.matrices.Matrix4
+import kotlin.math.PI
 
 class Animator(private val model: AnimatedModel) {
 
     private var currentAnimation: Animation? = null
     private var animationTime = 0f
+    private val rotationMatrix = Matrix4().rotateX(-PI.toFloat() / 2f)
 
     fun startAnimation(animation: Animation) {
-        println("Start ${model.rootJoint.transformation.getPosition()}")
-        println(model.rootJoint.name)
-        println()
-        println()
-        println()
         animationTime = 0f
         currentAnimation = animation
+
+//        val transforms = animation.keyFrames[1].second
+//        val currentPose = HashMap<String, Matrix4>()
+//        for (transform in transforms.jointTransformations) {
+//            currentPose[transform.key] = transform.value.getTransformationMatrix()
+//        }
+//
+//        for (entry in currentPose) {
+//            model.rootJoint.setLocalTransform(entry.key, entry.value)
+//        }
+//        model.rootJoint.setTransform(Matrix4())
     }
 
     fun update(delta: Float) {
@@ -27,13 +35,13 @@ class Animator(private val model: AnimatedModel) {
         if (currentAnimation == null) {
             return
         }
-//        println(model.rootJoint.transformation.getPosition())
 
         val currentPose = calculateCurrentPose()
-//        println(currentPose[model.rootJoint.name]!!.getPosition())
-        applyPoseToJoints(currentPose, model.rootJoint, Matrix4())
-//        println(model.rootJoint.transformation.getPosition())
-//        println()
+        for (entry in currentPose) {
+            model.rootJoint.setLocalTransform(entry.key, entry.value)
+        }
+        model.rootJoint.setTransform(Matrix4())
+//        applyPoseToJoints(currentPose, model.rootJoint, Matrix4())
     }
 
     private fun increaseTimer(delta: Float) {
@@ -42,12 +50,12 @@ class Animator(private val model: AnimatedModel) {
             if (currentAnimation!!.loop) {
                 animationTime %= currentAnimation!!.getLength()
             } else {
-                println("Done ${model.rootJoint.transformation.getPosition()}")
+//                println("Done ${model.rootJoint.bindMatrix.getPosition()}")
                 animationTime = 0f
                 currentAnimation = null
             }
         }
-        println(" ${model.rootJoint.transformation.getPosition()}")
+//        println(" ${model.rootJoint.bindMatrix.getPosition()}")
     }
 
     private fun calculateCurrentPose(): HashMap<String, Matrix4> {
@@ -57,18 +65,15 @@ class Animator(private val model: AnimatedModel) {
     }
 
     private fun applyPoseToJoints(currentPose: HashMap<String, Matrix4>, joint: Joint, parentTransformation: Matrix4) {
-
         val currentLocalTransformation = currentPose[joint.name] ?: throw IllegalArgumentException("No joint with id: ${joint.name} was found for the current pose..")
         val currentTransformation = parentTransformation dot currentLocalTransformation
 
-//        if (joint.name == "Torso_Bone") {
-//            println("${joint.name} ${currentTransformation dot joint.inverseBindMatrix}")
-//        }
         for (child in joint.children) {
             applyPoseToJoints(currentPose, child, currentTransformation)
         }
 
-        joint.transformation = currentTransformation dot joint.inverseBindMatrix
+        joint.worldTransformation = currentTransformation
+        joint.animatedTransform = currentTransformation dot joint.inverseBindMatrix
     }
 
     private fun getFrames(): List<Pair<Int, Pose>> {
@@ -98,11 +103,6 @@ class Animator(private val model: AnimatedModel) {
             val previousTransformation = previousFrame.second.jointTransformations[jointName] ?: throw IllegalArgumentException("No joint with id: $jointName found for previous frame")
             val nextTransformation = nextFrame.second.jointTransformations[jointName] ?: throw IllegalArgumentException("No joint with id: $jointName found for next frame")
             val currentTransformation = JointTransformation.interpolate(previousTransformation, nextTransformation, progression, jointName == "Torso_Bone")
-            if (jointName == "Torso_Bone") {
-                println(previousTransformation.position)
-                println(currentTransformation.position)
-                println()
-            }
             currentPose[jointName] = currentTransformation.getTransformationMatrix()
 //            currentPose[jointName] = previousTransformation.getTransformationMatrix()
         }

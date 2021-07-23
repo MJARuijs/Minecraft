@@ -21,7 +21,5 @@ class JointTransformation(val position: Vector3, val rotation: Quaternion) {
             val rotation = Quaternion.interpolate(a.rotation, b.rotation, progress)
             return JointTransformation(position, rotation)
         }
-
     }
-
 }

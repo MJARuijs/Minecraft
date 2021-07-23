@@ -4,6 +4,7 @@ import graphics.Camera
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
 import graphics.model.animation.AnimatedModel
+import graphics.model.animation.Joint
 import graphics.renderer.Renderable
 import graphics.renderer.Renderer
 import graphics.samplers.Sampler
