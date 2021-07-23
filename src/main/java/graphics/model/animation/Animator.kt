@@ -1,28 +1,15 @@
 package graphics.model.animation
 
 import math.matrices.Matrix4
-import kotlin.math.PI
 
 class Animator(private val model: AnimatedModel) {
 
     private var currentAnimation: Animation? = null
     private var animationTime = 0f
-    private val rotationMatrix = Matrix4().rotateX(-PI.toFloat() / 2f)
 
     fun startAnimation(animation: Animation) {
         animationTime = 0f
         currentAnimation = animation
-
-//        val transforms = animation.keyFrames[1].second
-//        val currentPose = HashMap<String, Matrix4>()
-//        for (transform in transforms.jointTransformations) {
-//            currentPose[transform.key] = transform.value.getTransformationMatrix()
-//        }
-//
-//        for (entry in currentPose) {
-//            model.rootJoint.setLocalTransform(entry.key, entry.value)
-//        }
-//        model.rootJoint.setTransform(Matrix4())
     }
 
     fun update(delta: Float) {
@@ -37,11 +24,7 @@ class Animator(private val model: AnimatedModel) {
         }
 
         val currentPose = calculateCurrentPose()
-        for (entry in currentPose) {
-            model.rootJoint.setLocalTransform(entry.key, entry.value)
-        }
-        model.rootJoint.setTransform(Matrix4())
-//        applyPoseToJoints(currentPose, model.rootJoint, Matrix4())
+        applyPoseToJoints(currentPose, model.rootJoint, Matrix4())
     }
 
     private fun increaseTimer(delta: Float) {
@@ -104,7 +87,6 @@ class Animator(private val model: AnimatedModel) {
             val nextTransformation = nextFrame.second.jointTransformations[jointName] ?: throw IllegalArgumentException("No joint with id: $jointName found for next frame")
             val currentTransformation = JointTransformation.interpolate(previousTransformation, nextTransformation, progression, jointName == "Torso_Bone")
             currentPose[jointName] = currentTransformation.getTransformationMatrix()
-//            currentPose[jointName] = previousTransformation.getTransformationMatrix()
         }
 
         return currentPose

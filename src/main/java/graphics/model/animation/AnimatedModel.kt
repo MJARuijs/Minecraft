@@ -4,20 +4,14 @@ import graphics.model.Model
 import graphics.model.Shape
 import graphics.shaders.ShaderProgram
 import math.matrices.Matrix4
-import kotlin.math.PI
+import math.vectors.Vector3
 
 class AnimatedModel(shapes: List<Shape>, val rootJoint: Joint, private val poses: List<Pose>): Model(shapes) {
 
     private val animator = Animator(this)
     private val animations = ArrayList<Animation>()
-//    private var currentPose = poses[0]
 
     var print = false
-
-    init {
-//        rootJoint.calculateWorldTransformation(Matrix4().rotateX(PI.toFloat() / -2.0f))
-//        rootJoint.calculateWorldTransformation(Matrix4())
-    }
 
     fun addAnimation(name: String, loop: Boolean, keyframes: List<Pair<Int, Int>>) {
         val frames = ArrayList<Pair<Int, Pose>>()
@@ -38,6 +32,10 @@ class AnimatedModel(shapes: List<Shape>, val rootJoint: Joint, private val poses
                 return
             }
         }
+    }
+
+    fun translate(transformation: Matrix4) {
+        rootJoint.initWorldTransformation(transformation)
     }
 
     override fun render(shaderProgram: ShaderProgram) {

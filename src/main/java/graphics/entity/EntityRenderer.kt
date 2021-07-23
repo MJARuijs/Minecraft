@@ -23,7 +23,6 @@ class EntityRenderer : Renderer() {
     override val deferredLightingProgram = ShaderProgram.load("shaders/debug/2D.vert", "shaders/entities/entityLightingPass.frag")
 
     override fun render(camera: Camera, ambient: AmbientLight, sun: Sun, entities: List<Renderable>, shadows: List<ShadowData>) {
-
         val staticEntities = entities.filter { renderable ->
             (renderable as Entity).model !is AnimatedModel
         }

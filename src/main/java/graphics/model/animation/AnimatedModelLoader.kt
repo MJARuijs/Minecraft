@@ -63,7 +63,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
             listOf()
         }
 
-        rootJoint.calculateWorldTransformation(rotationMatrix)
+        rootJoint.initWorldTransformation(Matrix4())
 
         return AnimatedModel(shapes, rootJoint, poses)
     }
@@ -93,7 +93,6 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
             val inverseBindMatrices = getFloatArray("<float_array", inverseBindMatrixContent)
 
             transformationMatrix = Matrix4(getFloatArray("<bind_shape_matrix>", controllerContent))
-//            transformationMatrix = rotationMatrix dot Matrix4(getFloatArray("<bind_shape_matrix>", controllerContent))
 
             for (i in influencingJoints.indices) {
                 val requiredJoint = globalJoints[influencingJoints[i]] ?: continue
@@ -208,9 +207,8 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
                     i += 1
                 }
             } else if (line.contains("</node>")) {
-//                println("$name $localJointTransformation")
                 if (jointId == 0) {
-//                    localJointTransformation = rotationMatrix dot localJointTransformation
+                    localJointTransformation = rotationMatrix dot localJointTransformation
                 }
                 val jointData = Joint(name, jointId, children, localJointTransformation)
                 bones += jointData
@@ -314,9 +312,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
                 null
             }
 
-//            val position = ((geometryData.positions[positionIndex])).toArray()
             val position = (transformationMatrix.dot(geometryData.positions[positionIndex])).toArray()
-//            val normal = (geometryData.normals[normalIndex]).toArray()
             val normal = (Matrix3(transformationMatrix).dot(geometryData.normals[normalIndex])).toArray()
             vertexData += position
             vertexData += normal
@@ -380,7 +376,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
                     Matrix4(poseData.copyOfRange(i * 16, (i + 1) * 16))
                 }
 
-                val jointTransformation = JointTransformation(poseMatrix.getPosition().xyz(), Quaternion.fromMatrix(poseMatrix))
+                val jointTransformation = JointTransformation(poseMatrix.getPosition(), Quaternion.fromMatrix(poseMatrix))
                 poseTransformations[i][boneId] = jointTransformation
             }
         }

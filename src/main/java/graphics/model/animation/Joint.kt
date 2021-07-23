@@ -6,12 +6,20 @@ import math.matrices.Matrix4
 
 class Joint(val name: String, val id: Int, val children: List<Joint> = arrayListOf(), private var localTransformation: Matrix4) {
 
-    var worldTransformation = Matrix4()
-
     private val model = ModelLoader().load("models/sphere.dae")
+
+    var worldTransformation = Matrix4()
 
     var inverseBindMatrix = Matrix4()
     var animatedTransform = Matrix4()
+
+    fun initWorldTransformation(parentTransform: Matrix4) {
+        worldTransformation = parentTransform dot localTransformation
+        animatedTransform = worldTransformation dot inverseBindMatrix
+        for (child in children) {
+            child.initWorldTransformation(worldTransformation)
+        }
+    }
 
     fun getJoints(): List<Joint> {
         val children = ArrayList<Joint>()
@@ -25,35 +33,6 @@ class Joint(val name: String, val id: Int, val children: List<Joint> = arrayList
     fun render(shaderProgram: ShaderProgram) {
         shaderProgram.set("model", worldTransformation)
         model.render(shaderProgram)
-    }
-
-    fun calculateWorldTransformation(parentTransform: Matrix4) {
-        worldTransformation = parentTransform dot localTransformation
-//        println("$name ${worldTransformation.getPosition()} ${localTransformation.getPosition()}")
-        for (child in children) {
-            child.calculateWorldTransformation(worldTransformation)
-        }
-    }
-
-    fun setLocalTransform(name: String, transformation: Matrix4) {
-        if (this.name == name) {
-            localTransformation = transformation
-            if (id == 0) {
-//                println("Local transform: $localTransform")
-            }
-        } else {
-            for (child in children) {
-                child.setLocalTransform(name, transformation)
-            }
-        }
-    }
-
-    fun setTransform(parentTransform: Matrix4) {
-        worldTransformation = parentTransform dot localTransformation
-        animatedTransform = worldTransformation dot inverseBindMatrix
-        for (child in children) {
-            child.setTransform(worldTransformation)
-        }
     }
 
     fun loadTransformation(shaderProgram: ShaderProgram, print: Boolean) {
