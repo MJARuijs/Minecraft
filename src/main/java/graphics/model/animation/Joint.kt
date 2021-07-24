@@ -1,45 +1,31 @@
 package graphics.model.animation
 
-import graphics.model.ModelLoader
 import graphics.shaders.ShaderProgram
 import math.matrices.Matrix4
 
 class Joint(val name: String, val id: Int, val children: List<Joint> = arrayListOf(), private var localTransformation: Matrix4) {
 
-    private val model = ModelLoader().load("models/sphere.dae")
-
-    var worldTransformation = Matrix4()
-
-    var inverseBindMatrix = Matrix4()
-    var animatedTransform = Matrix4()
+    private var inverseBindMatrix = Matrix4()
+    private var animatedTransform = Matrix4()
 
     fun initWorldTransformation(parentTransform: Matrix4) {
-        worldTransformation = parentTransform dot localTransformation
+        val worldTransformation = parentTransform dot localTransformation
         animatedTransform = worldTransformation dot inverseBindMatrix
+
         for (child in children) {
             child.initWorldTransformation(worldTransformation)
         }
     }
 
-    fun getJoints(): List<Joint> {
-        val children = ArrayList<Joint>()
-        children += this
-        for (child in this.children) {
-            children += child.getJoints()
-        }
-        return children
+    fun calculateAnimatedTransformation(currentWorldTransformation: Matrix4) {
+        animatedTransform = currentWorldTransformation dot inverseBindMatrix
     }
 
-    fun render(shaderProgram: ShaderProgram) {
-        shaderProgram.set("model", worldTransformation)
-        model.render(shaderProgram)
-    }
-
-    fun loadTransformation(shaderProgram: ShaderProgram, print: Boolean) {
+    fun loadTransformation(shaderProgram: ShaderProgram) {
         shaderProgram.set("boneMatrices[$id]", animatedTransform)
 
         for (child in children) {
-            child.loadTransformation(shaderProgram, print)
+            child.loadTransformation(shaderProgram)
         }
     }
 

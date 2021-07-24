@@ -3,13 +3,12 @@ package graphics.entity
 import graphics.Camera
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
-import graphics.model.animation.AnimatedModel
-import graphics.model.animation.Joint
 import graphics.renderer.Renderable
 import graphics.renderer.Renderer
 import graphics.samplers.Sampler
 import graphics.shaders.ShaderProgram
 import graphics.shadows.ShadowData
+import math.matrices.Matrix4
 import math.vectors.Vector2
 
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
@@ -19,16 +18,17 @@ class EntityRenderer : Renderer() {
     private val animatedProgram = ShaderProgram.load("shaders/entities/animatedEntity.vert", "shaders/entities/entityForwardRendering.frag")
     private val deferredGeometryProgram = ShaderProgram.load("shaders/entities/entity.vert", "shaders/entities/entityGeometryPass.frag")
 
-    override val shadowProgram = ShaderProgram.load("shaders/entities/shadowEntity.vert", "shaders/entities/shadowEntity.frag")
+    private val staticShadowProgram = ShaderProgram.load("shaders/entities/shadowEntity.vert", "shaders/entities/shadowEntity.frag")
+    private val animatedShadowProgram = ShaderProgram.load("shaders/entities/animatedShadowEntity.vert", "shaders/entities/shadowEntity.frag")
     override val deferredLightingProgram = ShaderProgram.load("shaders/debug/2D.vert", "shaders/entities/entityLightingPass.frag")
 
     override fun render(camera: Camera, ambient: AmbientLight, sun: Sun, entities: List<Renderable>, shadows: List<ShadowData>) {
         val staticEntities = entities.filter { renderable ->
-            (renderable as Entity).model !is AnimatedModel
+            !(renderable as Entity).isAnimated()
         }
 
         val animatedEntities = entities.filter { renderable ->
-            (renderable as Entity).model is AnimatedModel
+            (renderable as Entity).isAnimated()
         }
 
         render(staticProgram, camera, ambient, sun, staticEntities, shadows)
@@ -47,6 +47,31 @@ class EntityRenderer : Renderer() {
         }
 
         deferredGeometryProgram.stop()
+    }
+
+    override fun renderForShadowMap(items: List<Renderable>, projection: Matrix4, view: Matrix4) {
+        val staticEntities = items.filter { renderable ->
+            !(renderable as Entity).isAnimated()
+        }
+
+        val animatedEntities = items.filter { renderable ->
+            (renderable as Entity).isAnimated()
+        }
+
+        renderForShadowMap(staticShadowProgram, staticEntities, projection, view)
+        renderForShadowMap(animatedShadowProgram, animatedEntities, projection, view)
+    }
+
+    private fun renderForShadowMap(program: ShaderProgram, items: List<Renderable>, projection: Matrix4, view: Matrix4) {
+        program.start()
+        program.set("projection", projection)
+        program.set("view", view)
+
+        for (item in items) {
+            item.render(program)
+        }
+
+        program.stop()
     }
 
     private fun render(program: ShaderProgram, camera: Camera, ambient: AmbientLight, sun: Sun, entities: List<Renderable>, shadows: List<ShadowData>) {

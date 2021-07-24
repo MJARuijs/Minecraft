@@ -70,8 +70,6 @@ data class Vector4(var x: Float = 0.0f, var y: Float = 0.0f, var z: Float = 0.0f
         w /= norm
     }
 
-    // TODO: Remove the rounding of the elements
-//    override fun toString() = "<${FloatUtils.roundToDecimal(x, 2)}, ${FloatUtils.roundToDecimal(y, 2)}, ${FloatUtils.roundToDecimal(y, 2)}, ${FloatUtils.roundToDecimal(w, 2)}>"
     override fun toString() = "<$x, $y, $z, $w>"
 
     override fun toArray() = floatArrayOf(x, y, z, w)

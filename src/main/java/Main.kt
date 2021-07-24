@@ -17,14 +17,11 @@ import graphics.entity.Entity
 import graphics.entity.EntityRenderer
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
-import graphics.model.ModelLoader
-import graphics.model.animation.AnimatedModel
 import graphics.model.animation.AnimatedModelLoader
 import graphics.renderer.RenderData
 import graphics.renderer.RenderEngine
 import graphics.renderer.RenderType
 import graphics.rendertarget.RenderTargetManager
-import graphics.shaders.ShaderProgram
 import graphics.shadows.ShadowBox
 import math.Color
 import math.matrices.Matrix4
@@ -57,7 +54,7 @@ object Main {
     private val ambientLight = AmbientLight(Color(lightValue, lightValue, lightValue))
     private val sun = Sun(Color(directionalValue, directionalValue, directionalValue), Vector3(1.0f, 1.0f, -1.0f))
 
-    private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, ChunkGenerator.TERRAIN_HEIGHT + 2, 0))
+    private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, ChunkGenerator.TERRAIN_HEIGHT + 2, 5))
 
     private val chunkManager = ChunkManager(camera.position)
     private val chunkRenderer = ChunkRenderer()
@@ -77,6 +74,8 @@ object Main {
     private const val sampleSize = 40
     private var printPerformance = false
     private val fps = FloatArray(sampleSize)
+
+    private var controlPlayer = false
 
     @JvmStatic
     fun main(args: Array<String>) {
@@ -99,8 +98,7 @@ object Main {
 
         ui += page
         ui.showPage("page")
-
-        val animatedModel = AnimatedModelLoader().load("models/animatedPlayer6.dae")
+        val animatedModel = AnimatedModelLoader().load("models/animatedPlayer.dae")
         animatedModel.addAnimation("start_walking", true, listOf(
                 Pair(1, 0),
                 Pair(2, 500),
@@ -110,22 +108,18 @@ object Main {
                 Pair(0, 0),
                 Pair(0, 1500)
         ))
-
-//        animatedModel.addAnimation("walking", true, listOf(
-//                Pair(2, 250),
-//                Pair(1, 250)
-//        ))
+        animatedModel.addAnimation("walking", true, listOf(
+                Pair(1, 1000),
+                Pair(2, 500)
+        ))
 
         val player = Entity(animatedModel, Matrix4().translate(Vector3(0, ChunkGenerator.TERRAIN_HEIGHT + 2, 0)))
         entities += player
-//        entities += Entity(MyModelLoader().load("models/box.dae"), Matrix4().translate(0f, 0f, -10f))
 
         var i = 0
 
         timer.reset()
         mouse.capture()
-
-        val jointProgram = ShaderProgram.load("shaders/debug/bone.vert", "shaders/debug/bone.frag")
 
         while (!window.isClosed()) {
             window.poll()
@@ -144,28 +138,10 @@ object Main {
                 player.animate("stop_walking")
             }
 
-            if (keyboard.isPressed(Key.P)) {
-                (player.model as AnimatedModel).print = !player.model.print
-            }
-
             renderEngine.render(camera, ambientLight, sun, skyBox, arrayListOf(
                     RenderData(entities, entityRenderer, RenderType.FORWARD),
                     RenderData(chunks, chunkRenderer, RenderType.FORWARD)
             ))
-
-            GraphicsContext.disable(GraphicsOption.DEPTH_TESTING)
-            jointProgram.start()
-            jointProgram.set("projection", camera.projectionMatrix)
-            jointProgram.set("view", camera.viewMatrix)
-            val joints = animatedModel.getJoints()
-            for (joint in joints) {
-                joint.render(jointProgram)
-            }
-//            jointProgram.set("model", Matrix4())
-//            sphere.render(jointProgram)
-
-            jointProgram.stop()
-            GraphicsContext.enable(GraphicsOption.DEPTH_TESTING)
 
             ui.update(mouse, timer.getDelta())
             ui.draw(window.width, window.height)
@@ -208,7 +184,11 @@ object Main {
         }
 
         if (keyboard.isPressed(Key.P)) {
-//            printPerformance = !printPerformance
+            printPerformance = !printPerformance
+        }
+
+        if (keyboard.isPressed(Key.F2)) {
+            controlPlayer = !controlPlayer
         }
 
         if (mouse.isCaptured()) {

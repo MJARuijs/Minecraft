@@ -1,10 +1,10 @@
 #version 460
 
-layout (location = 0) in vec3 inPosition;
-layout (location = 1) in vec3 inNormal;
-//layout (location = 2) in vec2 inTextureCoordinates;
-layout(location = 2) in vec4 inBoneIds;
+layout(location = 0) in vec3 inPosition;
+layout(location = 1) in vec3 inNormal;
+layout(location = 2) in vec2 inTextureCoordinates;
 layout(location = 3) in vec4 inBoneWeights;
+layout(location = 4) in ivec4 inBoneIds;
 
 const float transitionDistance = 0.0;
 const int MAX_BONES = 100;
@@ -28,13 +28,15 @@ void main() {
     vec4 position = vec4(0.0);
     vec3 normal = vec3(0.0);
 
-//    for (int i = 0; i < MAX_BONES_PER_VERTEX; i++) {
-        vec4 unscaledPosition = boneMatrices[int(inBoneIds[0])] * vec4(inPosition, 1.0);
-        position += unscaledPosition * inBoneWeights[0];
+    for (int i = 0; i < MAX_BONES_PER_VERTEX; i++) {
+        int boneId = int(inBoneIds[i]);
 
-        vec3 unscaledNormal = mat3(boneMatrices[int(inBoneIds[0])]) * inNormal;
-        normal += unscaledNormal * inBoneWeights[0];
-//    }
+        vec4 unscaledPosition = boneMatrices[boneId] * vec4(inPosition, 1.0);
+        position += unscaledPosition * inBoneWeights[i];
+
+        vec3 unscaledNormal = mat3(boneMatrices[boneId]) * inNormal;
+        normal += unscaledNormal * inBoneWeights[i];
+    }
 
     worldPosition = model * position;
     passNormal = mat3(model) * normal;

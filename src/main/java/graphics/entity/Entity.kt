@@ -6,7 +6,9 @@ import graphics.renderer.Renderable
 import graphics.shaders.ShaderProgram
 import math.matrices.Matrix4
 
-class Entity(val model: Model, var transformation: Matrix4): Renderable {
+class Entity(private val model: Model, private var transformation: Matrix4): Renderable {
+
+    fun isAnimated() = model is AnimatedModel
 
     fun animate(name: String) {
         if (model is AnimatedModel) {

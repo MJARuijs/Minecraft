@@ -1,6 +1,5 @@
 package math.matrices
 
-import util.FloatUtils
 import java.util.*
 
 /**
@@ -214,24 +213,23 @@ abstract class Matrix<T: Matrix<T>>(private val dimensions: Int, var elements: F
     /**
      * @return a copy of the matrix.
      */
-    fun copy() = create(Arrays.copyOf(elements, size))
+    fun copy() = create(elements.copyOf(size))
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Matrix<*>) return false
         if (dimensions != other.dimensions) return false
-        return Arrays.equals(elements, other.elements)
+        return elements.contentEquals(other.elements)
     }
     
-    override fun hashCode() = Arrays.hashCode(elements)
+    override fun hashCode() = elements.contentHashCode()
 
-    // TODO: Remove the rounding of the elements
     override fun toString(): String {
         val outer = StringJoiner(", ")
         for (row in 0 until dimensions) {
             val inner = StringJoiner(", ")
             for (column in 0 until dimensions) {
-                inner.add(FloatUtils.roundToDecimal(this[row, column], 1).toString())
+                inner.add(this[row, column].toString())
             }
             outer.add("\n[$inner]")
         }

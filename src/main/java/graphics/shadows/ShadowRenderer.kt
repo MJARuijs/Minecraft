@@ -20,7 +20,7 @@ class ShadowRenderer {
             box.updateBox(camera, sun)
 
             renderData.forEach {
-                it.renderer.renderBlack(it.data, box.getProjectionMatrix(), box.getViewMatrix())
+                it.renderer.renderForShadowMap(it.data, box.getProjectionMatrix(), box.getViewMatrix())
             }
 
             shadowData += ShadowData(

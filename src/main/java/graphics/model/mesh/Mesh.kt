@@ -2,39 +2,38 @@ package graphics.model.mesh
 
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL15.*
-import org.lwjgl.opengl.GL20.glEnableVertexAttribArray
-import org.lwjgl.opengl.GL20.glVertexAttribPointer
 import org.lwjgl.opengl.GL30.*
+import org.lwjgl.opengl.GL45.*
 import resources.Resource
+import java.nio.ByteBuffer
 
-open class Mesh(layout: Layout, vertices: FloatArray, indices: IntArray): Resource {
+open class Mesh(layout: Layout, vertices: ByteBuffer, indices: IntArray): Resource {
 
-    private val vao = glGenVertexArrays()
-    private val vbo = glGenBuffers()
-    private val ebo = glGenBuffers()
+    private val vao = glCreateVertexArrays()
+    private val vbo = glCreateBuffers()
+    private val ebo = glCreateBuffers()
 
     private val code = layout.primitive.code
     private val count = indices.size
 
     init {
-        glBindVertexArray(vao)
-        glBindBuffer(GL_ARRAY_BUFFER, vbo)
-        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW)
+        glNamedBufferData(vbo, vertices.rewind(), GL_STATIC_DRAW)
 
-        var offset = 0
+        var offset = 0L
 
         for (attribute in layout.attributes) {
-            glVertexAttribPointer(attribute.location, attribute.size, GL_FLOAT, false, 4 * layout.stride, 4L * offset)
-            glEnableVertexAttribArray(attribute.location)
-            offset += attribute.size
+            glVertexArrayVertexBuffer(vao, attribute.location, vbo, offset, layout.stride)
+            glEnableVertexArrayAttrib(vao, attribute.location)
+
+            if (attribute.dataType == DataType.INT) {
+                glVertexArrayAttribIFormat(vao, attribute.location, attribute.size, attribute.dataType.code, 0)
+            } else {
+                glVertexArrayAttribFormat(vao, attribute.location, attribute.size, attribute.dataType.code, false, 0)
+            }
+            offset += attribute.size * attribute.dataType.size
         }
 
-        glBindBuffer(GL_ARRAY_BUFFER, 0)
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW)
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
-        glBindVertexArray(0)
+        glNamedBufferData(ebo, indices, GL_STATIC_DRAW)
     }
 
     fun draw() {

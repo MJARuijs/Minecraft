@@ -12,7 +12,7 @@ import math.vectors.Vector2
 
 abstract class Renderer {
 
-    abstract val shadowProgram: ShaderProgram
+//    abstract val shadowProgram: ShaderProgram
     abstract val deferredLightingProgram: ShaderProgram
 
     private val quad = Quad()
@@ -48,15 +48,17 @@ abstract class Renderer {
         deferredLightingProgram.stop()
     }
 
-    fun renderBlack(items: List<Renderable>, projection: Matrix4, view: Matrix4) {
-        shadowProgram.start()
-        shadowProgram.set("projection", projection)
-        shadowProgram.set("view", view)
+    abstract fun renderForShadowMap(items: List<Renderable>, projection: Matrix4, view: Matrix4)
 
-        for (item in items) {
-            item.render(shadowProgram)
-        }
-
-        shadowProgram.stop()
-    }
+//    fun renderBlack(items: List<Renderable>, projection: Matrix4, view: Matrix4) {
+//        shadowProgram.start()
+//        shadowProgram.set("projection", projection)
+//        shadowProgram.set("view", view)
+//
+//        for (item in items) {
+//            item.render(shadowProgram)
+//        }
+//
+//        shadowProgram.stop()
+//    }
 }

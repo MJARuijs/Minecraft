@@ -14,9 +14,8 @@ import kotlin.math.sqrt
 
 class SkyBox(path: String, cameraFarPlane: Float) {
 
-//    private val sampler = Sampler(0)
     private val shaderProgram = ShaderProgram.load("shaders/environment/sky/skybox.vert", "shaders/environment/sky/skybox.frag")
-    private val cube = MeshCache.get("models/block.obj")
+    private val cube = MeshCache.get("models/box.dae")
 
     private val handle = glGenTextures()
     private val distance = sqrt((cameraFarPlane * cameraFarPlane) / 3.0f)

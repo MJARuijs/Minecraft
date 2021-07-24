@@ -9,6 +9,7 @@ import graphics.renderer.Renderer
 import graphics.samplers.Sampler
 import graphics.shaders.ShaderProgram
 import graphics.shadows.ShadowData
+import math.matrices.Matrix4
 import math.vectors.Vector2
 
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
@@ -21,10 +22,15 @@ class ChunkRenderer : Renderer() {
     private val normalSampler = Sampler(1)
     private val specularSampler = Sampler(2)
 
-    override val shadowProgram = ShaderProgram.load("shaders/environment/terrain/shadowChunk.vert", "shaders/environment/terrain/shadowChunk.frag")
+    private val shadowProgram = ShaderProgram.load("shaders/environment/terrain/shadowChunk.vert", "shaders/environment/terrain/shadowChunk.frag")
+
     override val deferredLightingProgram = ShaderProgram.load("shaders/debug/2D.vert", "shaders/environment/terrain/chunkLightingPass.frag")
 
     override fun render(camera: Camera, ambient: AmbientLight, sun: Sun, chunks: List<Renderable>, shadows: List<ShadowData>) {
+        blockSampler.bind(FaceTextures.textures!!)
+        normalSampler.bind(FaceTextures.normals!!)
+        specularSampler.bind(FaceTextures.speculars!!)
+
         shaderProgram.start()
         shaderProgram.set("projection", camera.projectionMatrix)
         shaderProgram.set("view", camera.viewMatrix)
@@ -32,10 +38,6 @@ class ChunkRenderer : Renderer() {
         shaderProgram.set("normalMap", normalSampler.index)
         shaderProgram.set("specularMap", specularSampler.index)
         shaderProgram.set("cameraPosition", camera.position)
-
-        blockSampler.bind(FaceTextures.textures!!)
-        normalSampler.bind(FaceTextures.normals!!)
-        specularSampler.bind(FaceTextures.speculars!!)
 
         ambient.apply(shaderProgram)
         sun.apply(shaderProgram)
@@ -74,7 +76,6 @@ class ChunkRenderer : Renderer() {
         deferredGeometryProgram.set("normalMap", normalSampler.index)
         deferredGeometryProgram.set("specularMap", specularSampler.index)
 
-
         if (shadows.isNotEmpty()) {
             val shadowData = shadows[0]
             val shadowSampler = Sampler(6)
@@ -96,6 +97,18 @@ class ChunkRenderer : Renderer() {
         }
 
         deferredGeometryProgram.stop()
+    }
+
+    override fun renderForShadowMap(items: List<Renderable>, projection: Matrix4, view: Matrix4) {
+        shadowProgram.start()
+        shadowProgram.set("projection", projection)
+        shadowProgram.set("view", view)
+
+        for (item in items) {
+            item.render(shadowProgram)
+        }
+
+        shadowProgram.stop()
     }
 
 }

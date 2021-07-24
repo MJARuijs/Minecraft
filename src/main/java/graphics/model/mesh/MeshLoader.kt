@@ -7,16 +7,15 @@ import math.vectors.Vector3
 import org.lwjgl.assimp.*
 import resources.Loader
 import util.File
-import java.nio.charset.StandardCharsets
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 class MeshLoader: Loader<Mesh> {
-
-    private val boneIds = HashMap<String, Pair<Int, Matrix4>>()
 
     override fun load(path: String): Mesh {
         val scene = loadScene(path)
         val aiMeshes = scene.mMeshes()
-        return parseData(AIMesh.create(aiMeshes!!.get(0)), Matrix4(), false)
+        return parseData(AIMesh.create(aiMeshes!!.get(0)), Matrix4())
     }
 
     private fun loadScene(path: String) = Assimp.aiImportFile(
@@ -24,16 +23,36 @@ class MeshLoader: Loader<Mesh> {
             Assimp.aiProcess_Triangulate or Assimp.aiProcess_OptimizeGraph or Assimp.aiProcess_RemoveRedundantMaterials
     ) ?: throw Exception("Could not load scene: $path")
 
-    fun parseData(aiMesh: AIMesh, transformation: Matrix4, isRigged: Boolean): Mesh {
-        var containsTexCoords = false
-        var containsNormals = false
-
+    fun parseData(aiMesh: AIMesh, transformation: Matrix4): Mesh {
         var vertices = FloatArray(0)
         var indices = IntArray(0)
 
         val aiVertices = aiMesh.mVertices()
         val aiTexCoords = aiMesh.mTextureCoords(0)
         val aiNormals = aiMesh.mNormals()
+
+        val containsTexCoords = aiTexCoords?.capacity() != null
+        val containsNormals = aiNormals?.capacity() != null
+
+        var stride = 3
+        if (containsTexCoords) {
+            stride += 2
+        }
+        if (containsNormals) {
+            stride += 3
+        }
+
+        val attributes = arrayListOf(Attribute(0, 3))
+
+        if (containsTexCoords) {
+            attributes += Attribute(1, 2)
+        }
+        if (containsNormals) {
+            attributes += Attribute(2, 3)
+        }
+
+        val layout = Layout(Primitive.TRIANGLE, attributes)
+        val buffer = ByteBuffer.allocateDirect(aiMesh.mNumVertices() * layout.stride).order(ByteOrder.nativeOrder())
 
         for (i in 0 until aiMesh.mNumVertices()) {
 
@@ -46,12 +65,17 @@ class MeshLoader: Loader<Mesh> {
             vertices += position.y
             vertices += position.z
 
+            buffer.putFloat(position.x)
+            buffer.putFloat(position.y)
+            buffer.putFloat(position.z)
+
             if (aiTexture != null) {
                 val texCoord = Vector2(aiTexture.x(), aiTexture.y())
                 vertices += texCoord.x
                 vertices += texCoord.y
 
-                containsTexCoords = true
+                buffer.putFloat(texCoord.x)
+                buffer.putFloat(texCoord.y)
             }
 
             if (aiNormal != null) {
@@ -60,23 +84,9 @@ class MeshLoader: Loader<Mesh> {
                 vertices += normal.y
                 vertices += normal.z
 
-                containsNormals = true
-            }
-
-            if (aiMesh.mNumBones() > 0) {
-                val bone = AIBone.create(aiMesh.mBones()!!.get())
-
-                val boneName = StandardCharsets.UTF_8.decode(bone.mName().data()).toString()
-                if (!boneIds.containsKey(boneName)) {
-                    boneIds[boneName] = Pair(boneIds.size, parseMatrix(bone.mOffsetMatrix()))
-                }
-
-                for (weight in bone.mWeights()) {
-                    if (weight.mVertexId() == i) {
-                        vertices += boneIds[boneName]!!.first.toFloat()
-                        vertices += weight.mWeight()
-                    }
-                }
+                buffer.putFloat(normal.x)
+                buffer.putFloat(normal.y)
+                buffer.putFloat(normal.z)
             }
         }
 
@@ -91,30 +101,6 @@ class MeshLoader: Loader<Mesh> {
             }
         }
 
-        val attributes = arrayListOf(Attribute(0, 3))
-
-        if (containsTexCoords) {
-            attributes += Attribute(1, 2)
-        }
-        if (containsNormals) {
-            attributes += Attribute(2, 3)
-        }
-        if (isRigged) {
-            attributes += Attribute(3, 4)
-            attributes += Attribute(4, 4)
-        }
-
-        val layout = Layout(Primitive.TRIANGLE, attributes)
-        return Mesh(layout, vertices, indices)
+        return Mesh(layout, buffer, indices)
     }
-
-    private fun parseMatrix(aiMatrix: AIMatrix4x4): Matrix4 {
-        return Matrix4(floatArrayOf(
-                aiMatrix.a1(), aiMatrix.a2(), aiMatrix.a3(), aiMatrix.a4(),
-                aiMatrix.b1(), aiMatrix.b2(), aiMatrix.b3(), aiMatrix.b4(),
-                aiMatrix.c1(), aiMatrix.c2(), aiMatrix.c3(), aiMatrix.c4(),
-                aiMatrix.d1(), aiMatrix.d2(), aiMatrix.d3(), aiMatrix.d4())
-        )
-    }
-
 }

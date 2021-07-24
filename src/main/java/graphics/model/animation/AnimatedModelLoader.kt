@@ -3,10 +3,7 @@ package graphics.model.animation
 import graphics.material.ColoredMaterial
 import graphics.material.Material
 import graphics.model.Shape
-import graphics.model.mesh.Attribute
-import graphics.model.mesh.Layout
-import graphics.model.mesh.Mesh
-import graphics.model.mesh.Primitive
+import graphics.model.mesh.*
 import math.Color
 import math.Quaternion
 import math.matrices.Matrix3
@@ -16,6 +13,8 @@ import math.vectors.Vector3
 import math.vectors.Vector4
 import resources.Loader
 import util.File
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import kotlin.math.PI
 
 class AnimatedModelLoader: Loader<AnimatedModel> {
@@ -152,7 +151,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
         for (geometry in geometries) {
             for (shapeData in geometry.value) {
                 val material = materials[shapeData.materialId] ?: throw IllegalArgumentException("No material found for id: ${shapeData.materialId}")
-                val mesh = createGeometry(Matrix4(), shapeData, meshJointWeights[geometry.key]!!)
+                val mesh = createGeometry(shapeData, meshJointWeights[geometry.key]!!)
 
                 shapes += Shape(mesh, material)
             }
@@ -288,7 +287,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
         return geometries
     }
 
-    private fun createGeometry(transformation: Matrix4, geometryData: GeometryData, meshJointWeights: List<MeshJointWeights>): Mesh {
+    private fun createGeometry(geometryData: GeometryData, meshJointWeights: List<MeshJointWeights>): Mesh {
         var indices = IntArray(0)
 
         val containsTextureCoordinates = geometryData.attributes.any { attribute -> attribute.name == "TEXCOORD" }
@@ -301,6 +300,16 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
 
         var vertexData = FloatArray(0)
 
+        val attributes = arrayListOf(Attribute(0, 3), Attribute(1, 3), Attribute(3, 4), Attribute(4, 4, DataType.INT))
+
+        if (containsTextureCoordinates) {
+            attributes += Attribute(2, 2)
+        }
+
+        val layout = Layout(Primitive.TRIANGLE, attributes)
+
+        val buffer = ByteBuffer.allocateDirect(geometryData.indexData.size / 2 * layout.stride).order(ByteOrder.nativeOrder())
+
         for (i in geometryData.indexData.indices step stepSize) {
 
             val positionIndex = geometryData.indexData[i + positionOffset]
@@ -312,8 +321,8 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
                 null
             }
 
-            val position = (transformationMatrix.dot(geometryData.positions[positionIndex])).toArray()
-            val normal = (Matrix3(transformationMatrix).dot(geometryData.normals[normalIndex])).toArray()
+            val position = transformationMatrix.dot(geometryData.positions[positionIndex]).toArray()
+            val normal = Matrix3(transformationMatrix).dot(geometryData.normals[normalIndex]).toArray()
             vertexData += position
             vertexData += normal
 
@@ -321,21 +330,33 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
                 vertexData += geometryData.textureCoordinates[textureIndex].toArray()
             }
 
-            val boneIds = meshJointWeights[positionIndex].jointIds.toArray()
             val boneWeights = meshJointWeights[positionIndex].weights.toArray()
-            vertexData += boneIds
+            val boneIds = meshJointWeights[positionIndex].jointIds.toArray()
             vertexData += boneWeights
+            vertexData += boneIds
+
+            buffer.putFloat(position[0])
+            buffer.putFloat(position[1])
+            buffer.putFloat(position[2])
+
+            buffer.putFloat(normal[0])
+            buffer.putFloat(normal[1])
+            buffer.putFloat(normal[2])
+
+            buffer.putFloat(boneWeights[0])
+            buffer.putFloat(boneWeights[1])
+            buffer.putFloat(boneWeights[2])
+            buffer.putFloat(boneWeights[3])
+
+            buffer.putInt(boneIds[0].toInt())
+            buffer.putInt(boneIds[1].toInt())
+            buffer.putInt(boneIds[2].toInt())
+            buffer.putInt(boneIds[3].toInt())
 
             indices += indices.size
         }
 
-        val attributes = arrayListOf(Attribute(0, 3), Attribute(1, 3), Attribute(2, 4), Attribute(3, 4))
-
-        if (containsTextureCoordinates) {
-            attributes += Attribute(2, 2)
-        }
-
-        return Mesh(Layout(Primitive.TRIANGLE, attributes), vertexData, indices)
+        return Mesh(layout, buffer, indices)
     }
 
     private fun loadPoses(content: String): List<Pose> {
