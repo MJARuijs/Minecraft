@@ -42,7 +42,7 @@ class ModelLoader: Loader<Model> {
 
             val material = materials[aiMesh.mMaterialIndex()]
             val transformation = parseMatrix(aiTransformation)
-            shapes += Shape(MeshCache.get(aiMesh, transformation, isRigged), material)
+            shapes += Shape(MeshCache.get(aiMesh, transformation), material)
         }
 
         return shapes

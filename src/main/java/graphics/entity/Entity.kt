@@ -6,7 +6,7 @@ import graphics.renderer.Renderable
 import graphics.shaders.ShaderProgram
 import math.matrices.Matrix4
 
-class Entity(private val model: Model, private var transformation: Matrix4): Renderable {
+open class Entity(private val model: Model, private var transformation: Matrix4): Renderable {
 
     fun isAnimated() = model is AnimatedModel
 

@@ -3,13 +3,13 @@ import devices.Key
 import devices.Timer
 import devices.Window
 import environment.sky.SkyBox
-import environment.terrain.FaceTextures
 import environment.terrain.Selector
 import environment.terrain.blocks.BlockType
 import environment.terrain.chunks.Chunk
 import environment.terrain.chunks.ChunkGenerator
 import environment.terrain.chunks.ChunkManager
 import environment.terrain.chunks.ChunkRenderer
+import game.player.Player
 import graphics.Camera
 import graphics.GraphicsContext
 import graphics.GraphicsOption
@@ -48,8 +48,6 @@ object Main {
 
     private const val lightValue = 0.75f
     private const val directionalValue = 0.5f
-
-    private val faceTextures = FaceTextures("src/main/resources/textures/blocks/")
 
     private val ambientLight = AmbientLight(Color(lightValue, lightValue, lightValue))
     private val sun = Sun(Color(directionalValue, directionalValue, directionalValue), Vector3(1.0f, 1.0f, -1.0f))
@@ -98,6 +96,7 @@ object Main {
 
         ui += page
         ui.showPage("page")
+        
         val animatedModel = AnimatedModelLoader().load("models/animatedPlayer.dae")
         animatedModel.addAnimation("start_walking", true, listOf(
                 Pair(1, 0),
@@ -113,7 +112,7 @@ object Main {
                 Pair(2, 500)
         ))
 
-        val player = Entity(animatedModel, Matrix4().translate(Vector3(0, ChunkGenerator.TERRAIN_HEIGHT + 2, 0)))
+        val player = Player(animatedModel, Matrix4().translate(Vector3(0, ChunkGenerator.TERRAIN_HEIGHT + 2, 0)))
         entities += player
 
         var i = 0

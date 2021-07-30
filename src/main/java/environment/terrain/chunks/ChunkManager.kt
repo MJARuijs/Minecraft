@@ -1,6 +1,7 @@
 package environment.terrain.chunks
 
 import environment.terrain.Biome
+import environment.terrain.FaceTextures
 import environment.terrain.chunks.ChunkGenerator.Companion.CHUNK_SIZE
 import math.vectors.Vector3
 import java.util.*
@@ -23,6 +24,7 @@ class ChunkManager(x: Int, z: Int) {
     private var currentZ = 0
 
     init {
+        FaceTextures.load("src/main/resources/textures/blocks/")
         currentX = floor((x.toFloat() + (CHUNK_SIZE / 2)) / CHUNK_SIZE).toInt()
         currentZ = floor((z.toFloat() + (CHUNK_SIZE / 2)) / CHUNK_SIZE).toInt()
         update()
