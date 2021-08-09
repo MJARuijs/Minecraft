@@ -42,7 +42,7 @@ data class Animator(private val model: AnimatedModel) {
                 previousFrame = animation.keyFrames[currentFrameIndex++]
                 nextFrame = animation.keyFrames[currentFrameIndex++]
             } else {
-                previousFrame = KeyFrame(0, currentPose)
+                previousFrame = KeyFrame(0, defaultPose)
                 nextFrame = animation.keyFrames.first()
 
                 val startOffset = nextFrame!!.timeStamp
@@ -77,17 +77,11 @@ data class Animator(private val model: AnimatedModel) {
         }
     }
 
-    var print = false
-
     fun stopAnimating(transitionDuration: Int) {
         previousFrame = KeyFrame(0, currentPose)
-//        nextFrame = KeyFrame(transitionDuration, defaultPose)
-        nextFrame = KeyFrame(transitionDuration, currentPose)
+        nextFrame = KeyFrame(transitionDuration, defaultPose)
         currentAnimation = Animation("stop_animating", listOf(previousFrame!!, nextFrame!!))
-        print = true
         resetAnimator()
-
-//        startAnimation(currentAnimation!!)
     }
 
     fun update(delta: Float, transformation: Matrix4) {
@@ -192,22 +186,8 @@ data class Animator(private val model: AnimatedModel) {
             throw IllegalArgumentException("Cannot play animation when next keyframe is null..")
         }
 
-        var progression = calculateProgression(previousFrame!!.timeStamp, nextFrame!!.timeStamp)
+        val progression = calculateProgression(previousFrame!!.timeStamp, nextFrame!!.timeStamp)
 
-        if (progression <= 0.0f) {
-            progression = 0.0f
-        }
-        if (progression >= 0.999f) {
-            progression = 1.0f
-        }
-
-//        if (print || progression == 1.0f) {
-//            for (j in currentPose) {
-//                println(j.key)
-//                println(j.value)
-//            }
-//            print = false
-//        }
         return interpolatePoses(previousFrame!!, nextFrame!!, progression)
     }
 
@@ -225,6 +205,7 @@ data class Animator(private val model: AnimatedModel) {
     private fun calculateProgression(previousFrameTime: Float, nextFrameTime: Float): Float {
         val totalTime = nextFrameTime - previousFrameTime
         val currentTime = animationTime - previousFrameTime
+
         return currentTime / totalTime
     }
 
@@ -233,22 +214,9 @@ data class Animator(private val model: AnimatedModel) {
             val previousTransformation = previousFrame.pose.jointTransformations[jointName] ?: throw IllegalArgumentException("No joint with id: $jointName found for previous frame")
             val nextTransformation = nextFrame.pose.jointTransformations[jointName] ?: throw IllegalArgumentException("No joint with id: $jointName found for next frame")
             val currentTransformation = JointTransformation.interpolate(previousTransformation, nextTransformation, progression)
-//            if (print) {
-//                println(jointName)
-//                println(previousTransformation.scale)
-//                println(nextTransformation.scale)
-//                println(previousTransformation.getTransformationMatrix())
-//            println(nextTransformation.getTransformationMatrix())
-//            println()
-//            println()
-//            println()
-//            }
+
             currentPose[jointName] = currentTransformation
         }
-        if (print) {
-            print = false
-        }
-
         return currentPose
     }
 }

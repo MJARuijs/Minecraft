@@ -105,7 +105,9 @@ object Main {
                 Pair(0, 250)
         ))
         animatedModel.addAnimation("walking", listOf(
-                Pair(1, 750),
+//                Pair(0, 0),
+                Pair(1, 750)
+                ,
                 Pair(2, 1500)
         ), LoopEffect.REVERSE)
 
