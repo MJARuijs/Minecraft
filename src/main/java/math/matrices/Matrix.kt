@@ -1,5 +1,6 @@
 package math.matrices
 
+import util.FloatUtils
 import java.util.*
 
 /**
@@ -229,7 +230,9 @@ abstract class Matrix<T: Matrix<T>>(private val dimensions: Int, var elements: F
         for (row in 0 until dimensions) {
             val inner = StringJoiner(", ")
             for (column in 0 until dimensions) {
-                inner.add(this[row, column].toString())
+                inner.add(
+                        FloatUtils.roundToDecimal(this[row, column], 1).toString()
+                )
             }
             outer.add("\n[$inner]")
         }

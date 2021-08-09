@@ -5,6 +5,7 @@ import math.Quaternion
 import math.vectors.Vector2
 import math.vectors.Vector3
 import math.vectors.Vector4
+import kotlin.math.abs
 
 class Matrix4(elements: FloatArray = generateIdentityElements(4)): Matrix<Matrix4>(4, elements) {
 
@@ -34,12 +35,12 @@ class Matrix4(elements: FloatArray = generateIdentityElements(4)): Matrix<Matrix
     infix fun dot(vector: Vector3) = Vector3(dot(Vector4(vector)))
 
     fun translate(x: Float = 0.0f, y: Float = 0.0f, z: Float = 0.0f) = transform(
-        Matrix4(floatArrayOf(
-            1.0f, 0.0f, 0.0f, x,
-            0.0f, 1.0f, 0.0f, y,
-            0.0f, 0.0f, 1.0f, z,
-            0.0f, 0.0f, 0.0f, 1.0f
-        ))
+            Matrix4(floatArrayOf(
+                    1.0f, 0.0f, 0.0f, x,
+                    0.0f, 1.0f, 0.0f, y,
+                    0.0f, 0.0f, 1.0f, z,
+                    0.0f, 0.0f, 0.0f, 1.0f
+            ))
     )
 
     fun translate(vector: Vector2) = translate(vector.x, vector.y)
@@ -47,12 +48,12 @@ class Matrix4(elements: FloatArray = generateIdentityElements(4)): Matrix<Matrix
     fun translate(vector: Vector3) = translate(vector.x, vector.y, vector.z)
 
     fun scale(x: Float = 1.0f, y: Float = 1.0f, z: Float = 1.0f) = transform(
-        Matrix4(floatArrayOf(
-            x, 0.0f, 0.0f, 0.0f,
-            0.0f, y, 0.0f, 0.0f,
-            0.0f, 0.0f, z, 0.0f,
-            0.0f, 0.0f, 0.0f, 1.0f
-        ))
+            Matrix4(floatArrayOf(
+                    x, 0.0f, 0.0f, 0.0f,
+                    0.0f, y, 0.0f, 0.0f,
+                    0.0f, 0.0f, z, 0.0f,
+                    0.0f, 0.0f, 0.0f, 1.0f
+            ))
     )
 
     fun scale(vector: Vector2) = scale(vector.x, vector.y)
@@ -69,10 +70,24 @@ class Matrix4(elements: FloatArray = generateIdentityElements(4)): Matrix<Matrix
 
     fun rotate(vector: Vector3) = rotateX(vector.x).rotateY(vector.y).rotateZ(vector.z)
 
+    fun scalePosition(scale: Vector3): Matrix4 {
+        set(0, 3, get(0, 3) * scale.x)
+        set(1, 3, get(1, 3) * scale.y)
+        set(2, 3, get(2, 3) * scale.z)
+        return this
+    }
+
     fun getPosition(): Vector3 {
         val x = get(0, 3)
         val y = get(1, 3)
         val z = get(2, 3)
+        return Vector3(x, y, z)
+    }
+
+    fun getScale(): Vector3 {
+        val x = abs(get(0, 0))
+        val y = abs(get(1, 1))
+        val z = abs(get(2, 2))
         return Vector3(x, y, z)
     }
 

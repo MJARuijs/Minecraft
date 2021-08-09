@@ -1,29 +1,32 @@
 package graphics.entity
 
 import graphics.model.Model
-import graphics.model.animation.AnimatedModel
+import graphics.model.animation.model.AnimatedModel
 import graphics.renderer.Renderable
 import graphics.shaders.ShaderProgram
 import math.matrices.Matrix4
+import math.vectors.Vector3
 
-open class Entity(private val model: Model, private var transformation: Matrix4): Renderable {
+abstract class Entity(protected var transformation: Matrix4): Renderable {
 
-    fun isAnimated() = model is AnimatedModel
+    abstract val model: Model
 
-    fun animate(name: String) {
-        if (model is AnimatedModel) {
-            model.animate(name)
-        }
+    abstract fun isAnimated(): Boolean
+
+    fun getPosition() = transformation.getPosition()
+
+    open fun update(delta: Float) {}
+
+    open fun scale(scale: Vector3) {
+        transformation = transformation.scale(scale)
     }
 
-    fun update(delta: Float) {
-        if (model is AnimatedModel) {
-            model.update(delta)
-        }
+    open fun translate(translation: Vector3) {
+        transformation = transformation.translate(translation)
     }
 
     override fun render(shaderProgram: ShaderProgram) {
-        shaderProgram.set("model", transformation)
+        shaderProgram.set("model", Matrix4())
         model.render(shaderProgram)
     }
 

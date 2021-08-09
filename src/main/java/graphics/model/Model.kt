@@ -6,6 +6,8 @@ import resources.Resource
 
 open class Model(private val shapes: List<Shape>): Resource {
 
+    constructor(model: Model) : this(model.shapes)
+
     open fun render(shaderProgram: ShaderProgram) {
         for (shape in shapes) {
             shape.render(shaderProgram)

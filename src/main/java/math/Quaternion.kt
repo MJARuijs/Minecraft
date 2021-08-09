@@ -119,7 +119,6 @@ data class Quaternion(var w: Float = 1.0f, var x: Float = 0.0f, var y: Float = 0
         }
 
         fun fromMatrix(matrix: Matrix4): Quaternion {
-
             val m00 = matrix[0, 0]
             val m11 = matrix[1, 1]
             val m22 = matrix[2, 2]

@@ -1,4 +1,4 @@
-package graphics.model.animation
+package graphics.model.animation.model
 
 import resources.Cache
 

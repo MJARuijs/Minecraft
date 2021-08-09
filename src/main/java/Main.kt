@@ -9,19 +9,21 @@ import environment.terrain.chunks.Chunk
 import environment.terrain.chunks.ChunkGenerator
 import environment.terrain.chunks.ChunkManager
 import environment.terrain.chunks.ChunkRenderer
-import game.player.Player
 import graphics.Camera
 import graphics.GraphicsContext
 import graphics.GraphicsOption
+import graphics.entity.AnimatedEntity
 import graphics.entity.Entity
 import graphics.entity.EntityRenderer
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
-import graphics.model.animation.AnimatedModelLoader
+import graphics.model.animation.LoopEffect
+import graphics.model.animation.model.AnimatedModelCache
 import graphics.renderer.RenderData
 import graphics.renderer.RenderEngine
 import graphics.renderer.RenderType
 import graphics.rendertarget.RenderTargetManager
+import graphics.shaders.ShaderProgram
 import graphics.shadows.ShadowBox
 import math.Color
 import math.matrices.Matrix4
@@ -53,6 +55,7 @@ object Main {
     private val sun = Sun(Color(directionalValue, directionalValue, directionalValue), Vector3(1.0f, 1.0f, -1.0f))
 
     private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, ChunkGenerator.TERRAIN_HEIGHT + 2, 5))
+//    private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, 0, 5))
 
     private val chunkManager = ChunkManager(camera.position)
     private val chunkRenderer = ChunkRenderer()
@@ -96,24 +99,28 @@ object Main {
 
         ui += page
         ui.showPage("page")
-        
-        val animatedModel = AnimatedModelLoader().load("models/animatedPlayer.dae")
-        animatedModel.addAnimation("start_walking", true, listOf(
-                Pair(1, 0),
+
+        val animatedModel = AnimatedModelCache.get("models/animatedPlayer.dae")
+        animatedModel.addAnimation("stop_walking", listOf(
+                Pair(0, 250)
+        ))
+        animatedModel.addAnimation("walking", listOf(
+                Pair(1, 750),
+                Pair(2, 1500)
+        ), LoopEffect.REVERSE)
+
+        animatedModel.addAnimation("walking_reverse", listOf(
                 Pair(2, 500),
                 Pair(1, 1000)
-        ))
-        animatedModel.addAnimation("stop_walking", false, listOf(
-                Pair(0, 0),
-                Pair(0, 1500)
-        ))
-        animatedModel.addAnimation("walking", true, listOf(
-                Pair(1, 1000),
-                Pair(2, 500)
-        ))
+        ), LoopEffect.NONE)
 
-        val player = Player(animatedModel, Matrix4().translate(Vector3(0, ChunkGenerator.TERRAIN_HEIGHT + 2, 0)))
+        val player = AnimatedEntity(animatedModel, Matrix4().translate(Vector3(0, ChunkGenerator.TERRAIN_HEIGHT + 1, 0)))
+        val secondPlayer = AnimatedEntity(animatedModel, Matrix4().translate(Vector3(3, ChunkGenerator.TERRAIN_HEIGHT + 1, 0)))
+
         entities += player
+        entities += secondPlayer
+
+        val boneProgram = ShaderProgram.load("shaders/debug/bone.vert", "shaders/debug/bone.frag")
 
         var i = 0
 
@@ -131,16 +138,39 @@ object Main {
             entities.forEach { entity -> entity.update(timer.getDelta()) }
 
             if (keyboard.isPressed(Key.RIGHT)) {
-                player.animate("start_walking")
+                player.animate("walking")
             }
+
             if (keyboard.isPressed(Key.LEFT)) {
-                player.animate("stop_walking")
+                player.stopAnimating(250)
+            }
+
+            if (keyboard.isPressed(Key.K)) {
+                player.translate(Vector3(0.5f, 0.0f, 0.0f))
             }
 
             renderEngine.render(camera, ambientLight, sun, skyBox, arrayListOf(
                     RenderData(entities, entityRenderer, RenderType.FORWARD),
                     RenderData(chunks, chunkRenderer, RenderType.FORWARD)
             ))
+
+            GraphicsContext.disable(GraphicsOption.DEPTH_TESTING)
+            boneProgram.start()
+            boneProgram.set("projection", camera.projectionMatrix)
+            boneProgram.set("view", camera.viewMatrix)
+
+            val joints = player.model.getJoints()
+            for (joint in joints) {
+                joint.render(boneProgram)
+            }
+
+            val secondJoints = secondPlayer.model.getJoints()
+            for (joint in secondJoints) {
+                joint.render(boneProgram)
+            }
+
+            boneProgram.stop()
+            GraphicsContext.enable(GraphicsOption.DEPTH_TESTING)
 
             ui.update(mouse, timer.getDelta())
             ui.draw(window.width, window.height)

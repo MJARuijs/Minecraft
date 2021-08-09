@@ -1,8 +1,9 @@
-package graphics.model.animation
+package graphics.model.animation.model
 
 import graphics.material.ColoredMaterial
 import graphics.material.Material
 import graphics.model.Shape
+import graphics.model.animation.Pose
 import graphics.model.mesh.*
 import math.Color
 import math.Quaternion
@@ -17,6 +18,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.math.PI
 
+@Suppress("SameParameterValue")
 class AnimatedModelLoader: Loader<AnimatedModel> {
 
     private class GeometryData(val materialId: String, val positions: ArrayList<Vector3>, val normals: ArrayList<Vector3>, val textureCoordinates: ArrayList<Vector2>, val indexData: IntArray, val attributes: List<Attribute>)
@@ -30,6 +32,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
     private val globalJoints = HashMap<String, Pair<Int, Matrix4>>()
     private val rotationMatrix = Matrix4().rotateX(-PI.toFloat() / 2f)
     private var transformationMatrix = Matrix4()
+    val scale = Vector3()
 
     override fun load(path: String): AnimatedModel {
 
@@ -98,7 +101,6 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
                 if (!requiredJoint.second.isZeroMatrix()) {
                     continue
                 }
-
 
                 val values = inverseBindMatrices.copyOfRange(i * 16, (i + 1)* 16)
                 val invBindMatrix = Matrix4(values)
@@ -187,7 +189,6 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
             if (line.startsWith("<node id")) {
                 val type = getString("type", line)
                 if (type == "JOINT") {
-
                     if (!name.isBlank()) {
                         if (getString("name", line) == name) {
                             i++
@@ -203,11 +204,24 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
                         localJointTransformation = Matrix4(getFloatArray("transform", bindMatrixLine))
                     }
                 } else if (type == "NODE") {
-                    i += 1
+                    var j = i
+                    while (true) {
+                        val nextLine = lines[j++].trim()
+                        if (nextLine.startsWith("<scale")) {
+                            val values = getFloatArray("sid", nextLine)
+                            scale.x = values[0]
+                            scale.y = values[1]
+                            scale.z = values[2]
+                            break
+                        }
+                    }
+                    i++
                 }
             } else if (line.contains("</node>")) {
                 if (jointId == 0) {
                     localJointTransformation = rotationMatrix dot localJointTransformation
+                    localJointTransformation = localJointTransformation.scale(scale)
+                    localJointTransformation.scalePosition(scale)
                 }
                 val jointData = Joint(name, jointId, children, localJointTransformation)
                 bones += jointData
@@ -372,8 +386,12 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
 
             val id = getString("<animation id", animationContent).removePrefix("Armature_").removeSuffix("_pose_matrix")
             var boneId = ""
+            var rootJointName = ""
 
             bones.forEach { bone ->
+                if (bone.id == 0) {
+                    rootJointName = bone.name
+                }
                 if (id == bone.name) {
                     boneId = bone.name
                 }
@@ -391,14 +409,16 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
             }
 
             for (i in 0 until numberOfMatrices) {
-                val poseMatrix = if (boneId == "Bone") {
-                    rotationMatrix dot Matrix4(poseData.copyOfRange(i * 16, (i + 1) * 16))
-                } else {
-                    Matrix4(poseData.copyOfRange(i * 16, (i + 1) * 16))
-                }
+                var poseMatrix = Matrix4(poseData.copyOfRange(i * 16, (i + 1) * 16))
+                if (boneId == rootJointName) {
+                    poseMatrix = (rotationMatrix dot poseMatrix).scalePosition(scale)
 
-                val jointTransformation = JointTransformation(poseMatrix.getPosition(), Quaternion.fromMatrix(poseMatrix))
-                poseTransformations[i][boneId] = jointTransformation
+                    val jointTransformation = JointTransformation(poseMatrix.getPosition(), Quaternion.fromMatrix(poseMatrix), scale)
+                    poseTransformations[i][boneId] = jointTransformation
+                } else {
+                    val jointTransformation = JointTransformation(poseMatrix.getPosition(), Quaternion.fromMatrix(poseMatrix))
+                    poseTransformations[i][boneId] = jointTransformation
+                }
             }
         }
 
