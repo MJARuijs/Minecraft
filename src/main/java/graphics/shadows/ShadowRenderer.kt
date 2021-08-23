@@ -4,11 +4,10 @@ import graphics.Camera
 import graphics.lights.Sun
 import graphics.renderer.RenderData
 import graphics.rendertarget.RenderTargetManager
-import graphics.rendertarget.attachments.AttachmentType
 
 class ShadowRenderer {
 
-    private val renderTarget = RenderTargetManager.getAvailableTarget(false, AttachmentType.DEPTH_TEXTURE, width = SHADOW_MAP_SIZE, height = SHADOW_MAP_SIZE)
+    private val renderTarget = RenderTargetManager.getAvailableTarget(false, 0, 0, 1, 0, width = SHADOW_MAP_SIZE, height = SHADOW_MAP_SIZE)
 
     fun render(camera: Camera, sun: Sun, shadowBoxes: List<ShadowBox>, renderData: List<RenderData>): List<ShadowData> {
         val shadowData = ArrayList<ShadowData>()

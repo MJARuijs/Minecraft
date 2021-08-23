@@ -6,7 +6,6 @@ import graphics.lights.AmbientLight
 import graphics.lights.Sun
 import graphics.rendertarget.RenderTarget
 import graphics.rendertarget.RenderTargetManager
-import graphics.rendertarget.attachments.AttachmentType
 import graphics.shadows.ShadowData
 import org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT
 
@@ -15,7 +14,7 @@ class ForwardRenderEngine {
     private lateinit var forwardTarget: RenderTarget
 
     fun prepare(): RenderTarget {
-        forwardTarget = RenderTargetManager.getAvailableTarget(true, AttachmentType.COLOR_TEXTURE, AttachmentType.DEPTH_TEXTURE)
+        forwardTarget = RenderTargetManager.getAvailableTarget(true, 1, 0, 1, 0)
         return forwardTarget
     }
 

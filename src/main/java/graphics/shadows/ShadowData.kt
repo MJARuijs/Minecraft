@@ -4,7 +4,7 @@ import graphics.textures.DepthMap
 import math.matrices.Matrix4
 import math.vectors.Vector3
 
-class ShadowData(val projectionMatrix: Matrix4, val viewMatrix: Matrix4, val shadowDistance: Float, val shadowMap: DepthMap) {
+class ShadowData(private val projectionMatrix: Matrix4, private val viewMatrix: Matrix4, val shadowDistance: Float, val shadowMap: DepthMap) {
 
     fun getShadowMatrix(): Matrix4 {
         var shadowMatrix = Matrix4()

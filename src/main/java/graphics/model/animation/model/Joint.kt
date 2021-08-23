@@ -8,7 +8,7 @@ class Joint(val name: String, val id: Int, val children: List<Joint> = arrayList
 
     private val model = ModelLoader().load("models/sphere.dae")
 
-    var worldTransformation = Matrix4()
+    private var worldTransformation = Matrix4()
     private var inverseBindMatrix = Matrix4()
     private var animatedTransform = Matrix4()
 

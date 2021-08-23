@@ -5,7 +5,6 @@ import graphics.lights.AmbientLight
 import graphics.lights.Sun
 import graphics.rendertarget.RenderTarget
 import graphics.rendertarget.RenderTargetManager
-import graphics.rendertarget.attachments.AttachmentType
 import graphics.samplers.Sampler
 import graphics.shadows.ShadowData
 
@@ -23,16 +22,7 @@ class DeferredRenderEngine {
     private val shadowCoordinateSampler = Sampler(5)
 
     fun render(camera: Camera, ambient: AmbientLight, sun: Sun, shadows: List<ShadowData>, renderData: List<RenderData>, forwardTarget: RenderTarget): RenderTarget {
-        geometryTarget = RenderTargetManager.getAvailableTarget(
-                multiSampled,
-                AttachmentType.COLOR_TEXTURE,
-                AttachmentType.COLOR_TEXTURE,
-                AttachmentType.COLOR_TEXTURE,
-                AttachmentType.COLOR_TEXTURE,
-                AttachmentType.COLOR_TEXTURE,
-                AttachmentType.COLOR_TEXTURE,
-                AttachmentType.DEPTH_TEXTURE
-        )
+        geometryTarget = RenderTargetManager.getAvailableTarget(multiSampled, 6, 0, 1, 0)
 
         if (renderData.none { data -> data.type == RenderType.DEFERRED }) {
             return geometryTarget

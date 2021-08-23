@@ -1,7 +1,6 @@
 package graphics.rendertarget
 
 import devices.Window
-import graphics.rendertarget.attachments.AttachmentType
 
 object RenderTargetManager {
 
@@ -10,19 +9,19 @@ object RenderTargetManager {
     private lateinit var default: RenderTarget
 
     fun init(window: Window) {
-        default = RenderTarget(window.width, window.height, false, AttachmentType.COLOR_TEXTURE, AttachmentType.DEPTH_TEXTURE, handle = 0)
+        default = RenderTarget(window.width, window.height, false, 1, 0, 1, 0, handle = 0)
     }
 
     fun getDefault() = default
 
-    fun getAvailableTarget(multiSampled: Boolean, vararg types: AttachmentType, width: Int = default.getWidth(), height: Int = default.getHeight()): RenderTarget {
-        return renderTargets.find {
-            it.matches(width, height, multiSampled, *types)
-        } ?: createTarget(width, height, multiSampled, *types)
+    fun getAvailableTarget(multiSampled: Boolean, numberOfColorTextures: Int, numberOfColorBuffers: Int, numberOfDepthTextures: Int, numberOfDepthBuffers: Int, width: Int = default.getWidth(), height: Int = default.getHeight()): RenderTarget {
+        return renderTargets.find { target ->
+            target.matches(width, height, multiSampled, numberOfColorTextures, numberOfColorBuffers, numberOfDepthTextures, numberOfDepthBuffers)
+        } ?: createTarget(width, height, multiSampled, numberOfColorTextures, numberOfColorBuffers, numberOfDepthTextures, numberOfDepthBuffers)
     }
 
-    private fun createTarget(width: Int, height: Int, multiSampled: Boolean, vararg types: AttachmentType): RenderTarget {
-        val renderTarget = RenderTarget(width, height, multiSampled, *types)
+    private fun createTarget(width: Int, height: Int, multiSampled: Boolean, numberOfColorTextures: Int, numberOfColorBuffers: Int, numberOfDepthTextures: Int, numberOfDepthBuffers: Int): RenderTarget {
+        val renderTarget = RenderTarget(width, height, multiSampled, numberOfColorTextures, numberOfColorBuffers, numberOfDepthTextures, numberOfDepthBuffers)
         renderTargets += renderTarget
         return renderTarget
     }

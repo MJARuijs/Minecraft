@@ -19,8 +19,6 @@ class ColorTextureAttachment(val index: Int, width: Int, height: Int, multiSampl
 
     }
 
-    override val type = AttachmentType.COLOR_TEXTURE
-
     override fun resize(width: Int, height: Int) = colorMap.resize(width, height)
 
     override fun matches(other: Any?) = other is ColorTextureAttachment

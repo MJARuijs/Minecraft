@@ -17,8 +17,6 @@ class ColorBufferAttachment(val index: Int, width: Int, height: Int, multiSample
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_RENDERBUFFER, handle)
     }
 
-    override val type = AttachmentType.COLOR_BUFFER
-
     override fun resize(width: Int, height: Int) {}
 
     override fun matches(other: Any?) = other is ColorBufferAttachment

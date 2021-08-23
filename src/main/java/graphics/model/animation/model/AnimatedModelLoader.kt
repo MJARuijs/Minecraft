@@ -189,7 +189,7 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
             if (line.startsWith("<node id")) {
                 val type = getString("type", line)
                 if (type == "JOINT") {
-                    if (!name.isBlank()) {
+                    if (name.isNotBlank()) {
                         if (getString("name", line) == name) {
                             i++
                             continue

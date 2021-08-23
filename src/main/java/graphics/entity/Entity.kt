@@ -1,7 +1,6 @@
 package graphics.entity
 
 import graphics.model.Model
-import graphics.model.animation.model.AnimatedModel
 import graphics.renderer.Renderable
 import graphics.shaders.ShaderProgram
 import math.matrices.Matrix4

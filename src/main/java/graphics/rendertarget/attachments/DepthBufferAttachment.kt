@@ -17,8 +17,6 @@ class DepthBufferAttachment(width: Int, height: Int, multiSampled: Boolean) : At
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, handle)
     }
 
-    override val type = AttachmentType.DEPTH_BUFFER
-
     override fun resize(width: Int, height: Int) {
         glBindRenderbuffer(GL_RENDERBUFFER, handle)
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height)

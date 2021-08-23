@@ -9,6 +9,7 @@ import environment.terrain.chunks.Chunk
 import environment.terrain.chunks.ChunkGenerator
 import environment.terrain.chunks.ChunkManager
 import environment.terrain.chunks.ChunkRenderer
+import game.player.Player
 import graphics.Camera
 import graphics.GraphicsContext
 import graphics.GraphicsOption
@@ -100,31 +101,14 @@ object Main {
         ui += page
         ui.showPage("page")
 
-        val animatedModel = AnimatedModelCache.get("models/animatedPlayer9.dae")
-        animatedModel.addAnimation("stop_walking", listOf(
-                Pair(0, 250)
-        ))
+        val animatedModel = AnimatedModelCache.get("models/animatedPlayer.dae")
+
         animatedModel.addAnimation("walking", listOf(
-//                Pair(0, 0),
                 Pair(1, 400),
                 Pair(2, 800)
         ), LoopEffect.REVERSE)
 
-        animatedModel.addAnimation("walking_reverse", listOf(
-                Pair(2, 500),
-                Pair(1, 1000)
-        ), LoopEffect.NONE)
-
-        animatedModel.addAnimation("wave", listOf(
-                Pair(3, 250),
-                Pair(4, 500),
-                Pair(5, 750),
-                Pair(6, 1000),
-                Pair(5, 1250),
-                Pair(6, 1500)
-        ), LoopEffect.NONE)
-
-        val player = AnimatedEntity(animatedModel, Matrix4().translate(Vector3(0, ChunkGenerator.TERRAIN_HEIGHT + 1, 0)))
+        val player = Player(animatedModel, Matrix4().translate(Vector3(0, ChunkGenerator.TERRAIN_HEIGHT + 1, 0)))
         val secondPlayer = AnimatedEntity(animatedModel, Matrix4().translate(Vector3(3, ChunkGenerator.TERRAIN_HEIGHT + 1, 0)))
 
         entities += player
@@ -155,32 +139,12 @@ object Main {
                 player.stopAnimating(250)
             }
 
-            if (mouse.isPressed(Button.LEFT)) {
-                player.animate("wave")
-            }
-
             renderEngine.render(camera, ambientLight, sun, skyBox, arrayListOf(
                     RenderData(entities, entityRenderer, RenderType.FORWARD),
                     RenderData(chunks, chunkRenderer, RenderType.FORWARD)
             ))
 
-            GraphicsContext.disable(GraphicsOption.DEPTH_TESTING)
-            boneProgram.start()
-            boneProgram.set("projection", camera.projectionMatrix)
-            boneProgram.set("view", camera.viewMatrix)
-
-            val joints = player.model.getJoints()
-            for (joint in joints) {
-                joint.render(boneProgram)
-            }
-
-            val secondJoints = secondPlayer.model.getJoints()
-            for (joint in secondJoints) {
-                joint.render(boneProgram)
-            }
-
-            boneProgram.stop()
-            GraphicsContext.enable(GraphicsOption.DEPTH_TESTING)
+//            renderJoints(boneProgram, player)
 
             ui.update(mouse, timer.getDelta())
             ui.draw(window.width, window.height)
@@ -271,5 +235,20 @@ object Main {
             return 0
         }
         return i + 1
+    }
+
+    private fun renderJoints(boneProgram: ShaderProgram, player: AnimatedEntity) {
+        GraphicsContext.disable(GraphicsOption.DEPTH_TESTING)
+        boneProgram.start()
+        boneProgram.set("projection", camera.projectionMatrix)
+        boneProgram.set("view", camera.viewMatrix)
+
+        val joints = player.model.getJoints()
+        for (joint in joints) {
+            joint.render(boneProgram)
+        }
+
+        boneProgram.stop()
+        GraphicsContext.enable(GraphicsOption.DEPTH_TESTING)
     }
 }

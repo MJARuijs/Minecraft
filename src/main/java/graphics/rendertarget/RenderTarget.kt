@@ -10,7 +10,15 @@ import org.lwjgl.opengl.GL30.*
 import org.lwjgl.opengl.GL45.glBlitNamedFramebuffer
 import org.lwjgl.opengl.GL45.glCreateFramebuffers
 
-class RenderTarget(private var width: Int, private var height: Int, private val multiSampled: Boolean, vararg types: AttachmentType, private val handle: Int = glCreateFramebuffers()) {
+class RenderTarget(
+        private var width: Int,
+        private var height: Int,
+        private val multiSampled: Boolean,
+        private val numberOfColorTextures: Int,
+        private val numberOfColorBuffers: Int,
+        private val numberOfDepthTextures: Int,
+        private val numberOfDepthBuffers: Int,
+        private val handle: Int = glCreateFramebuffers()) {
 
     private val attachments = ArrayList<Attachment>()
     private var available = true
@@ -20,16 +28,23 @@ class RenderTarget(private var width: Int, private var height: Int, private val 
 
         var colorCounter = 0
 
-        for (attachmentType in types) {
-            attachments += when (attachmentType) {
-                AttachmentType.COLOR_TEXTURE -> ColorTextureAttachment(colorCounter++, width, height, multiSampled)
-                AttachmentType.COLOR_BUFFER -> ColorBufferAttachment(colorCounter++, width, height, multiSampled)
-                AttachmentType.DEPTH_TEXTURE -> DepthTextureAttachment(width, height, multiSampled)
-                AttachmentType.DEPTH_BUFFER -> DepthBufferAttachment(width, height, multiSampled)
-            }
+        for (i in 0 until numberOfColorTextures) {
+            attachments += ColorTextureAttachment(colorCounter++, width, height, multiSampled)
         }
 
-        val drawBuffers = createIntBuffer(colorCounter)
+        for (i in 0 until numberOfColorBuffers) {
+            attachments += ColorBufferAttachment(colorCounter++, width, height, multiSampled)
+        }
+
+        for (i in 0 until numberOfDepthTextures) {
+            attachments += DepthTextureAttachment(width, height, multiSampled)
+        }
+
+        for (i in 0 until numberOfDepthBuffers) {
+            attachments += DepthBufferAttachment(width, height, multiSampled)
+        }
+
+        val drawBuffers = createIntBuffer(numberOfColorTextures + numberOfColorBuffers)
 
         for (i in 0 until colorCounter) {
             drawBuffers.put(GL_COLOR_ATTACHMENT0 + i)
@@ -95,27 +110,15 @@ class RenderTarget(private var width: Int, private var height: Int, private val 
 
     fun renderTo(renderTarget: RenderTarget, buffers: Int) = renderTo(renderTarget.handle, buffers)
 
-    fun matches(width: Int, height: Int, multiSampled: Boolean, vararg requiredTypes: AttachmentType): Boolean {
-
+    fun matches(width: Int, height: Int, multiSampled: Boolean, requiredNumberOfColorTextures: Int, requiredNumberOfColorBuffers: Int, requiredNumberOfDepthTextures: Int, requiredNumberOfDepthBuffers: Int): Boolean {
         if (width != this.width) return false
         if (height != this.height) return false
-
         if (multiSampled != this.multiSampled) return false
 
-        if (requiredTypes.size != attachments.size) return false
-
-        val requestedColorAttachments = requiredTypes.count { it == AttachmentType.COLOR_TEXTURE }
-        val availableColorAttachments = attachments.count { it.type == AttachmentType.COLOR_TEXTURE }
-
-        if (availableColorAttachments != requestedColorAttachments) return false
-
-        for (type in requiredTypes) {
-            attachments.find { it.type == type } ?: return false
-        }
-
-        for (attachment in attachments) {
-            requiredTypes.find { it == attachment.type } ?: return false
-        }
+        if (numberOfColorTextures != requiredNumberOfColorTextures) return false
+        if (numberOfColorBuffers != requiredNumberOfColorBuffers) return false
+        if (numberOfDepthTextures != requiredNumberOfDepthTextures) return false
+        if (numberOfDepthBuffers != requiredNumberOfDepthBuffers) return false
 
         return true
     }
