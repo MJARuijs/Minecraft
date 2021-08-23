@@ -100,20 +100,28 @@ object Main {
         ui += page
         ui.showPage("page")
 
-        val animatedModel = AnimatedModelCache.get("models/animatedPlayer.dae")
+        val animatedModel = AnimatedModelCache.get("models/animatedPlayer9.dae")
         animatedModel.addAnimation("stop_walking", listOf(
                 Pair(0, 250)
         ))
         animatedModel.addAnimation("walking", listOf(
 //                Pair(0, 0),
-                Pair(1, 750)
-                ,
-                Pair(2, 1500)
+                Pair(1, 400),
+                Pair(2, 800)
         ), LoopEffect.REVERSE)
 
         animatedModel.addAnimation("walking_reverse", listOf(
                 Pair(2, 500),
                 Pair(1, 1000)
+        ), LoopEffect.NONE)
+
+        animatedModel.addAnimation("wave", listOf(
+                Pair(3, 250),
+                Pair(4, 500),
+                Pair(5, 750),
+                Pair(6, 1000),
+                Pair(5, 1250),
+                Pair(6, 1500)
         ), LoopEffect.NONE)
 
         val player = AnimatedEntity(animatedModel, Matrix4().translate(Vector3(0, ChunkGenerator.TERRAIN_HEIGHT + 1, 0)))
@@ -147,8 +155,8 @@ object Main {
                 player.stopAnimating(250)
             }
 
-            if (keyboard.isPressed(Key.K)) {
-                player.translate(Vector3(0.5f, 0.0f, 0.0f))
+            if (mouse.isPressed(Button.LEFT)) {
+                player.animate("wave")
             }
 
             renderEngine.render(camera, ambientLight, sun, skyBox, arrayListOf(

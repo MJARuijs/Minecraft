@@ -2,7 +2,7 @@ package graphics.model.animation
 
 import graphics.model.animation.model.JointTransformation
 
-class KeyFrame(var timeStamp: Float = 0f, val pose: Pose = Pose()) {
+data class KeyFrame(var timeStamp: Float = 0f, val pose: Pose = Pose()) {
 
     constructor(timeStamp: Int, pose: Pose) : this(timeStamp.toFloat(), pose)
 

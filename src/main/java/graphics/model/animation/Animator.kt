@@ -34,7 +34,7 @@ data class Animator(private val model: AnimatedModel) {
     }
 
     fun startAnimation(animation: Animation) {
-        if (currentAnimation == null) {
+//        if (currentAnimation == null) {
             resetAnimator()
             currentAnimation = animation
 
@@ -47,40 +47,46 @@ data class Animator(private val model: AnimatedModel) {
 
                 val startOffset = nextFrame!!.timeStamp
 
-                startAnimation(Animation("transition_to_${animation.name}", listOf(previousFrame!!, nextFrame!!), LoopEffect.NONE) {
-                    animation.keyFrames.forEach { frame ->
-                        frame.timeStamp -= startOffset
+                startAnimation(Animation("transition_to_${animation.name}", arrayListOf(previousFrame!!, nextFrame!!), LoopEffect.NONE) {
+
+                    val animationCopy = animation.copy(keyFrames = arrayListOf())
+                    for (keyFrame in animation.keyFrames) {
+                        animationCopy += KeyFrame(keyFrame.timeStamp - startOffset, keyFrame.pose)
                     }
-                    startAnimation(animation)
+
+                    startAnimation(animationCopy)
                 })
             }
-        } else {
-            resetAnimator()
-            currentAnimation = animation
-
-            if (animation.keyFrames.first().timeStamp == 0f) {
-                previousFrame = animation.keyFrames[currentFrameIndex++]
-                nextFrame = animation.keyFrames[currentFrameIndex++]
-            } else {
-                previousFrame = KeyFrame(0, defaultPose)
-                nextFrame = animation.keyFrames.first()
-
-                val startOffset = nextFrame!!.timeStamp
-
-                startAnimation(Animation("transition_to_${animation.name}", listOf(previousFrame!!, nextFrame!!), LoopEffect.NONE) {
-                    animation.keyFrames.forEach { frame ->
-                        frame.timeStamp -= startOffset
-                    }
-                    startAnimation(animation)
-                })
-            }
-        }
+//        } else {
+//            resetAnimator()
+//            currentAnimation = animation
+//
+//            if (animation.keyFrames.first().timeStamp == 0f) {
+//                previousFrame = animation.keyFrames[currentFrameIndex++]
+//                nextFrame = animation.keyFrames[currentFrameIndex++]
+//            } else {
+//                previousFrame = KeyFrame(0, currentPose)
+//                nextFrame = animation.keyFrames.first()
+//
+//                val startOffset = nextFrame!!.timeStamp
+//
+//                startAnimation(Animation("transition_to_${animation.name}", arrayListOf(previousFrame!!, nextFrame!!), LoopEffect.NONE) {
+//
+//                    val animationCopy = animation.copy(keyFrames = arrayListOf())
+//                    for (keyFrame in animation.keyFrames) {
+//                        animationCopy += KeyFrame(keyFrame.timeStamp - startOffset, keyFrame.pose)
+//                    }
+//
+//                    startAnimation(animationCopy)
+//                })
+//            }
+//        }
     }
 
     fun stopAnimating(transitionDuration: Int) {
         previousFrame = KeyFrame(0, currentPose)
         nextFrame = KeyFrame(transitionDuration, defaultPose)
-        currentAnimation = Animation("stop_animating", listOf(previousFrame!!, nextFrame!!))
+        currentAnimation = Animation("stop_animating", arrayListOf(previousFrame!!, nextFrame!!))
         resetAnimator()
     }
 
@@ -197,6 +203,10 @@ data class Animator(private val model: AnimatedModel) {
 
         joint.calculateAnimatedTransformation(currentWorldTransformation)
 
+        if (joint.name == "Right_Arm_Bone") {
+            println(joint.worldTransformation)
+        }
+
         for (child in joint.children) {
             applyPoseToJoints(currentPose, child, currentWorldTransformation)
         }
@@ -215,6 +225,9 @@ data class Animator(private val model: AnimatedModel) {
             val nextTransformation = nextFrame.pose.jointTransformations[jointName] ?: throw IllegalArgumentException("No joint with id: $jointName found for next frame")
             val currentTransformation = JointTransformation.interpolate(previousTransformation, nextTransformation, progression)
 
+//            if (jointName == "Right_Arm_Bone") {
+//                println(currentTransformation.getTransformationMatrix())
+//            }
             currentPose[jointName] = currentTransformation
         }
         return currentPose

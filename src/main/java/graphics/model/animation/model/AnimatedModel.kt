@@ -9,7 +9,7 @@ import math.vectors.Vector3
 
 data class AnimatedModel(private val shapes: List<Shape>, val rootJoint: Joint, private val poses: List<Pose>, private val animations: ArrayList<Animation> = ArrayList()): Model(shapes) {
 
-    constructor(model: AnimatedModel): this(model.shapes, (model.rootJoint.copy()), model.poses, model.animations)
+    constructor(model: AnimatedModel): this(model.shapes, model.rootJoint.copy(), model.poses, model.animations)
 
     private val animator = Animator(this)
 
