@@ -80,4 +80,12 @@ class Camera(
         rotation.x = min(max(-PI.toFloat() / 2.0f, rotation.x), PI.toFloat() / 2.0f)
         rotation.y = (mouse.x.toFloat() * mouseSpeed) % (2.0f * PI.toFloat())
     }
+
+    fun place(position: Vector3) {
+        this.position = position
+    }
+
+    fun rotate(rotation: Vector3) {
+        this.rotation = rotation
+    }
 }

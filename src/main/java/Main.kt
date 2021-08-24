@@ -9,6 +9,7 @@ import environment.terrain.chunks.Chunk
 import environment.terrain.chunks.ChunkGenerator
 import environment.terrain.chunks.ChunkManager
 import environment.terrain.chunks.ChunkRenderer
+import game.player.Controller
 import game.player.Player
 import graphics.Camera
 import graphics.GraphicsContext
@@ -114,6 +115,8 @@ object Main {
         entities += player
         entities += secondPlayer
 
+        val controller = Controller(player, camera)
+
         val boneProgram = ShaderProgram.load("shaders/debug/bone.vert", "shaders/debug/bone.frag")
 
         var i = 0
@@ -123,6 +126,8 @@ object Main {
 
         while (!window.isClosed()) {
             window.poll()
+
+            controller.update(keyboard, mouse, timer.getDelta())
 
             processInput()
             updateChunkManager()
@@ -175,7 +180,7 @@ object Main {
         }
 
         if (mouse.isCaptured()) {
-            camera.update(keyboard, mouse, timer.getDelta())
+//            camera.update(keyboard, mouse, timer.getDelta())
         }
 
         if (keyboard.isPressed(Key.UP)) {

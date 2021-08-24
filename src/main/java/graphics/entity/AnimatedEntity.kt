@@ -32,6 +32,11 @@ open class AnimatedEntity(model: AnimatedModel, transformation: Matrix4) : Entit
         model.scale(scale)
     }
 
+    override fun rotate(rotation: Vector3) {
+        super.rotate(rotation)
+        // TODO: rotate model as-well
+    }
+
     override fun update(delta: Float) {
         model.update(delta, transformation)
     }

@@ -14,16 +14,21 @@ abstract class Entity(protected var transformation: Matrix4): Renderable {
 
     fun getPosition() = transformation.getPosition()
 
-    open fun update(delta: Float) {}
+//    fun getRotation() = transformation.getRotation()
 
-    open fun scale(scale: Vector3) {
-        transformation = transformation.scale(scale)
-    }
+    open fun update(delta: Float) {}
 
     open fun translate(translation: Vector3) {
         transformation = transformation.translate(translation)
     }
 
+    open fun scale(scale: Vector3) {
+        transformation = transformation.scale(scale)
+    }
+
+    open fun rotate(rotation: Vector3) {
+        transformation = transformation.rotate(rotation)
+    }
     override fun render(shaderProgram: ShaderProgram) {
         shaderProgram.set("model", Matrix4())
         model.render(shaderProgram)
