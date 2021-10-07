@@ -1,4 +1,4 @@
-package graphics
+package game.camera
 
 import devices.Key
 import devices.Keyboard
@@ -27,6 +27,8 @@ class Camera(
                 0.0f, 0.0f, -(zFar + zNear) / (zFar - zNear), -(2.0f * zFar * zNear) / (zFar - zNear),
                 0.0f, 0.0f, -1.0f, 0.0f
         ))
+
+//    var viewMatrix2 = Matrix4()
 
     val viewMatrix: Matrix4
         get() = Matrix4()
@@ -76,16 +78,13 @@ class Camera(
             position += rotationMatrix.dot(-translation.unit()) * delta * moveSpeed
         }
 
-        rotation.x = (-mouse.y.toFloat() * mouseSpeed) % (2.0f * PI.toFloat())
+//        rotation.x = (-mouse.y.toFloat() * mouseSpeed) % (2.0f * PI.toFloat())
+//        rotation.x = min(max(-PI.toFloat() / 2.0f, rotation.x), PI.toFloat() / 2.0f)
+//        rotation.y = (mouse.x.toFloat() * mouseSpeed) % (2.0f * PI.toFloat())
+
+        rotation.x += -mouse.dy.toFloat() * mouseSpeed
         rotation.x = min(max(-PI.toFloat() / 2.0f, rotation.x), PI.toFloat() / 2.0f)
-        rotation.y = (mouse.x.toFloat() * mouseSpeed) % (2.0f * PI.toFloat())
-    }
-
-    fun place(position: Vector3) {
-        this.position = position
-    }
-
-    fun rotate(rotation: Vector3) {
-        this.rotation = rotation
+        rotation.y += mouse.dx.toFloat() * mouseSpeed
+        rotation %= 2.0f * PI.toFloat()
     }
 }

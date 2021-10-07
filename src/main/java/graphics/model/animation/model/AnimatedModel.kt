@@ -9,14 +9,16 @@ import math.vectors.Vector3
 
 data class AnimatedModel(private val shapes: List<Shape>, val rootJoint: Joint, private val poses: List<Pose>, private val animations: ArrayList<Animation> = ArrayList()): Model(shapes) {
 
-    constructor(model: AnimatedModel): this(model.shapes, model.rootJoint.copy(), model.poses, model.animations)
+    constructor(model: AnimatedModel) : this(model.shapes, model.rootJoint.copy(), model.poses, model.animations)
 
     private val animator = Animator(this)
 
     fun addAnimation(name: String, keyframes: List<Pair<Int, Int>>, loopEffect: LoopEffect = LoopEffect.NONE): AnimatedModel {
         val frames = ArrayList<KeyFrame>()
+        var totalTime = 0
         for (pose in keyframes) {
-            frames += KeyFrame(pose.second, this.poses[pose.first])
+            frames += KeyFrame(totalTime + pose.second, poses[pose.first])
+            totalTime += pose.second
         }
         animations += Animation(name, frames, loopEffect)
         return this
@@ -36,11 +38,23 @@ data class AnimatedModel(private val shapes: List<Shape>, val rootJoint: Joint, 
         println("No animation with name $name was found for this model..")
     }
 
+    fun toggleAnimation() {
+        animator.toggleAnimation()
+    }
+
+    fun stopAnimation() {
+        animator.stopAnimation()
+    }
+
     fun stopAnimating(transitionDuration: Int) {
         animator.stopAnimating(transitionDuration)
     }
 
     fun translateTo(transformation: Matrix4) {
+        rootJoint.initWorldTransformation(transformation)
+    }
+
+    fun rotate(transformation: Matrix4) {
         rootJoint.initWorldTransformation(transformation)
     }
 
@@ -54,7 +68,7 @@ data class AnimatedModel(private val shapes: List<Shape>, val rootJoint: Joint, 
 
     override fun render(shaderProgram: ShaderProgram) {
         rootJoint.loadTransformation(shaderProgram)
-
         super.render(shaderProgram)
     }
+
 }

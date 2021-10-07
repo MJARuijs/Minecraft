@@ -1,6 +1,6 @@
 package environment.sky
 
-import graphics.Camera
+import game.camera.Camera
 import graphics.GraphicsContext
 import graphics.GraphicsOption
 import graphics.model.mesh.*
@@ -54,7 +54,6 @@ class SkyBox(path: String, cameraFarPlane: Float) {
         shaderProgram.set("cubeMap", 0)
         shaderProgram.set("projection", camera.projectionMatrix)
         shaderProgram.set("view", camera.viewMatrix)
-        shaderProgram.set("model", Matrix4())
         shaderProgram.set("distance", distance)
 
         cube.draw()

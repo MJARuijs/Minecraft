@@ -16,12 +16,9 @@ class ColorTextureAttachment(val index: Int, width: Int, height: Int, multiSampl
         } else {
             glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, colorMap.handle, 0)
         }
-
     }
 
     override fun resize(width: Int, height: Int) = colorMap.resize(width, height)
-
-    override fun matches(other: Any?) = other is ColorTextureAttachment
 
     override fun destroy() {
         colorMap.destroy()

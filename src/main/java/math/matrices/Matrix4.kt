@@ -5,7 +5,8 @@ import math.Quaternion
 import math.vectors.Vector2
 import math.vectors.Vector3
 import math.vectors.Vector4
-import kotlin.math.abs
+import kotlin.math.atan2
+import kotlin.math.sqrt
 
 class Matrix4(elements: FloatArray = generateIdentityElements(4)): Matrix<Matrix4>(4, elements) {
 
@@ -60,7 +61,10 @@ class Matrix4(elements: FloatArray = generateIdentityElements(4)): Matrix<Matrix
 
     fun scale(vector: Vector3) = scale(vector.x, vector.y, vector.z)
 
-    fun rotate(quaternion: Quaternion) = transform(quaternion.toMatrix())
+    fun rotate(quaternion: Quaternion): Matrix4 {
+        val scale = quaternion.toMatrix().getScale()
+        return transform(quaternion.toMatrix()).scale(Vector3(1f / scale.x, 1f / scale.y, 1f / scale.z))
+    }
 
     fun rotateX(angle: Float) = rotate(Quaternion(Axis.X, angle))
 
@@ -84,11 +88,37 @@ class Matrix4(elements: FloatArray = generateIdentityElements(4)): Matrix<Matrix
         return Vector3(x, y, z)
     }
 
+    fun getRotation(): Vector3 {
+        val scale = Vector3(1f / getScale().x, 1f / getScale().y, 1f / getScale().z)
+        val scaledMatrix = this.scale(scale)
+        val xRotation = atan2(scaledMatrix.get(2, 1), scaledMatrix.get(2, 2))
+        val yRotation = atan2(-scaledMatrix.get(2, 0), sqrt(scaledMatrix.get(2,1 ) * scaledMatrix.get(2, 1) + scaledMatrix.get(2, 2) * scaledMatrix.get(2, 2)))
+        val zRotation = atan2(scaledMatrix.get(1, 0), scaledMatrix.get(0, 0))
+        return Vector3(xRotation, yRotation, zRotation)
+    }
+
+    fun getRotationMatrix(): Matrix4 {
+        val scale = getScale()
+        val rotation = Matrix4()
+        rotation[0, 0] = get(0, 0) / scale.x
+        rotation[1, 0] = get(1, 0) / scale.x
+        rotation[2, 0] = get(2, 0) / scale.x
+
+        rotation[0, 1] = get(0, 1) / scale.y
+        rotation[1, 1] = get(1, 1) / scale.y
+        rotation[2, 1] = get(2, 1) / scale.y
+
+        rotation[0, 2] = get(0, 2) / scale.z
+        rotation[1, 2] = get(1, 2) / scale.z
+        rotation[2, 2] = get(2, 2) / scale.z
+        return rotation
+    }
+
     fun getScale(): Vector3 {
-        val x = abs(get(0, 0))
-        val y = abs(get(1, 1))
-        val z = abs(get(2, 2))
-        return Vector3(x, y, z)
+        val x = Vector3(get(0, 0), get(1, 0), get(2, 0))
+        val y = Vector3(get(0, 1), get(1, 1), get(2, 1))
+        val z = Vector3(get(0, 2), get(1, 2), get(2, 2))
+        return Vector3(x.length(), y.length(), z.length())
     }
 
 }

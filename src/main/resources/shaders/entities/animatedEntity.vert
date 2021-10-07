@@ -12,7 +12,7 @@ const int MAX_BONES_PER_VERTEX = 4;
 
 uniform mat4 projection;
 uniform mat4 view;
-uniform mat4 model;
+//uniform mat4 model;
 uniform mat4 boneMatrices[MAX_BONES];
 
 uniform mat4 shadowMatrix;
@@ -38,8 +38,8 @@ void main() {
         normal += unscaledNormal * inBoneWeights[i];
     }
 
-    worldPosition = model * position;
-    passNormal = mat3(model) * normal;
+    worldPosition =  position;
+    passNormal = normal;
 
     shadowCoords = shadowMatrix * worldPosition;
 

@@ -20,8 +20,6 @@ class DepthTextureAttachment(width: Int, height: Int, multiSampled: Boolean) : A
 
     override fun resize(width: Int, height: Int) = depthMap.resize(width, height)
 
-    override fun matches(other: Any?) = other is DepthTextureAttachment
-
     override fun destroy() {
         depthMap.destroy()
     }

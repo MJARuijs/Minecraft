@@ -1,6 +1,8 @@
 package graphics.entity
 
-import graphics.Camera
+import graphics.GraphicsContext
+import graphics.GraphicsOption
+import game.camera.Camera
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
 import graphics.renderer.Renderable
@@ -75,6 +77,8 @@ class EntityRenderer : Renderer() {
     }
 
     private fun render(program: ShaderProgram, camera: Camera, ambient: AmbientLight, sun: Sun, entities: List<Renderable>, shadows: List<ShadowData>) {
+        GraphicsContext.disable(GraphicsOption.FACE_CULLING)
+
         program.start()
 
         if (shadows.isNotEmpty()) {

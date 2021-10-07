@@ -1,6 +1,6 @@
 package graphics.shadows
 
-import graphics.Camera
+import game.camera.Camera
 import graphics.lights.Sun
 import graphics.renderer.RenderData
 import graphics.rendertarget.RenderTargetManager

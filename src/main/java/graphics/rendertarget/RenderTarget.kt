@@ -110,6 +110,8 @@ class RenderTarget(
 
     fun renderTo(renderTarget: RenderTarget, buffers: Int) = renderTo(renderTarget.handle, buffers)
 
+    fun renderToScreen(buffers: Int) = renderTo(0, buffers)
+
     fun matches(width: Int, height: Int, multiSampled: Boolean, requiredNumberOfColorTextures: Int, requiredNumberOfColorBuffers: Int, requiredNumberOfDepthTextures: Int, requiredNumberOfDepthBuffers: Int): Boolean {
         if (width != this.width) return false
         if (height != this.height) return false

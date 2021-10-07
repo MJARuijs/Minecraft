@@ -14,4 +14,5 @@ float linearizeDepth(float depth) {
 
 void main() {
     outColor = texture(sampler, passTextureCoordinates);
+    outColor = vec4(0.7, 0, 0, 1);
 }

@@ -18,6 +18,8 @@ data class Animator(private val model: AnimatedModel) {
     private var animationTime = 0f
     private var reversing = false
 
+    private var paused = false
+
     private fun getDefaultPose(): HashMap<String, JointTransformation> {
         val defaultTransformations = model.rootJoint.getJoints()
         val defaultPose = HashMap<String, JointTransformation>()
@@ -37,7 +39,10 @@ data class Animator(private val model: AnimatedModel) {
         resetAnimator()
         currentAnimation = animation
 
-        if (animation.keyFrames.first().timeStamp == 0f) {
+        if (animation.keyFrames.size == 1) {
+            previousFrame = KeyFrame(0, defaultPose)
+            nextFrame = animation.keyFrames.first()
+        } else if (animation.keyFrames.first().timeStamp == 0f) {
             previousFrame = animation.keyFrames[currentFrameIndex++]
             nextFrame = animation.keyFrames[currentFrameIndex++]
         } else {
@@ -58,6 +63,23 @@ data class Animator(private val model: AnimatedModel) {
         }
     }
 
+    fun toggleAnimation() {
+        paused = !paused
+    }
+
+    fun resumeAnimation() {
+        paused = false
+    }
+
+    fun pauseAnimation() {
+        paused = true
+    }
+
+    fun stopAnimation() {
+        currentAnimation = null
+        resetAnimator()
+    }
+
     fun stopAnimating(transitionDuration: Int) {
         previousFrame = KeyFrame(0, currentPose)
         nextFrame = KeyFrame(transitionDuration, defaultPose)
@@ -65,8 +87,12 @@ data class Animator(private val model: AnimatedModel) {
         resetAnimator()
     }
 
+    fun applyPose(currentPose: HashMap<String, JointTransformation>, transformation: Matrix4) {
+        applyPoseToJoints(currentPose, model.rootJoint, transformation)
+    }
+
     fun update(delta: Float, transformation: Matrix4) {
-        if (currentAnimation == null) {
+        if (currentAnimation == null || paused) {
             return
         }
 
@@ -175,7 +201,6 @@ data class Animator(private val model: AnimatedModel) {
     private fun applyPoseToJoints(currentPose: HashMap<String, JointTransformation>, joint: Joint, parentTransformation: Matrix4) {
         val currentLocalTransformation = currentPose[joint.name] ?: throw IllegalArgumentException("No joint with id: ${joint.name} was found for the current pose..")
         val currentWorldTransformation = parentTransformation dot currentLocalTransformation.getTransformationMatrix()
-
         joint.calculateAnimatedTransformation(currentWorldTransformation)
 
         for (child in joint.children) {
@@ -194,10 +219,12 @@ data class Animator(private val model: AnimatedModel) {
         for (jointName in previousFrame.pose.jointTransformations.keys) {
             val previousTransformation = previousFrame.pose.jointTransformations[jointName] ?: throw IllegalArgumentException("No joint with id: $jointName found for previous frame")
             val nextTransformation = nextFrame.pose.jointTransformations[jointName] ?: throw IllegalArgumentException("No joint with id: $jointName found for next frame")
+
             val currentTransformation = JointTransformation.interpolate(previousTransformation, nextTransformation, progression)
 
             currentPose[jointName] = currentTransformation
         }
         return currentPose
     }
+
 }

@@ -1,6 +1,6 @@
 package graphics.shadows
 
-import graphics.Camera
+import game.camera.Camera
 import graphics.lights.Sun
 import graphics.rendertarget.RenderTargetManager
 import math.matrices.Matrix4
@@ -28,7 +28,7 @@ class ShadowBox(camera: Camera, val maxDistance: Float = 50f) {
     private var viewMatrix = Matrix4()
 
     init {
-        val defaultAspectRatio = RenderTargetManager.getDefault().getAspectRatio()
+        val defaultAspectRatio = RenderTargetManager.getAspectRatio()
         nearHeight = nearWidth / defaultAspectRatio
         farHeight = farWidth / defaultAspectRatio
     }

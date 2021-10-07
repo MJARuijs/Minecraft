@@ -35,7 +35,6 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
     val scale = Vector3()
 
     override fun load(path: String): AnimatedModel {
-
         val file = File(path)
         val content = file.getContent()
 
@@ -50,7 +49,6 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
         }
 
         val rootJoint = getJointHierarchy(shapeContent)
-        indexJoints(rootJoint)
 
         val meshJointWeights = getJointMeshData(jointContent, rootJoint)
 
@@ -97,15 +95,17 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
             transformationMatrix = Matrix4(getFloatArray("<bind_shape_matrix>", controllerContent))
 
             for (i in influencingJoints.indices) {
-                val requiredJoint = globalJoints[influencingJoints[i]] ?: continue
-                if (!requiredJoint.second.isZeroMatrix()) {
-                    continue
-                }
+//                val requiredJoint = globalJoints[influencingJoints[i]] ?: continue
+                val requiredJoint: Joint = bones.find { bone -> bone.name == influencingJoints[i] } ?: continue
+//                if (!requiredJoint.second.isZeroMatrix()) {
+//                    continue
+//                }
 
                 val values = inverseBindMatrices.copyOfRange(i * 16, (i + 1)* 16)
                 val invBindMatrix = Matrix4(values)
 
-                rootJoint.setInverseBindMatrix(requiredJoint.first, invBindMatrix)
+                requiredJoint.setInverseBindMatrix(invBindMatrix)
+//                rootJoint.setInverseBindMatrix(requiredJoint.id, invBindMatrix)
             }
 
             val weights = getFloatArray("<float_array", weightContent)
@@ -129,7 +129,8 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
                     }
                     val localJointIndex = vertexJointWeights[j * 2]
                     val jointName = influencingJoints[localJointIndex]
-                    val globalJointIndex = globalJoints[jointName]?.first ?: throw IllegalArgumentException("No global joint was found with Id: $jointName, necessary for mesh: $meshId")
+//                    val globalJointIndex = globalJoints[jointName]?.first ?: throw IllegalArgumentException("No global joint was found with Id: $jointName, necessary for mesh: $meshId")
+                    val globalJointIndex = bones.find { bone -> bone.name == jointName }!!.id
 
                     jointIndices[j - counter] = globalJointIndex.toFloat()
 
@@ -165,15 +166,6 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
     private fun getJointHierarchy(content: String): Joint {
         val lines = content.split("\n")
         return getBoneData(lines, 0).first
-    }
-
-    private fun indexJoints(joint: Joint) {
-        if (!globalJoints.contains(joint.name)) {
-            globalJoints[joint.name] = Pair(globalJoints.size, Matrix4(FloatArray(16)))
-        }
-        for (child in joint.children) {
-            indexJoints(child)
-        }
     }
 
     private fun getBoneData(lines: List<String>, index: Int): Pair<Joint, Int> {
@@ -312,8 +304,6 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
         val normalOffset = geometryData.attributes.find { attribute -> attribute.name == "NORMAL" }?.offset ?: -1
         val texCoordOffset = geometryData.attributes.find { attribute -> attribute.name == "TEXCOORD" }?.offset ?: -1
 
-        var vertexData = FloatArray(0)
-
         val attributes = arrayListOf(Attribute(0, 3), Attribute(1, 3), Attribute(3, 4), Attribute(4, 4, DataType.INT))
 
         if (containsTextureCoordinates) {
@@ -323,6 +313,8 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
         val layout = Layout(Primitive.TRIANGLE, attributes)
 
         val buffer = ByteBuffer.allocateDirect(geometryData.indexData.size / 2 * layout.stride).order(ByteOrder.nativeOrder())
+
+        var t = FloatArray(0)
 
         for (i in geometryData.indexData.indices step stepSize) {
 
@@ -337,17 +329,10 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
 
             val position = transformationMatrix.dot(geometryData.positions[positionIndex]).toArray()
             val normal = Matrix3(transformationMatrix).dot(geometryData.normals[normalIndex]).toArray()
-            vertexData += position
-            vertexData += normal
-
-            if (textureIndex != null) {
-                vertexData += geometryData.textureCoordinates[textureIndex].toArray()
-            }
+//            val textureCoordinate = geometryData.textureCoordinates[textureIndex]
 
             val boneWeights = meshJointWeights[positionIndex].weights.toArray()
             val boneIds = meshJointWeights[positionIndex].jointIds.toArray()
-            vertexData += boneWeights
-            vertexData += boneIds
 
             buffer.putFloat(position[0])
             buffer.putFloat(position[1])
@@ -367,9 +352,25 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
             buffer.putInt(boneIds[2].toInt())
             buffer.putInt(boneIds[3].toInt())
 
+            t += position[0]
+            t += position[1]
+            t += position[2]
+
+            t += normal[0]
+            t += normal[1]
+            t += normal[2]
+
+            t += boneWeights[0]
+            t += boneWeights[1]
+            t += boneWeights[2]
+            t += boneWeights[3]
+
+            t += boneIds[0]
+            t += boneIds[1]
+            t += boneIds[2]
+            t += boneIds[3]
             indices += indices.size
         }
-
         return Mesh(layout, buffer, indices)
     }
 
@@ -412,7 +413,6 @@ class AnimatedModelLoader: Loader<AnimatedModel> {
                 var poseMatrix = Matrix4(poseData.copyOfRange(i * 16, (i + 1) * 16))
                 if (boneId == rootJointName) {
                     poseMatrix = (rotationMatrix dot poseMatrix).scalePosition(scale)
-
                     val jointTransformation = JointTransformation(poseMatrix.getPosition(), Quaternion.fromMatrix(poseMatrix), scale)
                     poseTransformations[i][boneId] = jointTransformation
                 } else {

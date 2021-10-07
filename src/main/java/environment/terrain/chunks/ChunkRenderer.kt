@@ -1,7 +1,7 @@
 package environment.terrain.chunks
 
 import environment.terrain.FaceTextures
-import graphics.Camera
+import game.camera.Camera
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
 import graphics.renderer.Renderable

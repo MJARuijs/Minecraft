@@ -19,8 +19,6 @@ class ColorBufferAttachment(val index: Int, width: Int, height: Int, multiSample
 
     override fun resize(width: Int, height: Int) {}
 
-    override fun matches(other: Any?) = other is ColorBufferAttachment
-
     override fun destroy() {}
 
 }

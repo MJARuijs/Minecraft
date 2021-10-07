@@ -1,7 +1,7 @@
 package graphics.renderer
 
 import environment.sky.SkyBox
-import graphics.Camera
+import game.camera.Camera
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
 import graphics.model.Quad
@@ -10,12 +10,14 @@ import graphics.samplers.Sampler
 import graphics.shaders.ShaderProgram
 import graphics.shadows.ShadowBox
 import graphics.shadows.ShadowRenderer
-import org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT
+import org.lwjgl.opengl.GL11.*
+import org.lwjgl.opengl.GL30.GL_FRAMEBUFFER
+import org.lwjgl.opengl.GL30.glBindFramebuffer
 
-class RenderEngine {
+class RenderEngine(multiSampled: Boolean) {
 
-    private val forwardEngine = ForwardRenderEngine()
-    private val deferredEngine = DeferredRenderEngine()
+    private val forwardEngine = ForwardRenderEngine(multiSampled)
+    private val deferredEngine = DeferredRenderEngine(multiSampled)
 
     private val shadowRenderer = ShadowRenderer()
 
@@ -38,14 +40,12 @@ class RenderEngine {
         val geometryTarget = deferredEngine.render(camera, ambient, sun, shadows, renderData, forwardTarget)
 
         val forwardResultTarget = forwardEngine.render(camera, ambient, sun, sky, shadows, renderData, geometryTarget)
+        forwardResultTarget.renderToScreen(GL_COLOR_BUFFER_BIT)
 
-        val defaultTarget = RenderTargetManager.getDefault()
-//        defaultTarget.start()
-//        defaultTarget.clear()
-        forwardResultTarget.renderTo(defaultTarget, GL_COLOR_BUFFER_BIT)
-
-//        sampler.bind(geometryTarget.getColorMap())
+//        glBindFramebuffer(GL_FRAMEBUFFER, 0)
+//        glClear(GL_DEPTH_BUFFER_BIT or GL_COLOR_BUFFER_BIT)
 //        program.start()
+//        sampler.bind(forwardResultTarget.getColorMap())
 //        program.set("sampler", sampler.index)
 //        quad.draw()
 //        program.stop()

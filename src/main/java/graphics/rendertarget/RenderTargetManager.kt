@@ -5,16 +5,19 @@ import devices.Window
 object RenderTargetManager {
 
     private val renderTargets = ArrayList<RenderTarget>()
-
-    private lateinit var default: RenderTarget
+    private var width = 0
+    private var height = 0
 
     fun init(window: Window) {
-        default = RenderTarget(window.width, window.height, false, 1, 0, 1, 0, handle = 0)
+        width = window.width
+        height = window.height
     }
 
-    fun getDefault() = default
+    fun getAspectRatio(): Float {
+        return width.toFloat() / height.toFloat()
+    }
 
-    fun getAvailableTarget(multiSampled: Boolean, numberOfColorTextures: Int, numberOfColorBuffers: Int, numberOfDepthTextures: Int, numberOfDepthBuffers: Int, width: Int = default.getWidth(), height: Int = default.getHeight()): RenderTarget {
+    fun getAvailableTarget(multiSampled: Boolean, numberOfColorTextures: Int, numberOfColorBuffers: Int, numberOfDepthTextures: Int, numberOfDepthBuffers: Int, width: Int = this.width, height: Int = this.height): RenderTarget {
         return renderTargets.find { target ->
             target.matches(width, height, multiSampled, numberOfColorTextures, numberOfColorBuffers, numberOfDepthTextures, numberOfDepthBuffers)
         } ?: createTarget(width, height, multiSampled, numberOfColorTextures, numberOfColorBuffers, numberOfDepthTextures, numberOfDepthBuffers)

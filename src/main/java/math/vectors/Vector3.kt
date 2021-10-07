@@ -50,6 +50,14 @@ data class Vector3(var x: Float = 0.0f, var y: Float = 0.0f, var z: Float = 0.0f
 
     override operator fun div(factor: Float) = times(1.0f / factor)
 
+//    operator fun rem(factor: Float) = Vector3(x % factor, y % factor, z % factor)
+
+    operator fun remAssign(factor: Float) {
+        x %= factor
+        y %= factor
+        z %= factor
+    }
+
     override infix fun dot(other: Vector3) = (x * other.x) + (y * other.y) + (z * other.z)
 
     override fun absolute() = Vector3(abs(x), abs(y), abs(z))

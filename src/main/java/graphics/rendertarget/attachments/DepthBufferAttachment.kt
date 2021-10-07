@@ -23,8 +23,6 @@ class DepthBufferAttachment(width: Int, height: Int, multiSampled: Boolean) : At
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, handle)
     }
 
-    override fun matches(other: Any?) = other is DepthBufferAttachment
-
     override fun destroy() {
         glDeleteRenderbuffers(handle)
     }

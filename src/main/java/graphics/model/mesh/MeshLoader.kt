@@ -96,8 +96,7 @@ class MeshLoader: Loader<Mesh> {
             val intBuffer = face.mIndices()
 
             while (intBuffer.remaining() > 0) {
-                val index = intBuffer.get()
-                indices += index
+                indices += intBuffer.get()
             }
         }
 

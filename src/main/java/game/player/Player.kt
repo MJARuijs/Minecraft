@@ -9,17 +9,21 @@ import math.vectors.Vector3
 
 class Player(model: AnimatedModel, transformation: Matrix4) : AnimatedEntity(model, transformation) {
 
-    var walking = false
-        private set
+    private var walking = false
+    private var crouching = false
 
-    var crouching = false
-        private set
+    fun isWalking() = walking
+
+    fun isCrouching() = crouching
 
     fun walk(translation: Vector3) {
         println("walking")
-        walking = true
+        if (!walking) {
+            animate("walking")
+            walking = true
+        }
+
         translate(translation)
-        animate("walking")
     }
 
     fun stopWalking() {

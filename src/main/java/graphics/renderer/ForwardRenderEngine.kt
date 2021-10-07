@@ -1,7 +1,7 @@
 package graphics.renderer
 
 import environment.sky.SkyBox
-import graphics.Camera
+import game.camera.Camera
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
 import graphics.rendertarget.RenderTarget
@@ -9,12 +9,12 @@ import graphics.rendertarget.RenderTargetManager
 import graphics.shadows.ShadowData
 import org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT
 
-class ForwardRenderEngine {
+class ForwardRenderEngine(var multiSampled: Boolean) {
 
     private lateinit var forwardTarget: RenderTarget
 
     fun prepare(): RenderTarget {
-        forwardTarget = RenderTargetManager.getAvailableTarget(true, 1, 0, 1, 0)
+        forwardTarget = RenderTargetManager.getAvailableTarget(multiSampled, 1, 0, 1, 0)
         return forwardTarget
     }
 
@@ -27,7 +27,8 @@ class ForwardRenderEngine {
             forwardTarget.start()
             forwardTarget.clear()
         }
-
+//        forwardTarget.start()
+//        forwardTarget.clear()
         skyBox.render(camera)
 
         for (data in renderData) {
@@ -35,6 +36,7 @@ class ForwardRenderEngine {
                 data.renderer.render(camera, ambient, sun, data.data, shadows)
             }
         }
+//        forwardTarget.stop()
 
         return forwardTarget
     }

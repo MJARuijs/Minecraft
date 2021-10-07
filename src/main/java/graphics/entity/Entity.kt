@@ -14,7 +14,7 @@ abstract class Entity(protected var transformation: Matrix4): Renderable {
 
     fun getPosition() = transformation.getPosition()
 
-//    fun getRotation() = transformation.getRotation()
+    fun getRotation() = transformation.getRotationMatrix()
 
     open fun update(delta: Float) {}
 
@@ -29,8 +29,8 @@ abstract class Entity(protected var transformation: Matrix4): Renderable {
     open fun rotate(rotation: Vector3) {
         transformation = transformation.rotate(rotation)
     }
+
     override fun render(shaderProgram: ShaderProgram) {
-        shaderProgram.set("model", Matrix4())
         model.render(shaderProgram)
     }
 

@@ -1,6 +1,6 @@
 package graphics.renderer
 
-import graphics.Camera
+import game.camera.Camera
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
 import graphics.rendertarget.RenderTarget
@@ -8,11 +8,9 @@ import graphics.rendertarget.RenderTargetManager
 import graphics.samplers.Sampler
 import graphics.shadows.ShadowData
 
-class DeferredRenderEngine {
+class DeferredRenderEngine(var multiSampled: Boolean) {
 
     private lateinit var geometryTarget: RenderTarget
-
-    private val multiSampled = true
 
     private val positionSampler = Sampler(0, multiSampled)
     private val surfaceNormal = Sampler(1, multiSampled)

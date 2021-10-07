@@ -52,7 +52,7 @@ class Chunk(val x: Int, val z: Int, private val biome: Biome, private val blocks
         return blocks.find { block -> block.position == position }
     }
 
-    private fun getHiddenBlock(position: Vector3): BlockData? {
+    private fun getAndRemoveHiddenBlock(position: Vector3): BlockData? {
         val blockData = hiddenBlocks.find { block -> block.position == position }
         hiddenBlocks.removeIf { block -> block.position == position }
         return blockData
@@ -125,7 +125,7 @@ class Chunk(val x: Int, val z: Int, private val biome: Biome, private val blocks
                 removeFaceData(position, direction)
             } else {
                 if (containsHiddenBlock(position + direction.normal)) {
-                    val block = getHiddenBlock(position + direction.normal)!!
+                    val block = getAndRemoveHiddenBlock(position + direction.normal)!!
                     blocks += block
                     addFaceData(block, direction)
                 } else if (containsVisibleBlock(position + direction.normal)) {
@@ -150,7 +150,7 @@ class Chunk(val x: Int, val z: Int, private val biome: Biome, private val blocks
     }
 
     private fun removeFaceData(position: Vector3, direction: FaceDirection) {
-        val indices = getIndices(position, direction)
+        val indices = test(position, direction)
 
         for (index in indices) {
             removeFaceData(index)
@@ -159,36 +159,60 @@ class Chunk(val x: Int, val z: Int, private val biome: Biome, private val blocks
 
     private fun removeFaceData(index: Int) {
         val lastPositionIndex = positionData.size - POSITION_INSTANCE_SIZE
-        for (k in index until index + POSITION_INSTANCE_SIZE) {
-            positionData[k] = positionData[lastPositionIndex + k - index]
+        for (i in index until index + POSITION_INSTANCE_SIZE) {
+            positionData[i] = positionData[lastPositionIndex + i - index]
         }
 
         positionData = positionData.sliceArray(0 until positionData.size - POSITION_INSTANCE_SIZE)
 
         val startIndex = (index / POSITION_INSTANCE_SIZE) * TEXTURE_INSTANCE_SIZE
         val lastTextureIndex = textureIndices.size - TEXTURE_INSTANCE_SIZE
-        for (k in startIndex until startIndex + TEXTURE_INSTANCE_SIZE) {
-            textureIndices[k] = textureIndices[lastTextureIndex + k - startIndex]
+        val lastNormalIndex = normalIndices.size - TEXTURE_INSTANCE_SIZE
+        val lastSpecularIndex = specularIndices.size - TEXTURE_INSTANCE_SIZE
+
+        for (i in startIndex until startIndex + TEXTURE_INSTANCE_SIZE) {
+            textureIndices[i] = textureIndices[lastTextureIndex + i - startIndex]
+            normalIndices[i] = normalIndices[lastNormalIndex + i - startIndex]
+            specularIndices[i] = specularIndices[lastSpecularIndex + i - startIndex]
         }
 
         textureIndices = textureIndices.sliceArray(0 until textureIndices.size - TEXTURE_INSTANCE_SIZE)
-
-        val normalStartIndex = (index / POSITION_INSTANCE_SIZE) * TEXTURE_INSTANCE_SIZE
-        val lastNormalIndex = normalIndices.size - TEXTURE_INSTANCE_SIZE
-        for (k in normalStartIndex until normalStartIndex + TEXTURE_INSTANCE_SIZE) {
-            normalIndices[k] = normalIndices[lastNormalIndex + k - normalStartIndex]
-        }
-
         normalIndices = normalIndices.sliceArray(0 until normalIndices.size - TEXTURE_INSTANCE_SIZE)
+        specularIndices = specularIndices.sliceArray(0 until specularIndices.size - TEXTURE_INSTANCE_SIZE)
 
-        val specularStartIndex = (index / POSITION_INSTANCE_SIZE) * TEXTURE_INSTANCE_SIZE
-        val lastSpecularIndex = specularIndices.size - TEXTURE_INSTANCE_SIZE
-        for (k in specularStartIndex until specularStartIndex + TEXTURE_INSTANCE_SIZE) {
-            specularIndices[k] = specularIndices[lastSpecularIndex + k - specularStartIndex]
+        vertexCount -= 6
+    }
+
+    fun test(position: Vector3, direction: FaceDirection, k: Int = 0): IntArray {
+        var indices = IntArray(0)
+
+        for (i in k until positionData.size step POSITION_INSTANCE_SIZE) {
+            if (test2(position, direction, i)) {
+                indices += i
+            }
+
         }
 
-        specularIndices = specularIndices.sliceArray(0 until specularIndices.size - TEXTURE_INSTANCE_SIZE)
-        vertexCount -= 6
+        return indices
+    }
+
+    fun test2(position: Vector3, direction: FaceDirection, i: Int): Boolean {
+        for (j in 0 until direction.vertices.size step 3) {
+            val x = direction.vertices[j] + position.x
+            val y = direction.vertices[j + 1] + position.y
+            val z = direction.vertices[j + 2] + position.z
+
+            if (positionData[i + j] != x) {
+                return false
+            }
+            if (positionData[i + j + 1] != y) {
+                return false
+            }
+            if (positionData[i + j + 2] != z) {
+                return false
+            }
+        }
+        return true
     }
 
     private fun getIndices(position: Vector3, direction: FaceDirection): IntArray {
@@ -200,9 +224,15 @@ class Chunk(val x: Int, val z: Int, private val biome: Biome, private val blocks
                 val y = direction.vertices[j + 1] + position.y
                 val z = direction.vertices[j + 2] + position.z
 
-                if (positionData[i + j] != x) continue@loop
-                if (positionData[i + j + 1] != y) continue@loop
-                if (positionData[i + j + 2] != z) continue@loop
+                if (positionData[i + j] != x) {
+                    continue@loop
+                }
+                if (positionData[i + j + 1] != y) {
+                    continue@loop
+                }
+                if (positionData[i + j + 2] != z) {
+                    continue@loop
+                }
 
             }
             indices += i

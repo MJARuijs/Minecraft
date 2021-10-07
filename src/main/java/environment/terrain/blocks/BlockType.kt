@@ -19,8 +19,8 @@ enum class BlockType(val bestTool: ToolType, val hardness: Float, private var te
         if (generalTexture != null) {
             val textureIndex = FaceTextures.getTextureIndex(generalTexture.texturePath)
             val normalIndex = FaceTextures.getNormalIndex(generalTexture.texturePath)
-
             val specularIndex = FaceTextures.getSpecularIndex(generalTexture.texturePath)
+
             for (i in 0 until 6) {
                 textureIndices += textureIndex
                 normalIndices += normalIndex

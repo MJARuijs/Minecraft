@@ -1,6 +1,6 @@
 package graphics.renderer
 
-import graphics.Camera
+import game.camera.Camera
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
 import graphics.model.Quad
@@ -12,7 +12,6 @@ import math.vectors.Vector2
 
 abstract class Renderer {
 
-//    abstract val shadowProgram: ShaderProgram
     abstract val deferredLightingProgram: ShaderProgram
 
     private val quad = Quad()

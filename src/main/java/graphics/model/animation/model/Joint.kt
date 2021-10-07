@@ -25,25 +25,22 @@ class Joint(val name: String, val id: Int, val children: List<Joint> = arrayList
 
     fun calculateAnimatedTransformation(currentWorldTransformation: Matrix4) {
         worldTransformation = currentWorldTransformation
+//        println("$name $currentWorldTransformation")
         animatedTransform = currentWorldTransformation dot inverseBindMatrix
     }
 
     fun loadTransformation(shaderProgram: ShaderProgram) {
         shaderProgram.set("boneMatrices[$id]", animatedTransform)
 
+//        println("$name $animatedTransform")
+
         for (child in children) {
             child.loadTransformation(shaderProgram)
         }
     }
 
-    fun setInverseBindMatrix(id: Int, inverseBindMatrix: Matrix4) {
-        if (this.id == id) {
-            this.inverseBindMatrix = inverseBindMatrix
-        } else {
-            for (child in children) {
-                child.setInverseBindMatrix(id, inverseBindMatrix)
-            }
-        }
+    fun setInverseBindMatrix(inverseBindMatrix: Matrix4) {
+        this.inverseBindMatrix = inverseBindMatrix
     }
 
     fun render(shaderProgram: ShaderProgram) {

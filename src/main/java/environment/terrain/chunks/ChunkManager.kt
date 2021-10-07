@@ -3,6 +3,7 @@ package environment.terrain.chunks
 import environment.terrain.Biome
 import environment.terrain.FaceTextures
 import environment.terrain.chunks.ChunkGenerator.Companion.CHUNK_SIZE
+import environment.terrain.chunks.ChunkGenerator.Companion.HALF_CHUNK_SIZE
 import math.vectors.Vector3
 import java.util.*
 import kotlin.collections.ArrayList
@@ -25,8 +26,8 @@ class ChunkManager(x: Int, z: Int) {
 
     init {
         FaceTextures.load("src/main/resources/textures/blocks/")
-        currentX = floor((x.toFloat() + (CHUNK_SIZE / 2)) / CHUNK_SIZE).toInt()
-        currentZ = floor((z.toFloat() + (CHUNK_SIZE / 2)) / CHUNK_SIZE).toInt()
+        currentX = floor((x + HALF_CHUNK_SIZE).toFloat() / CHUNK_SIZE).toInt()
+        currentZ = floor((z + HALF_CHUNK_SIZE).toFloat() / CHUNK_SIZE).toInt()
         update()
     }
 
@@ -51,8 +52,8 @@ class ChunkManager(x: Int, z: Int) {
     }
 
     fun updatePosition(position: Vector3) {
-        val chunkX = floor((position.x + (CHUNK_SIZE / 2)) / CHUNK_SIZE).toInt()
-        val chunkZ = floor((position.z + (CHUNK_SIZE / 2)) / CHUNK_SIZE).toInt()
+        val chunkX = floor((position.x + HALF_CHUNK_SIZE) / CHUNK_SIZE).toInt()
+        val chunkZ = floor((position.z + HALF_CHUNK_SIZE) / CHUNK_SIZE).toInt()
 
 //        for (chunk in environment.terrain.chunks) {
 //            chunk.update()

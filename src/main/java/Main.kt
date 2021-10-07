@@ -6,12 +6,12 @@ import environment.sky.SkyBox
 import environment.terrain.Selector
 import environment.terrain.blocks.BlockType
 import environment.terrain.chunks.Chunk
-import environment.terrain.chunks.ChunkGenerator
 import environment.terrain.chunks.ChunkManager
 import environment.terrain.chunks.ChunkRenderer
-import game.player.Controller
+import game.camera.Camera
+import game.camera.CameraType
 import game.player.Player
-import graphics.Camera
+import game.player.controller.FreeController
 import graphics.GraphicsContext
 import graphics.GraphicsOption
 import graphics.entity.AnimatedEntity
@@ -30,6 +30,7 @@ import graphics.shadows.ShadowBox
 import math.Color
 import math.matrices.Matrix4
 import math.vectors.Vector3
+import org.lwjgl.opengl.GL11.*
 import userinterface.UIColor
 import userinterface.UIPage
 import userinterface.UniversalParameters
@@ -54,15 +55,14 @@ object Main {
     private const val directionalValue = 0.5f
 
     private val ambientLight = AmbientLight(Color(lightValue, lightValue, lightValue))
-    private val sun = Sun(Color(directionalValue, directionalValue, directionalValue), Vector3(1.0f, 1.0f, -1.0f))
+    private val sun = Sun(Color(directionalValue, directionalValue, directionalValue), Vector3(1.0f, 1.0f, 1.0f))
 
-    private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, ChunkGenerator.TERRAIN_HEIGHT + 2, 5))
-//    private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, 0, 5))
+    private val camera = Camera(aspectRatio = window.aspectRatio)
 
     private val chunkManager = ChunkManager(camera.position)
     private val chunkRenderer = ChunkRenderer()
 
-    private val renderEngine = RenderEngine()
+    private val renderEngine = RenderEngine(true)
     private val entities = ArrayList<Entity>()
     private val entityRenderer = EntityRenderer()
 
@@ -83,7 +83,7 @@ object Main {
     @JvmStatic
     fun main(args: Array<String>) {
         GraphicsContext.init(Color(0f, 0f, 0f))
-        GraphicsContext.enable(GraphicsOption.DEPTH_TESTING, GraphicsOption.FACE_CULLING, GraphicsOption.TEXTURE_MAPPING, GraphicsOption.MULTI_SAMPLE)
+        GraphicsContext.enable(GraphicsOption.FACE_CULLING, GraphicsOption.DEPTH_TESTING, GraphicsOption.TEXTURE_MAPPING, GraphicsOption.MULTI_SAMPLE)
 
         UniversalParameters.init(window.aspectRatio, FontLoader(window.aspectRatio).load("fonts/candara.png"))
         RenderTargetManager.init(window)
@@ -102,63 +102,102 @@ object Main {
         ui += page
         ui.showPage("page")
 
-        val animatedModel = AnimatedModelCache.get("models/animatedPlayer.dae")
+        val animatedModel = AnimatedModelCache.get("models/player3.dae")
 
         animatedModel.addAnimation("walking", listOf(
-                Pair(1, 400),
-                Pair(2, 800)
+                Pair(4, 400),
+                Pair(5, 400)
         ), LoopEffect.REVERSE)
 
-        val player = Player(animatedModel, Matrix4().translate(Vector3(0, ChunkGenerator.TERRAIN_HEIGHT + 1, 0)))
-        val secondPlayer = AnimatedEntity(animatedModel, Matrix4().translate(Vector3(3, ChunkGenerator.TERRAIN_HEIGHT + 1, 0)))
-
+        val player = Player(animatedModel, Matrix4().translate(Vector3(0, 17, 0)))
         entities += player
-        entities += secondPlayer
 
-        val controller = Controller(player, camera)
+        val freeController = FreeController(Vector3(0, 0, 5))
 
         val boneProgram = ShaderProgram.load("shaders/debug/bone.vert", "shaders/debug/bone.frag")
 
-        var i = 0
+        var frameCounter = 0
+
+        val mesh = MeshCreator.create()
+        val outlineProgram = ShaderProgram.load("shaders/adjacency.vert", "shaders/adjacency.geom", "shaders/adjacency.frag")
+        val meshProgram = ShaderProgram.load("shaders/mesh.vert", "shaders/mesh.frag")
 
         timer.reset()
         mouse.capture()
 
+        glLineWidth(5.0f)
+        glDepthFunc(GL_LEQUAL)
+
         while (!window.isClosed()) {
             window.poll()
 
-            controller.update(keyboard, mouse, timer.getDelta())
+            if (mouse.isCaptured()) {
+                freeController.update(camera, keyboard, mouse, timer.getDelta())
+            }
 
             processInput()
             updateChunkManager()
 
 //            val selectedBlock = selector.findSelectedItem(window, chunkRenderer, environment.terrain.chunks, camera)
 
-            entities.forEach { entity -> entity.update(timer.getDelta()) }
+//            entities.forEach { entity -> entity.update(timer.getDelta()) }
 
             if (keyboard.isPressed(Key.RIGHT)) {
                 player.animate("walking")
+            }
+
+            if (keyboard.isPressed(Key.K)) {
+                player.animate("wave")
+            }
+
+            if (keyboard.isPressed(Key.P)) {
+                player.toggleAnimation()
             }
 
             if (keyboard.isPressed(Key.LEFT)) {
                 player.stopAnimating(250)
             }
 
-            renderEngine.render(camera, ambientLight, sun, skyBox, arrayListOf(
-                    RenderData(entities, entityRenderer, RenderType.FORWARD),
-                    RenderData(chunks, chunkRenderer, RenderType.FORWARD)
-            ))
+            glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
 
+            skyBox.render(camera)
+
+            meshProgram.start()
+            meshProgram.set("projection", camera.projectionMatrix)
+            meshProgram.set("view", camera.viewMatrix)
+            meshProgram.set("model", Matrix4())
+//            mesh.draw()
+            meshProgram.stop()
+
+
+            outlineProgram.start()
+            outlineProgram.set("projection", camera.projectionMatrix)
+            outlineProgram.set("view", camera.viewMatrix)
+            outlineProgram.set("model", Matrix4())
+            sun.apply(outlineProgram)
+            mesh.draw()
+            outlineProgram.stop()
+
+//            glDepthFunc(GL_LESS)
+//            renderEngine.render(camera, ambientLight, sun, skyBox, arrayListOf(
+//                    RenderData(entities, entityRenderer, RenderType.FORWARD),
+//                    RenderData(chunks, chunkRenderer, RenderType.FORWARD)
+//            ))
+
+//            skyBox.render(camera)
+//            glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
+//            skyBox.render(camera)
+//            chunkRenderer.render(camera, ambientLight, sun, chunks, arrayListOf())
 //            renderJoints(boneProgram, player)
 
-            ui.update(mouse, timer.getDelta())
-            ui.draw(window.width, window.height)
+//            ui.update(mouse, timer.getDelta())
+//            ui.draw(window.width, window.height)
 
             window.synchronize()
             timer.update()
 
             if (printPerformance) {
-                i = updatePerformance(i)
+                frameCounter = updatePerformance(frameCounter)
             }
         }
 
@@ -170,9 +209,21 @@ object Main {
         chunks = chunkManager.determineVisibleChunks()
     }
 
+    var controllerType = CameraType.FREE
+
     private fun processInput() {
         if (keyboard.isPressed(Key.ESCAPE)) {
             mouse.toggle()
+        }
+
+        if (keyboard.isPressed(Key.ONE)) {
+            controllerType = CameraType.FIRST_PERSON
+        }
+        if (keyboard.isPressed(Key.TWO)) {
+            controllerType = CameraType.THIRD_PERSON
+        }
+        if (keyboard.isPressed(Key.THREE)) {
+            controllerType = CameraType.FREE
         }
 
         if (keyboard.isPressed(Key.F1) || keyboard.isPressed(Key.KP1)) {
@@ -256,4 +307,5 @@ object Main {
         boneProgram.stop()
         GraphicsContext.enable(GraphicsOption.DEPTH_TESTING)
     }
+
 }

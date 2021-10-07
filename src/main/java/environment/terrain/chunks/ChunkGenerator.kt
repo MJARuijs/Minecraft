@@ -112,13 +112,14 @@ class ChunkGenerator {
     }
 
     private fun get(x: Int, z: Int): Int {
-        if (x < 0 || z < 0 || x >= CHUNK_SIZE || z >= CHUNK_SIZE) {
-            return noise[x + chunkX, z + chunkZ].toInt() + TERRAIN_HEIGHT
-        }
-        if (heights[x][z] == 0) {
-            heights[x][z] = noise[x + chunkX, z + chunkZ].toInt() + TERRAIN_HEIGHT
-        }
-        return heights[x][z]
+//        if (x < 0 || z < 0 || x >= CHUNK_SIZE || z >= CHUNK_SIZE) {
+//            return noise[x + chunkX, z + chunkZ].toInt() + TERRAIN_HEIGHT
+//        }
+//        if (heights[x][z] == 0) {
+//            heights[x][z] = noise[x + chunkX, z + chunkZ].toInt() + TERRAIN_HEIGHT
+//        }
+//        return heights[x][z]
+        return TERRAIN_HEIGHT
     }
 
     private fun determineBlockType(y: Int, maxY: Int, biome: Biome): BlockType {

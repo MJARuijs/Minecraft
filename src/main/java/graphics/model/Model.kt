@@ -3,6 +3,7 @@ package graphics.model
 import graphics.model.mesh.Mesh
 import graphics.shaders.ShaderProgram
 import resources.Resource
+import kotlin.reflect.typeOf
 
 open class Model(private val shapes: List<Shape>): Resource {
 
