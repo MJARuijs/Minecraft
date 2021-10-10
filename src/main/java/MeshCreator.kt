@@ -75,9 +75,9 @@ object MeshCreator {
         var indices = IntArray(0)
         for (i in cubeVertices.indices step stride) {
             val vertexData = VertexData(cubeVertices.copyOfRange(i, i + stride), containsNormals, containsTextureCoordinates)
-                val newIndex = indices.distinct().size
-                indices += newIndex
-                vertexMap[vertexData] = newIndex
+            val newIndex = indices.distinct().size
+            indices += newIndex
+            vertexMap[vertexData] = newIndex
         }
 
         val triangles = ArrayList<Triangle>()
@@ -120,47 +120,7 @@ object MeshCreator {
             allIndices += adjacentIndices[1]
             allIndices += indices[i + 2]
             allIndices += adjacentIndices[2]
-
-            val positions = triangle.vertices.map { vertex -> vertex.position }
-
-            if (positions.contains(Vector3(-1f, 1f, -1f)) && positions.contains(Vector3(-1f, 1f, 1f)) && positions.contains(Vector3(1f, 1f, 1f))) {
-                println(triangle)
-//                println(adjacentIndices[0])
-//                println(adjacentIndices[1])
-//                println(adjacentIndices[2])
-
-                for (entry in vertexMap) {
-                    if (entry.value == adjacentIndices[0]) {
-                        println("adjacent 0: ${entry.key.getPosition()}")
-                    }
-                }
-                for (entry in vertexMap) {
-                    if (entry.value == adjacentIndices[1]) {
-                        println("adjacent 1: ${entry.key.getPosition()}")
-                    }
-                }
-                for (entry in vertexMap) {
-                    if (entry.value == adjacentIndices[2]) {
-                        println("adjacent 2: ${entry.key.getPosition()}")
-                    }
-                }
-//                println(triangles[indices[i]])
-//                println(triangles[indices[i + 1]])
-//                println(triangles[indices[i + 2]])
-            }
-
         }
-//        println()
-//        println()
-//        for (i in allIndices.indices step 6) {
-//            print("${allIndices[i]} ")
-//            print("${allIndices[i + 1]} ")
-//            print("${allIndices[i + 2]} ")
-//            print("${allIndices[i + 3]} ")
-//            print("${allIndices[i + 4]} ")
-//            print("${allIndices[i + 5]} ")
-//            println()
-//        }
 
         val layout = Layout(Primitive.TRIANGLE_ADJACENCY, listOf(Attribute(0, 3), Attribute(1, 3)))
         return AdjacencyMesh(layout, buffer, allIndices)

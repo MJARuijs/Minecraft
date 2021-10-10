@@ -3,6 +3,7 @@ package graphics.model
 import graphics.material.ColoredMaterial
 import graphics.material.Material
 import graphics.model.mesh.MeshCache
+import graphics.model.mesh.MeshLoader
 import math.Color
 import math.matrices.Matrix4
 import org.lwjgl.BufferUtils
@@ -13,10 +14,26 @@ import util.File
 
 class ModelLoader: Loader<Model> {
 
+    fun load(path: String, adjacentMesh: Boolean): Model {
+        return if (adjacentMesh) {
+            loadAdjacentMesh(path)
+        } else {
+            load(path)
+        }
+    }
+
+    private fun loadAdjacentMesh(path: String): Model {
+        val scene = loadScene(path)
+        val root = scene.mRootNode() ?: throw Exception("Scene does not contain root node")
+        val shapes = parseShapes(scene, root, true)
+
+        return Model(shapes)
+    }
+
     override fun load(path: String): Model {
         val scene = loadScene(path)
         val root = scene.mRootNode() ?: throw Exception("Scene does not contain root node")
-        val shapes = parseShapes(scene, root)
+        val shapes = parseShapes(scene, root, false)
 
         return Model(shapes)
     }
@@ -26,7 +43,7 @@ class ModelLoader: Loader<Model> {
             aiProcess_Triangulate or aiProcess_OptimizeGraph or aiProcess_RemoveRedundantMaterials
     ) ?: throw Exception("Could not load scene: $path")
 
-    private fun parseShapes(scene: AIScene, node: AINode): List<Shape> {
+    private fun parseShapes(scene: AIScene, node: AINode, adjacentMesh: Boolean): List<Shape> {
         val materials = ArrayList<Material>()
         val aiMaterials = scene.mMaterials()
         for (index in 0 until scene.mNumMaterials()) {
@@ -42,7 +59,11 @@ class ModelLoader: Loader<Model> {
 
             val material = materials[aiMesh.mMaterialIndex()]
             val transformation = parseMatrix(aiTransformation)
-            shapes += Shape(MeshCache.get(aiMesh, transformation), material)
+            shapes += if (adjacentMesh) {
+                Shape(AdjacentMeshLoader().parseData(aiMesh, transformation), material)
+            } else {
+                Shape(MeshLoader().parseData(aiMesh, transformation), material)
+            }
         }
 
         return shapes

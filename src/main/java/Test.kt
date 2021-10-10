@@ -4,13 +4,12 @@ object Test {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        val e4 = Vector3(1.0f, 1.0f, -1.0f) - Vector3(-1.0f, 1.0f, -1.0f)
-        val e5 = Vector3(1.0f, 1.0f, 1.0f) - Vector3(-1.0f, 1.0f, -1.0f)
+        val corner = Vector3(1, 1, 1)
+        val lightPosition = Vector3(0, 1, 0) * 10000
 
-        val cross = e4.cross(e5)
-        val dot = cross.dot(-Vector3(0.0f, 1.0f, 0.0f))
-        println(cross)
-        println(dot)
+
+        val lightDirection = (lightPosition - corner).normal()
+        println(lightDirection)
     }
 
 }

@@ -18,7 +18,7 @@ data class Vertex(val position: Vector3, val normal: Vector3? = null, val textur
     }
 
     override fun toString(): String {
-        return "position=$position"
+        return "Vertex(position=$position, normal=$normal)"
     }
 
     override fun equals(other: Any?): Boolean {

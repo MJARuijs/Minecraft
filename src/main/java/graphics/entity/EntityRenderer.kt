@@ -76,7 +76,7 @@ class EntityRenderer : Renderer() {
         program.stop()
     }
 
-    private fun render(program: ShaderProgram, camera: Camera, ambient: AmbientLight, sun: Sun, entities: List<Renderable>, shadows: List<ShadowData>) {
+    fun render(program: ShaderProgram, camera: Camera, ambient: AmbientLight, sun: Sun, entities: List<Renderable>, shadows: List<ShadowData>) {
         GraphicsContext.disable(GraphicsOption.FACE_CULLING)
 
         program.start()
@@ -87,6 +87,7 @@ class EntityRenderer : Renderer() {
 
             shadowSampler.bind(shadowData.shadowMap)
 
+            program.set("isShadowed", true)
             program.set("shadowDistance", shadowData.shadowDistance)
             program.set("shadowMatrix", shadowData.getShadowMatrix())
             program.set("shadowMapSize", Vector2(
@@ -94,6 +95,8 @@ class EntityRenderer : Renderer() {
                     shadowData.shadowMap.getHeight()
             ))
             program.set("shadowMap", shadowSampler.index)
+        } else {
+            program.set("isShadowed", false)
         }
 
         program.set("projection", camera.projectionMatrix)
