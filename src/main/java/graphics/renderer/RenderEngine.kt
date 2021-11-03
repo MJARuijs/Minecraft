@@ -10,6 +10,7 @@ import graphics.samplers.Sampler
 import graphics.shaders.ShaderProgram
 import graphics.shadows.ShadowBox
 import graphics.shadows.ShadowRenderer
+import graphics.shadows.StencilShadowRenderer
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL30.GL_FRAMEBUFFER
 import org.lwjgl.opengl.GL30.glBindFramebuffer
@@ -20,6 +21,7 @@ class RenderEngine(multiSampled: Boolean) {
     private val deferredEngine = DeferredRenderEngine(multiSampled)
 
     private val shadowRenderer = ShadowRenderer()
+    private val stencilShadowRenderer = StencilShadowRenderer()
 
     private val shadowBoxes = ArrayList<ShadowBox>()
     private val program = ShaderProgram.load("shaders/debug/2D.vert", "shaders/debug/depth.frag")
@@ -39,7 +41,7 @@ class RenderEngine(multiSampled: Boolean) {
         val forwardTarget = forwardEngine.prepare()
         val geometryTarget = deferredEngine.render(camera, ambient, sun, shadows, renderData, forwardTarget)
 
-        val forwardResultTarget = forwardEngine.render(camera, ambient, sun, sky, shadows, renderData, geometryTarget)
+        val forwardResultTarget = forwardEngine.render(camera, ambient, sun, sky, shadows, renderData, stencilShadowRenderer, geometryTarget)
         forwardResultTarget.renderToScreen(GL_COLOR_BUFFER_BIT)
 
 //        glBindFramebuffer(GL_FRAMEBUFFER, 0)

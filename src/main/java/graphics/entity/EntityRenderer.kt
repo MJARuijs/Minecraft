@@ -22,6 +22,7 @@ class EntityRenderer : Renderer() {
 
     private val staticShadowProgram = ShaderProgram.load("shaders/entities/shadowEntity.vert", "shaders/entities/shadowEntity.frag")
     private val animatedShadowProgram = ShaderProgram.load("shaders/entities/animatedShadowEntity.vert", "shaders/entities/shadowEntity.frag")
+
     override val deferredLightingProgram = ShaderProgram.load("shaders/debug/2D.vert", "shaders/entities/entityLightingPass.frag")
 
     override fun render(camera: Camera, ambient: AmbientLight, sun: Sun, entities: List<Renderable>, shadows: List<ShadowData>) {

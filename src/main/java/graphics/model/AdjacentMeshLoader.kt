@@ -163,8 +163,6 @@ class AdjacentMeshLoader: Loader<Mesh> {
             }
         }
 
-        println()
-
         return Mesh(layout, buffer, allIndices)
     }
 

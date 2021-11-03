@@ -7,6 +7,7 @@ import graphics.lights.Sun
 import graphics.rendertarget.RenderTarget
 import graphics.rendertarget.RenderTargetManager
 import graphics.shadows.ShadowData
+import graphics.shadows.StencilShadowRenderer
 import org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT
 
 class ForwardRenderEngine(var multiSampled: Boolean) {
@@ -18,13 +19,14 @@ class ForwardRenderEngine(var multiSampled: Boolean) {
         return forwardTarget
     }
 
-    fun render(camera: Camera, ambient: AmbientLight, sun: Sun, skyBox: SkyBox, shadows: List<ShadowData>, renderData: List<RenderData>, geometryTarget: RenderTarget): RenderTarget {
+    fun render(camera: Camera, ambient: AmbientLight, sun: Sun, skyBox: SkyBox, shadows: List<ShadowData>, renderData: List<RenderData>, stencilShadowRenderer: StencilShadowRenderer, geometryTarget: RenderTarget): RenderTarget {
 
         if (renderData.any { data -> data.type == RenderType.DEFERRED }) {
             geometryTarget.renderTo(forwardTarget, GL_DEPTH_BUFFER_BIT)
             forwardTarget.start()
         } else {
             forwardTarget.start()
+            stencilShadowRenderer.disableDepthBuffer()
             forwardTarget.clear()
         }
 //        forwardTarget.start()

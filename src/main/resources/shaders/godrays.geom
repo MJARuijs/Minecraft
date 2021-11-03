@@ -22,6 +22,9 @@ uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
 
+uniform mat4 shadowMatrix;
+uniform sampler2D shadowMap;
+
 //void emitQuadFromPointLight(vec3 startVertex, vec3 endVertex, mat4 mvpMatrix) {
 //    vec3 lightDirection = normalize(startVertex - pointLight.position);
 ////    vec3 lightDirection = -normalize(sun.direction);
@@ -43,7 +46,6 @@ uniform mat4 model;
 
 void emitQuadFromSun(vec3 startVertex, vec3 endVertex, mat4 mvpMatrix) {
     vec3 lightDirection = normalize(sun.direction);
-//    vec3 lightDirection = normalize(startVertex - pointLight.position);
 
     gl_Position = mvpMatrix * vec4((startVertex - lightDirection * epsilon), 1.0);
     EmitVertex();
@@ -51,7 +53,7 @@ void emitQuadFromSun(vec3 startVertex, vec3 endVertex, mat4 mvpMatrix) {
     gl_Position = mvpMatrix * vec4(-lightDirection, 0.0);
     EmitVertex();
 
-    gl_Position = mvpMatrix * vec4((endVertex - lightDirection * epsilon), 1.0);
+    gl_Position = mvpMatrix * vec4(endVertex - lightDirection * epsilon, 1.0);
     EmitVertex();
 
     gl_Position = mvpMatrix * vec4(-lightDirection, 0.0);
@@ -85,33 +87,38 @@ void main() {
 //    vec3 lightDirection = pointLight.position - vertexPosition[0];
     vec3 lightDirection = normalize(sun.direction);
 
-    if (dot(normal, lightDirection) > 0.00001) {
+    if (dot(normal, lightDirection) > 0) {
 
         normal = cross(baseEdge1, adjacentEdge1);
         if (dot(normal, lightDirection) <= 0) {
             vec3 startVertex = vertexPosition[0].xyz;
             vec3 endVertex = vertexPosition[2].xyz;
-//            emitQuadFromPointLight(startVertex, endVertex, mvpMatrix);
-            emitQuadFromSun(startVertex, endVertex, mvpMatrix);
+//            emitQuadFromSun(startVertex, endVertex, mvpMatrix);
         }
 
-//        lightDirection = pointLight.position - vertexPosition[2];
         normal = cross(baseEdge3, adjacentEdge3);
         if (dot(normal, lightDirection) <= 0) {
             vec3 startVertex = vertexPosition[2].xyz;
             vec3 endVertex = vertexPosition[4].xyz;
-//            emitQuadFromPointLight(startVertex, endVertex, mvpMatrix);
-            emitQuadFromSun(startVertex, endVertex, mvpMatrix);
+//            emitQuadFromSun(startVertex, endVertex, mvpMatrix);
         }
 
-//        lightDirection = pointLight.position - vertexPosition[4];
         normal = cross(baseEdge2, adjacentEdge2);
         if (dot(normal, lightDirection) <= 0) {
-            vec3 startVertex = vertexPosition[0].xyz;
-            vec3 endVertex = vertexPosition[4].xyz;
-//            emitQuadFromPointLight(startVertex, endVertex, mvpMatrix);
-            emitQuadFromSun(startVertex, endVertex, mvpMatrix);
+            vec3 startVertex = vertexPosition[4].xyz;
+            vec3 endVertex = vertexPosition[0].xyz;
+//            emitQuadFromSun(startVertex, endVertex, mvpMatrix);
         }
+
+        gl_Position = mvpMatrix * vec4(vertexPosition[0].xyz - lightDirection * epsilon, 1.0);
+        EmitVertex();
+
+        gl_Position = mvpMatrix * vec4(vertexPosition[2].xyz - lightDirection * epsilon, 1.0);
+        EmitVertex();
+
+        gl_Position = mvpMatrix * vec4(vertexPosition[4].xyz - lightDirection * epsilon, 1.0);
+        EmitVertex();
+        EndPrimitive();
     }
 
 }

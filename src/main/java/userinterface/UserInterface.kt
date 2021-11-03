@@ -5,6 +5,8 @@ import graphics.GraphicsContext
 import graphics.GraphicsOption
 import graphics.shaders.ShaderProgram
 import math.vectors.Vector2
+import org.lwjgl.opengl.GL11
+import org.lwjgl.opengl.GL11.*
 import userinterface.window.UIWindow
 
 class UserInterface(private val aspectRatio: Float) {
@@ -67,6 +69,8 @@ class UserInterface(private val aspectRatio: Float) {
     fun draw(windowWidth: Int, windowHeight: Int) {
         GraphicsContext.disable(GraphicsOption.DEPTH_TESTING)
         GraphicsContext.enable(GraphicsOption.ALPHA_BLENDING)
+//        glBlendFunc(GL_ONE, GL_ZERO)
+
         shaderProgram.start()
         shaderProgram.set("aspectRatio", aspectRatio)
         shaderProgram.set("viewPort", Vector2(windowWidth, windowHeight))

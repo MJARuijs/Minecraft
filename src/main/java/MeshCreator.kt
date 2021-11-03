@@ -1,5 +1,6 @@
 import graphics.model.mesh.Attribute
 import graphics.model.mesh.Layout
+import graphics.model.mesh.Mesh
 import graphics.model.mesh.Primitive
 import math.vectors.Vector3
 import java.nio.ByteBuffer
@@ -9,7 +10,7 @@ object MeshCreator {
 
     private val vertexMap = HashMap<VertexData, Int>()
 
-    fun create(): AdjacencyMesh {
+    fun create(): Mesh {
         val containsNormals = true
         val containsTextureCoordinates = false
 
@@ -123,7 +124,7 @@ object MeshCreator {
         }
 
         val layout = Layout(Primitive.TRIANGLE_ADJACENCY, listOf(Attribute(0, 3), Attribute(1, 3)))
-        return AdjacencyMesh(layout, buffer, allIndices)
+        return Mesh(layout, buffer, allIndices)
     }
 
     private fun findAdjacentIndices(triangles: List<Triangle>, triangle: Triangle): IntArray {

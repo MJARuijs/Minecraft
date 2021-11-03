@@ -19,7 +19,7 @@ object RenderTargetManager {
 
     fun getAvailableTarget(multiSampled: Boolean, numberOfColorTextures: Int, numberOfColorBuffers: Int, numberOfDepthTextures: Int, numberOfDepthBuffers: Int, width: Int = this.width, height: Int = this.height): RenderTarget {
         return renderTargets.find { target ->
-            target.matches(width, height, multiSampled, numberOfColorTextures, numberOfColorBuffers, numberOfDepthTextures, numberOfDepthBuffers)
+            target.isAvailable() && target.matches(width, height, multiSampled, numberOfColorTextures, numberOfColorBuffers, numberOfDepthTextures, numberOfDepthBuffers)
         } ?: createTarget(width, height, multiSampled, numberOfColorTextures, numberOfColorBuffers, numberOfDepthTextures, numberOfDepthBuffers)
     }
 

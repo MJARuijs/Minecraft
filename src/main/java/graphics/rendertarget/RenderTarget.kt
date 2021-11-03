@@ -18,7 +18,7 @@ class RenderTarget(
         private val numberOfColorBuffers: Int,
         private val numberOfDepthTextures: Int,
         private val numberOfDepthBuffers: Int,
-        private val handle: Int = glCreateFramebuffers()) {
+        val handle: Int = glCreateFramebuffers()) {
 
     private val attachments = ArrayList<Attachment>()
     private var available = true
@@ -61,6 +61,8 @@ class RenderTarget(
 
     fun getAspectRatio() = width.toFloat() / height.toFloat()
 
+    fun isAvailable() = available
+
     fun getColorMap(index: Int = 0): ColorMap {
         attachments.forEach {
             if (it is ColorTextureAttachment) {
@@ -89,8 +91,17 @@ class RenderTarget(
         available = false
     }
 
+    fun clearColor() {
+        glClear(GL_COLOR_BUFFER_BIT)
+    }
+
+    fun clearDepth() {
+        glClear(GL_DEPTH_BUFFER_BIT)
+    }
+
     fun clear() {
-        glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
+        clearColor()
+        clearDepth()
     }
 
     fun stop() {

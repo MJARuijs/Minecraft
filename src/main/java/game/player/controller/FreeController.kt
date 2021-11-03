@@ -18,7 +18,7 @@ class FreeController(private var position: Vector3 = Vector3()) : Controller() {
 
         if (translation.length() > 0.0f) {
             val rotationMatrix = Matrix4().rotateY(-rotation.y)
-            position += rotationMatrix.dot(-translation.unit()) * delta * moveSpeed
+            position += rotationMatrix.dot(-translation.unit()) * delta * moveSpeed * moveSpeedAmplifier
         }
 
         rotation.x += -mouse.dy.toFloat() * mouseSpeed
