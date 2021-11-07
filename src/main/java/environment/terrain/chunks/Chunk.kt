@@ -3,6 +3,7 @@ package environment.terrain.chunks
 import environment.terrain.Biome
 import environment.terrain.blocks.BlockData
 import environment.terrain.blocks.BlockType
+import environment.terrain.chunks.ChunkGenerator.Companion.CHUNK_SIZE
 import graphics.renderer.Renderable
 import graphics.shaders.ShaderProgram
 import math.vectors.Vector3
@@ -15,6 +16,9 @@ class Chunk(val x: Int, val z: Int, private val biome: Biome, private val blocks
     private var initialized = false
 
     private lateinit var mesh: ChunkMesh
+
+    val normalizedX = x / CHUNK_SIZE
+    val normalizedZ = z / CHUNK_SIZE
 
     private fun init() {
         mesh = ChunkMesh(bufferData(), vertexCount)
@@ -117,7 +121,7 @@ class Chunk(val x: Int, val z: Int, private val biome: Biome, private val blocks
         updateMesh()
     }
 
-    fun removeBlock(position: Vector3) {
+    fun removeBlock(position: Vector3): Boolean {
         blocks.removeIf { block -> block.position == position }
 
         for (direction in FaceDirection.values()) {
@@ -134,7 +138,29 @@ class Chunk(val x: Int, val z: Int, private val biome: Biome, private val blocks
                 }
             }
         }
+
         updateMesh()
+
+        println(position)
+        if (position.x - x == 7.0f || position.x - x == -8.0f) {
+            return true
+        }
+        if (position.z - z == 7.0f || position.z - z == -8.0f) {
+            return true
+        }
+        return false
+    }
+
+    fun addFaceData(position: Vector3, direction: FaceDirection) {
+        if (containsVisibleBlock(position + direction.normal)) {
+            val block = getVisibleBlock(position + direction.normal) ?: return
+            addFaceData(block, direction)
+            println("Added face data: ${block.position}, $direction")
+
+        } else if (containsHiddenBlock(position - direction.normal)) {
+            val block = getHiddenBlock(position - direction.normal) ?: return
+            addFaceData(block, direction)
+        }
     }
 
     private fun addFaceData(block: BlockData, direction: FaceDirection) {

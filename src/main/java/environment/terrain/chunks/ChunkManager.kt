@@ -1,8 +1,13 @@
 package environment.terrain.chunks
 
+import devices.Button
+import devices.Mouse
 import environment.terrain.Biome
 import environment.terrain.FaceTextures
+import environment.terrain.Selector
+import environment.terrain.blocks.BlockType
 import environment.terrain.chunks.ChunkGenerator.Companion.CHUNK_SIZE
+import graphics.Camera
 import math.vectors.Vector3
 import java.util.*
 import kotlin.collections.ArrayList
@@ -17,6 +22,7 @@ class ChunkManager(x: Int, z: Int) {
     private var preGenerateDistance = 0
 
     private val chunks = ArrayList<Chunk>()
+    private val selector = Selector()
 
     private var renderDistance = 0
 
@@ -50,13 +56,34 @@ class ChunkManager(x: Int, z: Int) {
         update()
     }
 
-    fun updatePosition(position: Vector3) {
+    fun update(position: Vector3, mouse: Mouse, camera: Camera): ArrayList<Chunk> {
+        if (mouse.isPressed(Button.LEFT)) {
+            val selectedBlock = selector.getSelected(chunks, camera, camera.position)
+            if (selectedBlock != null) {
+                for (chunk in chunks) {
+                    if (chunk.containsBlock(selectedBlock.first)) {
+                        val updateOtherChunks = chunk.removeBlock(selectedBlock.first)
+                        if (updateOtherChunks) {
+                            updateOtherChunks(chunk, selectedBlock.first)
+                        }
+                    }
+                }
+            }
+        }
+
+        if (mouse.isPressed(Button.RIGHT)) {
+            val selectedBlock = selector.getSelected(chunks, camera, camera.position)
+            if (selectedBlock != null) {
+                for (chunk in chunks) {
+                    if (chunk.containsBlock(selectedBlock.first)) {
+                        chunk.addBlock(selectedBlock.first + selectedBlock.second.normal, BlockType.DIAMOND_ORE)
+                    }
+                }
+            }
+        }
+
         val chunkX = floor((position.x + (CHUNK_SIZE / 2)) / CHUNK_SIZE).toInt()
         val chunkZ = floor((position.z + (CHUNK_SIZE / 2)) / CHUNK_SIZE).toInt()
-
-//        for (chunk in environment.terrain.chunks) {
-//            chunk.update()
-//        }
 
         if (chunkX != currentX || chunkZ != currentZ) {
             currentX = chunkX
@@ -65,9 +92,26 @@ class ChunkManager(x: Int, z: Int) {
                 update()
             }.start()
         }
+
+        return determineVisibleChunks()
     }
 
-    fun determineVisibleChunks(): ArrayList<Chunk> {
+    private fun updateOtherChunks(updatedChunk: Chunk, position: Vector3) {
+        val normalizedChunkX = updatedChunk.normalizedX
+        val normalizedChunkZ = updatedChunk.normalizedZ
+
+        if (position.x - updatedChunk.x == 7.0f) {
+            for (chunk in chunks) {
+                if (chunk.normalizedX == normalizedChunkX + 1 && chunk.normalizedZ == normalizedChunkZ) {
+                    chunk.addFaceData(position, FaceDirection.RIGHT)
+                }
+            }
+        }
+
+
+    }
+
+    private fun determineVisibleChunks(): ArrayList<Chunk> {
         val visibleChunks = ArrayList<Chunk>()
 
         for (x in (currentX - renderDistance) * CHUNK_SIZE .. (currentX + renderDistance) * CHUNK_SIZE step CHUNK_SIZE) {

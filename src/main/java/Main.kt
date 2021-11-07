@@ -1,10 +1,7 @@
-import devices.Button
 import devices.Key
 import devices.Timer
 import devices.Window
 import environment.sky.SkyBox
-import environment.terrain.Selector
-import environment.terrain.blocks.BlockType
 import environment.terrain.chunks.Chunk
 import environment.terrain.chunks.ChunkGenerator
 import environment.terrain.chunks.ChunkManager
@@ -65,7 +62,6 @@ object Main {
     private val entities = ArrayList<Entity>()
     private val entityRenderer = EntityRenderer()
 
-    private val selector = Selector()
     private val skyBox = SkyBox("textures/sky/box", camera.zFar)
 
     private var chunks = ArrayList<Chunk>()
@@ -125,26 +121,15 @@ object Main {
             window.poll()
 
             processInput()
-            updateChunkManager()
 
-//            val selectedBlock = selector.findSelectedItem(window, chunkRenderer, environment.terrain.chunks, camera)
+            chunks = chunkManager.update(camera.position, mouse, camera)
 
             entities.forEach { entity -> entity.update(timer.getDelta()) }
-
-            if (keyboard.isPressed(Key.RIGHT)) {
-                player.animate("walking")
-            }
-
-            if (keyboard.isPressed(Key.LEFT)) {
-                player.stopAnimating(250)
-            }
 
             renderEngine.render(camera, ambientLight, sun, skyBox, arrayListOf(
                     RenderData(entities, entityRenderer, RenderType.FORWARD),
                     RenderData(chunks, chunkRenderer, RenderType.FORWARD)
             ))
-
-//            renderJoints(boneProgram, player)
 
             ui.update(mouse, timer.getDelta())
             ui.draw(window.width, window.height)
@@ -157,12 +142,6 @@ object Main {
             }
         }
 
-        window.destroy()
-    }
-
-    private fun updateChunkManager() {
-        chunkManager.updatePosition(camera.position)
-        chunks = chunkManager.determineVisibleChunks()
     }
 
     private fun processInput() {
@@ -193,35 +172,6 @@ object Main {
         if (keyboard.isPressed(Key.F2)) {
             controlPlayer = !controlPlayer
         }
-
-        if (mouse.isCaptured()) {
-            if (mouse.isPressed(Button.LEFT)) {
-                val selectedBlock = selector.getSelected(chunks, camera, camera.position)
-                if (selectedBlock != null) {
-                    for (chunk in chunks) {
-                        if (chunk.containsBlock(selectedBlock.first)) {
-                            chunk.removeBlock(selectedBlock.first)
-                        }
-                    }
-                }
-            }
-
-            if (mouse.isPressed(Button.RIGHT) || keyboard.isPressed(Key.V)) {
-                val selectedBlock = selector.getSelected(chunks, camera, camera.position)
-                if (selectedBlock != null) {
-                    for (chunk in chunks) {
-                        if (chunk.containsBlock(selectedBlock.first)) {
-                            chunk.addBlock(selectedBlock.first + selectedBlock.second.normal, BlockType.DIAMOND_ORE)
-                        }
-                    }
-                }
-            }
-        }
-//
-//            if (mouse.isReleased(Button.LEFT)) {
-//                chunkManager.stopBreaking()
-//            }
-//        }
     }
 
     private fun updatePerformance(i: Int): Int {

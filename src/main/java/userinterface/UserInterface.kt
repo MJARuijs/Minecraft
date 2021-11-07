@@ -112,13 +112,5 @@ class UserInterface(private val aspectRatio: Float) {
         windows.forEach { window -> window.destroy() }
         pages.forEach { page -> page.destroy() }
     }
-    
-    fun saveToFile() {
-        var pageString = ""
-        for (page in pages) {
-//            for (child in page.children) {
-//
-//            }
-        }
-    }
+
 }
