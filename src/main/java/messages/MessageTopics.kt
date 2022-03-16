@@ -1,6 +1,6 @@
 package messages
 
-enum class MessageType {
+enum class MessageTopics {
 
     KEYBOARD_INPUT,
     MOUSE_INPUT

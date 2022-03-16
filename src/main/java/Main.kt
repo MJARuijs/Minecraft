@@ -1,7 +1,4 @@
-import devices.Button
-import devices.Key
-import devices.Timer
-import devices.Window
+import devices.*
 import environment.sky.SkyBox
 import environment.terrain.Selector
 import environment.terrain.blocks.BlockType
@@ -18,17 +15,22 @@ import graphics.entity.Entity
 import graphics.entity.EntityRenderer
 import graphics.lights.AmbientLight
 import graphics.lights.Sun
+import graphics.model.Quad
 import graphics.model.animation.LoopEffect
 import graphics.model.animation.model.AnimatedModelCache
 import graphics.renderer.RenderData
 import graphics.renderer.RenderEngine
 import graphics.renderer.RenderType
 import graphics.rendertarget.RenderTargetManager
+import graphics.samplers.Sampler
 import graphics.shaders.ShaderProgram
 import graphics.shadows.ShadowBox
 import math.Color
 import math.matrices.Matrix4
+import math.vectors.Vector2
 import math.vectors.Vector3
+import messages.MessageBus
+import messages.MessageTopics
 import userinterface.UIColor
 import userinterface.UIPage
 import userinterface.UniversalParameters
@@ -44,16 +46,17 @@ import userinterface.text.font.FontLoader
 
 object Main {
 
-    private val window = Window("Minecraft", GraphicsContext::resize)
-    private val keyboard = window.keyboard
-    private val mouse = window.mouse
+    private val deviceManager = DeviceManager("Minecraft", 1280, 720, GraphicsContext::resize)
+    private val window = deviceManager.window
+    private val keyboard = deviceManager.keyboard
+    private val mouse = deviceManager.mouse
     private val timer = Timer()
 
     private const val lightValue = 0.75f
     private const val directionalValue = 0.5f
 
     private val ambientLight = AmbientLight(Color(lightValue, lightValue, lightValue))
-    private val sun = Sun(Color(directionalValue, directionalValue, directionalValue), Vector3(1.0f, 1.0f, -1.0f))
+    private val sun = Sun(Color(directionalValue, directionalValue, directionalValue), Vector3(1.0f, 1.0f, 0.0f))
 
     private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, ChunkGenerator.TERRAIN_HEIGHT + 2, 5))
 //    private val camera = Camera(aspectRatio = window.aspectRatio, position = Vector3(0, 0, 5))
@@ -108,7 +111,7 @@ object Main {
                 Pair(2, 800)
         ), LoopEffect.REVERSE)
 
-        val player = Player(animatedModel, Matrix4().translate(Vector3(0, ChunkGenerator.TERRAIN_HEIGHT + 1, 0)))
+        val player = Player(animatedModel, Matrix4().translate(Vector3(0, ChunkGenerator.TERRAIN_HEIGHT + 10, 0)))
         val secondPlayer = AnimatedEntity(animatedModel, Matrix4().translate(Vector3(3, ChunkGenerator.TERRAIN_HEIGHT + 1, 0)))
 
         entities += player
@@ -118,11 +121,22 @@ object Main {
 
         var i = 0
 
+        val messageBus = MessageBus()
+
+        messageBus.registerClient(mouse)
+        messageBus.registerClient(ui, arrayListOf(MessageTopics.MOUSE_INPUT))
+
         timer.reset()
         mouse.capture()
 
+        val depthProgram = ShaderProgram.load("shaders/debug/2D.vert", "shaders/debug/depth.frag")
+        val depthQuad = Quad()
+        val depthSampler = Sampler(0)
+
         while (!window.isClosed()) {
             window.poll()
+
+            deviceManager.update()
 
             processInput()
             updateChunkManager()
@@ -131,13 +145,7 @@ object Main {
 
             entities.forEach { entity -> entity.update(timer.getDelta()) }
 
-            if (keyboard.isPressed(Key.RIGHT)) {
-                player.animate("walking")
-            }
-
-            if (keyboard.isPressed(Key.LEFT)) {
-                player.stopAnimating(250)
-            }
+            messageBus.update()
 
             renderEngine.render(camera, ambientLight, sun, skyBox, arrayListOf(
                     RenderData(entities, entityRenderer, RenderType.FORWARD),
@@ -146,10 +154,23 @@ object Main {
 
 //            renderJoints(boneProgram, player)
 
-            ui.update(mouse, timer.getDelta())
-            ui.draw(window.width, window.height)
+//            ui.update(mouse, timer.getDelta())
+//            ui.draw(window.width, window.height)
 
-            window.synchronize()
+            GraphicsContext.disable(GraphicsOption.DEPTH_TESTING)
+            depthSampler.bind(renderEngine.shadows[0].shadowMapHandle)
+            depthProgram.start()
+            depthProgram.set("translation", Vector2(-1.0f, 0.5f))
+            depthProgram.set("scale", Vector2(0.5f, 0.5f))
+            depthProgram.set("aspectRatio", UniversalParameters.aspectRatio)
+            depthProgram.set("linearize", true)
+            depthProgram.set("sampler", depthSampler.index)
+            depthQuad.draw()
+            depthProgram.stop()
+            GraphicsContext.enable(GraphicsOption.DEPTH_TESTING)
+
+
+            deviceManager.synchronize()
             timer.update()
 
             if (printPerformance) {
@@ -166,6 +187,10 @@ object Main {
     }
 
     private fun processInput() {
+        if (keyboard.isPressed(Key.R)) {
+            camera.rotation = Vector3()
+        }
+
         if (keyboard.isPressed(Key.ESCAPE)) {
             mouse.toggle()
         }

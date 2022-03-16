@@ -1,4 +1,3 @@
 package messages
 
-class Message {
-}
+class Message(val topic: MessageTopics, val data: HashMap<String, Any?> = HashMap())

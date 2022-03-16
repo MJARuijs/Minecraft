@@ -42,6 +42,16 @@ data class Sampler(
 //        setAnisotropy(anisotropy)
     }
 
+    fun bind(handle: Int) {
+        glActiveTexture(GL_TEXTURE0 + index)
+        if (multiSampled) {
+            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, handle)
+        } else {
+            glBindTexture(GL_TEXTURE_2D, handle)
+        }
+        glActiveTexture(GL_TEXTURE0)
+    }
+
     fun bind(map: TextureMap) {
         glActiveTexture(GL_TEXTURE0 + index)
         if (multiSampled) {

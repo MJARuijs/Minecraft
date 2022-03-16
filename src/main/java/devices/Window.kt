@@ -5,7 +5,7 @@ import org.lwjgl.glfw.GLFWErrorCallback
 import org.lwjgl.opengl.GL.createCapabilities
 import org.lwjgl.system.MemoryUtil.NULL
 
-class Window(title: String, private val onWindowResized: (Int, Int) -> Unit) {
+class Window(title: String, var width: Int, var height: Int, private val onWindowResized: (Int, Int) -> Unit) {
 
     internal val handle: Long
 
@@ -17,18 +17,8 @@ class Window(title: String, private val onWindowResized: (Int, Int) -> Unit) {
     var resized = true
         private set
 
-    var width = 1280
-        private set
-
-    var height = 720
-        private set
-
     val aspectRatio: Float
         get() = width.toFloat() / height.toFloat()
-
-    val keyboard: Keyboard
-
-    val mouse: Mouse
 
     init {
 
@@ -73,9 +63,6 @@ class Window(title: String, private val onWindowResized: (Int, Int) -> Unit) {
             onWindowResized(width, height)
         }
 
-        keyboard = Keyboard(this)
-        mouse = Mouse(this)
-
         glfwMakeContextCurrent(handle)
         glfwSwapInterval(1)
         createCapabilities()
@@ -83,15 +70,11 @@ class Window(title: String, private val onWindowResized: (Int, Int) -> Unit) {
     
     fun poll() {
         resized = false
-        mouse.moved = false
-        
         glfwPollEvents()
     }
     
     fun synchronize() {
         glfwSwapBuffers(handle)
-        mouse.update()
-        keyboard.update()
     }
 
     fun resize(width: Int, height: Int) {

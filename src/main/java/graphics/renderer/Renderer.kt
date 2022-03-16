@@ -29,13 +29,12 @@ abstract class Renderer {
             val shadowData = shadows[0]
             val shadowSampler = Sampler(6)
 
-            shadowSampler.bind(shadowData.shadowMap)
+            shadowSampler.bind(shadowData.shadowMapHandle)
+//            shadowSampler.bind(shadowData.shadowMap)
 
             deferredLightingProgram.set("shadowMap", shadowSampler.index)
-            deferredLightingProgram.set("shadowMapSize", Vector2(
-                    shadowData.shadowMap.getWidth(),
-                    shadowData.shadowMap.getHeight()
-            ))
+//            de
+            deferredLightingProgram.set("shadowMapSize", Vector2(shadowData.width, shadowData.height))
         }
 
         sun.apply(deferredLightingProgram)

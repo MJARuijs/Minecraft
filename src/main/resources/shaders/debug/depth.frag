@@ -1,8 +1,9 @@
 #version 450 core
 
-uniform sampler2D sampler;
-
 in vec2 passTextureCoordinates;
+
+uniform sampler2D sampler;
+uniform bool linearize;
 
 out vec4 outColor;
 
@@ -13,5 +14,16 @@ float linearizeDepth(float depth) {
 }
 
 void main() {
-    outColor = texture(sampler, passTextureCoordinates);
+        float depth = texture(sampler, passTextureCoordinates).r;
+
+        if (linearize) {
+            float linearDepth = linearizeDepth(depth);
+            outColor = vec4(linearDepth, linearDepth, linearDepth, 1.0f);
+        } else {
+            outColor = vec4(depth, depth, depth, 1.0f);
+        }
+
+//    outColor = texture(sampler, passTextureCoordinates);
+//    outColor.a = 1.0f;
+
 }

@@ -81,14 +81,14 @@ class EntityRenderer : Renderer() {
             val shadowData = shadows[0]
             val shadowSampler = Sampler(0)
 
-            shadowSampler.bind(shadowData.shadowMap)
+            shadowSampler.bind(shadowData.shadowMapHandle)
+
+//            shadowSampler.bind(shadowData.shadowMap)
 
             program.set("shadowDistance", shadowData.shadowDistance)
             program.set("shadowMatrix", shadowData.getShadowMatrix())
-            program.set("shadowMapSize", Vector2(
-                    shadowData.shadowMap.getWidth(),
-                    shadowData.shadowMap.getHeight()
-            ))
+//            program.set("shadowMapSize", Vector2(shadowData.shadowMap.getWidth(), shadowData.shadowMap.getHeight()))
+            program.set("shadowMapSize", Vector2(shadowData.width, shadowData.height))
             program.set("shadowMap", shadowSampler.index)
         }
 

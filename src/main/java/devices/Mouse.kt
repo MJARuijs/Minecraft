@@ -1,14 +1,17 @@
 package devices
 
+import messages.Message
+import messages.MessageClient
+import messages.MessageTopics
 import org.lwjgl.glfw.GLFW.*
 import java.util.*
 import kotlin.collections.HashSet
 
-class Mouse(private val window: Window) {
+class Mouse(private val windowHandle: Long, windowWidth: Int, windowHeight: Int) : MessageClient() {
 
     init {
 
-        glfwSetMouseButtonCallback(window.handle) { _, buttonInt: Int, actionInt: Int, _ ->
+        glfwSetMouseButtonCallback(windowHandle) { _, buttonInt: Int, actionInt: Int, _ ->
 
             val button = Button.fromInt(buttonInt)
             val action = Action.fromInt(actionInt)
@@ -17,17 +20,23 @@ class Mouse(private val window: Window) {
                 val event = Event(button, action)
                 events.push(event)
             }
+
         }
     
-        glfwSetScrollCallback(window.handle) { _: Long, xScroll: Double, yScroll: Double ->
+        glfwSetScrollCallback(windowHandle) { _: Long, xScroll: Double, yScroll: Double ->
             this.xScroll = xScroll.toFloat()
             this.yScroll = yScroll.toFloat()
+
+            data["xScroll"] = xScroll
+            data["yScroll"] = yScroll
+
+//            sendMessage(Message(MessageTopics.MOUSE_INPUT, data))
         }
         
-        glfwSetCursorPosCallback(window.handle) { _, xPixel: Double, yPixel: Double ->
+        glfwSetCursorPosCallback(windowHandle) { _, xPixel: Double, yPixel: Double ->
 
-            val scaledX = (xPixel - window.width / 2) / window.width
-            val scaledY = -(yPixel - window.height / 2) / window.height
+            val scaledX = (xPixel - windowWidth / 2) / windowWidth
+            val scaledY = -(yPixel - windowHeight / 2) / windowHeight
 
             moved = (x != scaledX) || (y != scaledY)
 
@@ -36,9 +45,14 @@ class Mouse(private val window: Window) {
 
             x = scaledX
             y = scaledY
+
+            data["x"] = scaledX
+            data["y"] = scaledY
+
+//            sendMessage(Message(MessageTopics.MOUSE_INPUT, data))
         }
 
-        glfwSetInputMode(window.handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED)
+        glfwSetInputMode(windowHandle, GLFW_CURSOR, GLFW_CURSOR_DISABLED)
     }
 
     private data class Event(val button: Button, val action: Action)
@@ -83,12 +97,12 @@ class Mouse(private val window: Window) {
 
     fun capture() {
         captured = true
-        glfwSetInputMode(window.handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED)
+        glfwSetInputMode(windowHandle, GLFW_CURSOR, GLFW_CURSOR_DISABLED)
     }
 
     fun release() {
         captured = false
-        glfwSetInputMode(window.handle, GLFW_CURSOR, GLFW_CURSOR_NORMAL)
+        glfwSetInputMode(windowHandle, GLFW_CURSOR, GLFW_CURSOR_NORMAL)
     }
 
     fun toggle() {
@@ -130,5 +144,14 @@ class Mouse(private val window: Window) {
                 }
             }
         }
+
+        data["pressed"] = pressed
+        data["down"] = down
+        data["released"] = released
+
+//        sendMessage(Message(MessageTopics.MOUSE_INPUT, data))
     }
+
+    override fun receiveMessage(message: Message) {}
+
 }

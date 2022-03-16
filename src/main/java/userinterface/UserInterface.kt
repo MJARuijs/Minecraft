@@ -5,9 +5,12 @@ import graphics.GraphicsContext
 import graphics.GraphicsOption
 import graphics.shaders.ShaderProgram
 import math.vectors.Vector2
+import messages.Message
+import messages.MessageClient
+import messages.MessageTopics
 import userinterface.window.UIWindow
 
-class UserInterface(private val aspectRatio: Float) {
+class UserInterface(private val aspectRatio: Float) : MessageClient() {
 
     private val shaderProgram = ShaderProgram.load("shaders/userinterface/ui.vert", "shaders/userinterface/ui.frag")
     private val iconProgram = ShaderProgram.load("shaders/userinterface/icon.vert", "shaders/userinterface/icon.frag")
@@ -120,5 +123,9 @@ class UserInterface(private val aspectRatio: Float) {
 //
 //            }
         }
+    }
+
+    override fun receiveMessage(message: Message) {
+        println("Received Message!")
     }
 }

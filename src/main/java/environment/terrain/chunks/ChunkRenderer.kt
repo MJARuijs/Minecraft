@@ -46,15 +46,14 @@ class ChunkRenderer : Renderer() {
             val shadowData = shadows[0]
             val shadowSampler = Sampler(4)
 
-            shadowSampler.bind(shadowData.shadowMap)
+            shadowSampler.bind(shadowData.shadowMapHandle)
 
+//            shadowSampler.bind(shadowData.shadowMap)
             shaderProgram.set("shadowDistance", shadowData.shadowDistance)
             shaderProgram.set("shadowMatrix", shadowData.getShadowMatrix())
             shaderProgram.set("shadowMap", shadowSampler.index)
-            shaderProgram.set("shadowMapSize", Vector2(
-                    shadowData.shadowMap.getWidth(),
-                    shadowData.shadowMap.getHeight()
-            ))
+//            shaderProgram.set("shadowMapSize", Vector2(shadowData.shadowMap.getWidth(), shadowData.shadowMap.getHeight()))
+            shaderProgram.set("shadowMapSize", Vector2(shadowData.width, shadowData.height))
         }
 
         for (chunk in chunks) {
@@ -80,15 +79,17 @@ class ChunkRenderer : Renderer() {
             val shadowData = shadows[0]
             val shadowSampler = Sampler(6)
 
-            shadowSampler.bind(shadowData.shadowMap)
+            shadowSampler.bind(shadowData.shadowMapHandle)
 
+//            shadowSampler.bind(shadowData.shadowMap)
             deferredGeometryProgram.set("shadowDistance", shadowData.shadowDistance)
             deferredGeometryProgram.set("shadowMatrix", shadowData.getShadowMatrix())
             deferredGeometryProgram.set("shadowMap", shadowSampler.index)
-            deferredGeometryProgram.set("shadowMapSize", Vector2(
-                    shadowData.shadowMap.getWidth(),
-                    shadowData.shadowMap.getHeight()
-            ))
+//            deferredGeometryProgram.set("shadowMapSize", Vector2(
+//                shadowData.shadowMap.getWidth(),
+//                shadowData.shadowMap.getHeight()
+//            ))
+            deferredGeometryProgram.set("shadowMapSize", Vector2(shadowData.width, shadowData.height))
         }
         ambient.apply(deferredGeometryProgram)
 

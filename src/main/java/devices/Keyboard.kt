@@ -4,11 +4,11 @@ import org.lwjgl.glfw.GLFW.glfwSetKeyCallback
 import java.util.*
 import kotlin.collections.HashSet
 
-class Keyboard(window: Window) {
+class Keyboard(windowHandle: Long) {
 
     init {
 
-        glfwSetKeyCallback(window.handle) { _, keyInt: Int, _, actionInt: Int, _ ->
+        glfwSetKeyCallback(windowHandle) { _, keyInt: Int, _, actionInt: Int, _ ->
 
             val key = Key.fromInt(keyInt)
             val action = Action.fromInt(actionInt)

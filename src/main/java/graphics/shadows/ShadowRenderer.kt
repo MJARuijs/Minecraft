@@ -7,9 +7,9 @@ import graphics.rendertarget.RenderTargetManager
 
 class ShadowRenderer {
 
-    private val renderTarget = RenderTargetManager.getAvailableTarget(false, 0, 0, 1, 0, width = SHADOW_MAP_SIZE, height = SHADOW_MAP_SIZE)
+    val renderTarget = RenderTargetManager.getAvailableTarget(false, 0, 0, 1, 0, width = SHADOW_MAP_SIZE, height = SHADOW_MAP_SIZE)
 
-    fun render(camera: Camera, sun: Sun, shadowBoxes: List<ShadowBox>, renderData: List<RenderData>): List<ShadowData> {
+    fun render(camera: Camera, sun: Sun, shadowBoxes: List<ShadowBox>, renderData: List<RenderData>): ArrayList<ShadowData> {
         val shadowData = ArrayList<ShadowData>()
 
         renderTarget.start()
@@ -26,8 +26,17 @@ class ShadowRenderer {
                     box.getProjectionMatrix(),
                     box.getViewMatrix(),
                     box.maxDistance,
-                    renderTarget.getDepthTexture()
+                    renderTarget.getDepthTexture().handle,
+                    renderTarget.getWidth(),
+                    renderTarget.getHeight()
             )
+
+//            shadowData += ShadowData(
+//                box.getProjectionMatrix(),
+//                box.getViewMatrix(),
+//                box.maxDistance,
+//                renderTarget.getDepthTexture()
+//            )
         }
 
         renderTarget.stop()
@@ -36,6 +45,6 @@ class ShadowRenderer {
     }
 
     companion object {
-        private const val SHADOW_MAP_SIZE = 4096 * 4
+        private const val SHADOW_MAP_SIZE = 4096 / 4
     }
 }

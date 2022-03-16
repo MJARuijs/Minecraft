@@ -40,6 +40,13 @@ class ShadowBox(camera: Camera, val maxDistance: Float = 50f) {
     private fun depth() = abs(maxZ - minZ)
 
     fun updateBox(camera: Camera, sun: Sun) {
+        minX = 0.0f
+        maxX = 0.0f
+        minY = 0.0f
+        maxY = 0.0f
+        minZ = 0.0f
+        maxZ = 0.0f
+
         val position = camera.position
 
         val lightDirection = -sun.direction
@@ -103,9 +110,21 @@ class ShadowBox(camera: Camera, val maxDistance: Float = 50f) {
         val z = maxZ
 
         val translation = (inverseLightDirection dot Vector4(x, y, z, 1.0f)).xyz()
+
         viewMatrix = lightRotation.translate(-translation - position)
 
         updateProjectionMatrix()
+
+//        println("$xRotation $yRotation")
+
+
+//        println("$x $y $z")
+//        println(inverseLightDirection)
+//        println(lightRotation)
+//        println(viewMatrix)
+//        println()
+//        println()
+//        println()
     }
 
     private fun updateProjectionMatrix() {
