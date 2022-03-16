@@ -1,0 +1,4 @@
+package devices
+
+class DeviceManager {
+}
